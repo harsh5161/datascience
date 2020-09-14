@@ -10,8 +10,6 @@
         ########################################################################################################
         ########################################################################################################
 
-
-
 import pandas as pd
 import os
 import numpy as np
@@ -23,8 +21,6 @@ from time import process_time
 import time
 from decimal import Decimal
 import math
-import joblib
-from sklearn.utils import class_weight
 
 # Model
 import xgboost as xgb
@@ -63,7 +59,7 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.ensemble import VotingRegressor
 from sklearn.metrics import classification_report
 from sklearn.utils import compute_sample_weight
-
+from sklearn.utils import class_weight
 import xgboost as xgb
 from scipy.stats import ks_2samp
 
@@ -135,7 +131,7 @@ class classification:
 
 
       bayes_trials = Trials()
-      print("Moving into HyperOp")
+      print("Moving into HyperOp for XGB")
       best = fmin(fn=objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
       print("HyperOP done for XGB")
 
@@ -211,7 +207,7 @@ class classification:
                   }
 
       bayes_trials = Trials()
-      print("Moving into HyperOp")
+      print("Moving into HyperOp for CAT")
       best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
       print("HyperOP done for CAT")
 
@@ -274,7 +270,7 @@ class classification:
                   }
 
       bayes_trials = Trials()
-      print("Moving into HyperOp")
+      print("Moving into HyperOp for RF")
       try:
         best = fmin(fn = objective, space = DSpace, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
         print("HyperOP done for RF")
@@ -348,7 +344,7 @@ class classification:
                         }
 
       bayes_trials = Trials()
-      print("Moving into HyperOp")
+      print("Moving into HyperOp for ET")
       try:
         best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
         print("HyperOP done for ET")
@@ -557,14 +553,12 @@ class classification:
 
       ##Best Model
       ########################################################################################################
-      best_info=df.sort_values('accuracy',ignore_index=True,ascending=False).loc[0,:]
+      best_info=df.sort_values('F1',ignore_index=True,ascending=False).loc[0,:]
       best_name=best_info['Name']
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
       ########################################################################################################
-
-      joblib.dump(best_info,'best_info')
 
       return best_name,best_mod, best_acc, best_param,df
 
@@ -574,9 +568,17 @@ class classification:
       ########################################################################################################
       ########################################################################################################
       ########################################################################################################
+      ########################################################################################################
+      ########################################################################################################
+      ########################################################################################################
+      ########################################################################################################
 
       ###################################### R E G R E S S I O N #############################################
 
+      ########################################################################################################
+      ########################################################################################################
+      ########################################################################################################
+      ########################################################################################################
       ########################################################################################################
       ########################################################################################################
       ########################################################################################################
@@ -1047,12 +1049,10 @@ class Regression:
       df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
       ind=ind+1
 
-      best_info=df.sort_values('accuracy',ignore_index=True,ascending=False).loc[0,:]
+      best_info=df.sort_values('RMSE',ignore_index=True,ascending=False).loc[0,:]
       best_name=best_info['Name']
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
-
-      joblib.dump(best_info,'best_info')
 
       return best_name,best_mod, best_acc, best_param,df

@@ -101,14 +101,14 @@ def importFile(path,nrows=None):
             sheet = wb.sheet_by_name(sheet_selected)
 
             # # writer object is created
-            col = csv.writer(open("T.csv", 'w', newline=""))
+            col = csv.writer(open("SheetSheetSheet.csv", 'w', newline=""))
 
             # writing the data into csv file
             for row in range(sheet.nrows):
                 col.writerow(sheet.row_values(row))
 
             # read csv file and convert into a dataframe object
-            df = pd.DataFrame(pd.read_csv("T.csv",nrows=nrows))
+            df = pd.DataFrame(pd.read_csv("SheetSheetSheet.csv",nrows=nrows))
             return df
             #######
         except FileNotFoundError:
@@ -135,20 +135,22 @@ def importFile(path,nrows=None):
         print('extension is {}'.format(ext))
         if ext == 'csv' or ext == 'tsv':
             df = importCsv(path)
-            return df
+            return df,None
         elif ext == 'json':
             df = importJSON(path)
-            return df
+            return df,None
         elif 'xl' in ext:
             df = importExcel(path)
-            return df
+            return df,'T.csv'
         elif ext == 'data':
             df = importTable(path)
-            return df
+            return df,None
         else:
             print('File format not supported\n')
-    except:
-        print('Extension NOT FOUND!')
+    except Exception as e:
+        print('We ran into some Error!')
+        print('The error message is {}'.format(e))
+        return None,None
 
 ######################################
 ######## getUserInput Function #######

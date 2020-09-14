@@ -49,11 +49,11 @@ def INIT(df,info):
 
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
-    ues = time.time()
-    if key:userInteractVisualization(df.drop(key,axis=1),target)
-    else:userInteractVisualization(df,target)
-    uee = time.time()
-    print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
+    # ues = time.time()
+    # if key:userInteractVisualization(df.drop(key,axis=1),target)
+    # else:userInteractVisualization(df,target)
+    # uee = time.time()
+    # print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
@@ -94,6 +94,16 @@ def INIT(df,info):
     print('\nRemoving Rows and Columns with more than 50% missing\n')
     X,y = DatasetSelection(X,y)
 
+    # Sampling Data
+    print('Sampling Data!')
+    X,y = data_model_select(X,y)
+    print('After sampling:')
+    print('Shape of X_train is {}'.format(X.shape))
+    print('Shape of y_train is {}'.format(y.shape))
+    if class_or_Reg == 'Classification':
+        print('printing target variable distribution for classification:\n')
+        print(pd.Series(y).value_counts(normalize=True))
+
     ######## DATE ENGINEERING #######
     print('\n#### DATE ENGINEERING RUNNING WAIT ####')
     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)
@@ -106,8 +116,9 @@ def INIT(df,info):
             print(DATE_DF.shape)
             DATE_DF.index = X.index
             X.drop(date_cols,axis=1,inplace=True)
-        except:
+        except Exception as exceptionMessage:
             print('#### DATE ENGINEERING HAD ERRORS ####')
+            print('Exception message is {}'.format(exceptionMessage))
             X.drop(date_cols,axis=1,inplace=True)
             DATE_DF = pd.DataFrame(None)
             date_cols = []
@@ -154,7 +165,7 @@ def INIT(df,info):
     print("Extracting Review Columns time",end-start)
     if (some_list is None):
       TEXT_DF = pd.DataFrame(None)
-      lda_models = pd.DataFrame(None)
+      lda_models = None
       remove_list = []
       print("No review/comment columns found")
     else:
@@ -190,13 +201,14 @@ def INIT(df,info):
             X.drop(some_list,axis=1,inplace=True)
             X.drop(remove_list,axis=1, inplace=True)
             lda_models.dropna(axis=0,inplace=True)
-        except:
+        except Exception as exceptionMessage:
             print('#### TEXT ENGINEERING HAD ERRORS ####')
+            print('Exception message is {}'.format(exceptionMessage))
             X.drop(useless_cols,axis=1,inplace=True)
             some_list = []
             remove_list = []
             TEXT_DF = pd.DataFrame(None)
-            lda_models = pd.DataFrame(None)
+            lda_models = None
 
     end2= time.time()
 

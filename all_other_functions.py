@@ -8,6 +8,7 @@ from collections import defaultdict
 from sklearn.preprocessing import LabelEncoder
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.utils import class_weight
 
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
@@ -40,6 +41,11 @@ def Segregation(df):
     numeric.fillna(numeric.mean(),inplace=True)
     cat_num.fillna('missing',inplace=True)
 
+    print('There are {} pure numeric columns'.format((len(numeric.columns))))
+    print('There are {} categorical numeric columns\n'.format((len(cat_num.columns))))
+    print('The pure numeric columns are {}'.format(numeric.columns))
+    print('The categorical numeric columns are {}\n'.format(cat_num.columns))
+
     obj_df = pd.DataFrame(df[obj])
 
     unique = []
@@ -48,31 +54,48 @@ def Segregation(df):
         l=column.value_counts(normalize=True)
         minor=l[l<=0.005].index
         if len(minor) > 0:
-            print('\n{} contains {} categories that is/are less than 0.5 percent'.format(column.name, len(minor)))
-            if (column.nunique() - len(minor)) in range(1,60):
+            print('{} contains {} categories that is/are less than 0.5 percent'.format(column.name, len(minor)))
+            if (column.nunique() - len(minor)) in range(1,61):
                 return column.replace(minor,'others')
             else:
                 unique.append(column.name)
         else:
-            print('\n{} does not contain minor categories'.format(column.name))
+            print('{} does not contain minor categories'.format(column.name))
             return column
 
     print('We found {} obj type columns!'.format(obj_df.shape[1]))
     obj_df.fillna('missing',inplace=True)
     print('Printing Cardinality info of All Object Type Columns!\n')
     print(obj_df.nunique())
+    print('\n')
     for col in obj_df:
-        obj_df[col] = func(obj_df[col])
-    print('Grouped all minor levels of columns!')
+        if obj_df[col].value_counts(normalize=True)[:5].sum()<=0.1:
+            print('{} has top 5 levels that contribute to less than 10% of data!'.format(col))
+            print('{} is unique\n'.format(col))
+            unique.append(col)
+        else:
+            print('{} has top 5 levels that contribute to more than 10% of data!'.format(col))
+            print('{} has {} levels before grouping'.format(col,obj_df[col].nunique()))
+            if obj_df[col].nunique() > 60:
+                print('Attempting grouping of minor levels of {} as the column has more than 60 levels'.format(col))
+                obj_df[col] = func(obj_df[col])
+                print('{} has {} levels after grouping\n'.format(col,obj_df[col].nunique()))
+            else:
+                print('{} is a discrete column!\n'.format(col))
+
+    print('\nWe found {} unique columns!\n'.format(len(unique)))
+    print('\nThe unique columns are {}'.format(unique))
+
     obj_df.drop(unique,axis=1,inplace=True)
-    print('\nWe found {} obj type discrete columns!'.format(obj_df.shape[1]))
+    print('\nWe now have {} obj type discrete columns!'.format(obj_df.shape[1]))
     print('\nPrinting Cardinality info of obj Discrete Columns!\n')
     print(obj_df.nunique())
-    print('\nWe found {} unique columns!\n'.format(len(unique)))
-    print('\n The useless columns are {}'.format(unique))
+    disc = pd.concat([cat_num,obj_df],axis=1)
+    print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')
+    print(disc.nunique())
     end = time.time()
     print('Segregation time taken : {}'.format(end-start))
-    return numeric,pd.concat([cat_num,obj_df],axis=1),unique
+    return numeric,disc,unique
 
 def Visualization(X,Y,class_or_Reg):
     import pydotplus
@@ -188,7 +211,7 @@ def SampleEquation(X,Y,class_or_Reg):
                     s=s+str(model.coef_[i][j])+"*"+X.columns[j]+" + "
                 s=s+str(model.intercept_[i])
 
-                print("Power term = "+s+"\n")
+                print("LogisticRegression Equation = "+s+"\n")
                 print("Probability(Y=1) = exp(Power term)/(exp(Power term) + 1)\n")
         else:#multiclass classification
             for i in range(len(model.coef_)): # for dispaying the equation curresponding to all classes
@@ -198,7 +221,7 @@ def SampleEquation(X,Y,class_or_Reg):
                 s=s+str(model.intercept_[i])
 
                 print("Prediction of class "+ str(model.classes_[i])+"\n\n")
-                print("Power term= " + s)
+                print("LogisticRegression Equation = " + s)
                 print("\nPrediction(class={}) = exp(Power term)/(exp(Power term) + 1)\n".format(model.classes_[i]))
     else:#regression problem
         from mlxtend.feature_selection import SequentialFeatureSelector as SFS
@@ -220,7 +243,7 @@ def SampleEquation(X,Y,class_or_Reg):
             equation= equation+str(coeff[i])+"*"+X.columns[i]+" + "
         equation=equation+str(model.intercept_)
 
-        print('Linear Equation is : {}'.format(equation))
+        print('Linear Regression Equation is : {}'.format(equation))
     if len(obj_df.columns)!=0:
         new_df = pd.DataFrame()
         print('\nWHERE, the encoded information is as follows : \n')
@@ -242,6 +265,12 @@ def featureSelectionPlot(feat_df):
     plt.show()
 
 def FeatureSelection(X,y,class_or_Reg):
+    class_weights = list(class_weight.compute_class_weight('balanced',
+                                             np.unique(y),
+                                             y))
+    w_array = np.ones(y.shape[0], dtype = 'float')
+    for i,val in enumerate(y):
+        w_array[i] = class_weights[val-1]
     n_est = 20
     if class_or_Reg == 'Classification':
         selector = XGBClassifier(n_estimators =n_est, max_depth= 6, n_jobs=-1)
@@ -251,7 +280,10 @@ def FeatureSelection(X,y,class_or_Reg):
         print('runnning regressor selector')
 
     for i in tqdm(range(10)):
-        selector.fit(X, y)
+        if class_or_Reg == 'Classification':
+            selector.fit(X, y, sample_weight=w_array)
+        else:
+            selector.fit(X, y)
 
     # all columns container
     cols = pd.DataFrame(X.columns)
@@ -333,12 +365,12 @@ def model_training(X_train,y_train,X_test,y_test,class_or_Reg,priorList,q_s):
   # Selecting best model
   if class_or_Reg == 'Classification':
     Classification=classification()
-    input_X_train,input_y_train=data_model_select(X_train,y_train)
-    name,mod,acc,par,model_info = Classification.best_model_class(input_X_train, X_test, input_y_train.values, y_test.values,priorList)
+    # input_X_train,input_y_train=data_model_select(X_train,y_train)
+    name,mod,acc,par,model_info = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList)
   else:#Regression
     regression=Regression()
-    input_X_train,input_y_train=data_model_select(X_train,y_train)
-    name,mod,acc,par,model_info = regression.best_model_reg(input_X_train, X_test, input_y_train, y_test)
+    # input_X_train,input_y_train=data_model_select(X_train,y_train)
+    name,mod,acc,par,model_info = regression.best_model_reg(X_train, X_test, y_train, y_test)
   print('Accuracy :',acc)
   return mod,model_info
 
@@ -365,15 +397,56 @@ def removeOutliers(df):
 
 def getDF(df,model):
     try:
-        df = df[model['init_cols']]
+        mdf = df[model['init_cols']]
         print('Columns Match!')
-        return df
+        return mdf
     except KeyError as e:
         print('We could not find the column/columns ' + str(e) + ' in the current file!')
         print('The column names don\'t match with the ones that were present during Training')
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
 
-def importModel(path):
-    print('IMPORTING MODEL INFORMATION')
-    return joblib.load(path)
+def bivar_ploter(df1,targ,base_var,ax1):
+      l=[]
+      for b in set(df1[targ]):l.append((df1[df1[targ]==b].groupby(base_var).count()[targ]).rename(b))
+      c=pd.concat(l,axis=1)
+      if(df1[targ].nunique()>5):
+          a=list(c.sum(axis=0).sort_values(ascending=False)[:4].index)
+          c=pd.concat([c[a],pd.Series(c[list(set(c.columns)-set(a))].sum(axis=1),name='Others')],axis=1)
+      if(df1[base_var].dtype==np.object or df1[base_var].nunique()/len(df1)>0.1):
+          if(df1[base_var].nunique()<10):a=c.plot(kind='bar',ax=ax1)
+          else:a=c.loc[list(c.sum(axis=1).sort_values().index)[-10:]].plot(kind='bar',ax=ax1)
+          ax1.set_title(base_var)
+      else:
+          a=c.plot(kind='line',alpha=0.5,ax=ax1)
+      ax1.set_ylabel('Frequency')
+      return a
+
+def userInteractVisualization(df1,targ):
+        B=list(df1.columns);B.remove(targ);l=[]
+        x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
+        if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=np.sum(df1.dtypes==np.object)-np.sum(x)
+        else:j=len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1
+        nr=int((j/4)+0.99)
+        print('\t Applying bivar_plotting to create Images ...') # For Testing
+        start = time.time()
+        fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(20,6*nr));axes=axes.ravel();i=0
+        if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
+            for c in (df1.dtypes.loc[(df1.dtypes==np.object).values].index):
+                #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
+                if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):continue
+                try:
+                    bivar_ploter(df1,c,targ,axes[i]);i=i+1
+                except:
+                    pass
+        else:
+            for c in B:
+                #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
+                if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10 and df1[c].dtype==np.object):continue
+                try:
+                    bivar_ploter(df1,targ,c,axes[i]);i=i+1
+                except:
+                    pass
+        for c in range(i,(4*nr)):axes[c].set_visible(False)
+        print('\n Target analysis');fig.suptitle(targ);fig.tight_layout();fig.show()
+        print(f'\t Done with Bivar plotting in time {time.time() - start} seconds ')

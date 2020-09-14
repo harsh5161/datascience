@@ -7,7 +7,7 @@ import scikitplot as skplt
 import seaborn as sns
 import swifter
 from sklearn.preprocessing import MinMaxScaler
-
+import joblib
 
 def score(df,init_info,validation=False):
     print('\n\t #### VALIDATION AND SCORING ZONE ####')
@@ -131,6 +131,7 @@ def score(df,init_info,validation=False):
         start = time.time()
         ############# MODEL TRAINING #############
         mod,model_info = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
+        print('MODEL SAVED')
         ############# MODEL TRAINING #############
         end = time.time()
         print('\nTotal Model Training Time taken : {}'.format(end-start))
@@ -210,11 +211,10 @@ def score(df,init_info,validation=False):
             plt.show()
     ############ PREDICTION/SCORING #############
     if validation:
-        init_info['model']=mod
-        init_info['model_info'] = model_info
+        model_info.drop(['model','param','accuracy'],axis=1).to_csv('MC.csv',index=False)
         del init_info['X_train'],init_info['y_train']                  # This removes the data from dict to avoid storage
-        joblib.dump(init_info,'model_info')
-        print('MODEL SAVED')
+        init_info['model'] = mod
+        joblib.dump(init_info,'model_info',compress=True)
 
     preview_length = 100 if len(X_test)>100 else len(X_test)
     if validation:
