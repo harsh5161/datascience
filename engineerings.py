@@ -24,7 +24,6 @@ stemmer = SnowballStemmer('english')
 ############## NUMERIC ENGINEERING #########
 ############################################
 
-
 def numeric_engineering(df):
     start = time.time()
 
@@ -63,15 +62,10 @@ def numeric_engineering(df):
     end = time.time();print('Numeric Engineering time taken:',end - start);print('\n')
     return(df)
 
+
 ############################################
 ############## DATE ENGINEERING ############
 ############################################
-
-
-######################## ----------------- DATE IDENTIFICATION --------------------- ######################
-
-# Global List of all months
-
 
 def getDateColumns(df,withPossibilies=0):
     '''
@@ -172,34 +166,49 @@ def date_engineering(df):
     return df.drop(date_cols,axis=1)
 
 
-
 ############################################
 ############## TEXT ANALYTICS ##############
 ############################################
 
-
 def findReviewColumns(df): #input main dataframe
 
-  df1 = df.copy() #contains original dataframe
-  df.dropna(axis=0,inplace=True) #dropping all rows with null values
+  rf = df.sample(n=50, random_state=1).dropna(axis=0) if len(df)>150 else df.dropna(axis=0)#use frac=0.25 to get 25% of the data
 
-  df2 = df.select_dtypes(include=['object'])
-  df =df2.copy()
-  print("The number of columns with dtype== object are as follows:",df.dtypes.value_counts())
-  print("Shape of the processed DataFrame is :", df.shape)
+  #df.dropna(axis=0,inplace=True) #dropping all rows with null values
+
+
 
   categorical_variables = []
-  for col in df.columns:
+  for col in rf.columns:
     if df[col].nunique() <100:  #define threshold for removing unique values #replace with variable threshold
-      df.drop(col, axis=1,inplace=True) #here df contains object columns, no null rows, no string-categorical,
+      rf.drop(col, axis=1,inplace=True) #here df contains object columns, no null rows, no string-categorical,
 
-  rf = df.sample(n=150, random_state=1) #use frac=0.25 to get 25% of the data
-  #df = rf.copy()
+  col_list =[]
+  rf.reset_index(drop=True,inplace=True)
+  for col in rf.columns:
+        count1,count2,count3 = 0,0,0
+        for i in range(len(rf)):
+            if len(str(rf.at[i,col]).split()) == 1:
+                count1 = count1+1
+            elif len(str(rf.at[i,col]).split()) == 2:
+                count2 = count2+1
+            elif len(str(rf.at[i,col]).split()) == 3:
+                count3 = count3+1
+
+        if count1+count2+count3 >=0.75*len(rf):
+            col_list.append(col)
+            print("dropping column",col)
+            rf.drop(col, axis=1,inplace=True)
+
+
+
+
+
   start = time.time()
   print(rf.shape)
   nlp = spacy.load('en_core_web_sm', disable=['tagger','parser','textcat'])
   sf = pd.DataFrame()
-  for col in df.columns:
+  for col in rf.columns:
     sf[col] = rf[col].apply(nlp)
 
 
@@ -212,7 +221,7 @@ def findReviewColumns(df): #input main dataframe
 
   start = time.time()
   #testf = sf.sample(frac=0.10,random_state=44)
-  col_list =[]
+
   #code to eliminate columns of name, city, address
   for col in sf.columns:
     entity_list =[]
@@ -228,7 +237,7 @@ def findReviewColumns(df): #input main dataframe
       entity_counter = Counter(entity_list).elements()  #counts the match
       counter_length = sum(1 for x in entity_counter)
       print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
-      if (counter_length >= 0.60*token_len):
+      if (counter_length >= 0.20*token_len):
         col_list.append(col)
     else:
       print("Length of token entities 0")
@@ -260,8 +269,6 @@ def findReviewColumns(df): #input main dataframe
       append(col)
 
     return main_list, col_list
-
-
 
 def sentiment_analysis(rf):
   bf = pd.DataFrame()
