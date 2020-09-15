@@ -172,7 +172,7 @@ def date_engineering(df):
 
 def findReviewColumns(df): #input main dataframe
 
-  rf = df.sample(n=50, random_state=1).dropna(axis=0) if len(df)>150 else df.dropna(axis=0)#use frac=0.25 to get 25% of the data
+  rf = df.sample(n=150, random_state=1).dropna(axis=0) if len(df)>150 else df.dropna(axis=0)#use frac=0.25 to get 25% of the data
 
   #df.dropna(axis=0,inplace=True) #dropping all rows with null values
 
@@ -186,16 +186,19 @@ def findReviewColumns(df): #input main dataframe
   col_list =[]
   rf.reset_index(drop=True,inplace=True)
   for col in rf.columns:
-        count1,count2,count3 = 0,0,0
+        count1,count2,count3,count4 = 0,0,0,0
         for i in range(len(rf)):
-            if len(str(rf.at[i,col]).split()) == 1:
+            val = len(str(rf.at[i,col]).split())
+            if val == 1:
                 count1 = count1+1
-            elif len(str(rf.at[i,col]).split()) == 2:
+            elif val == 2:
                 count2 = count2+1
-            elif len(str(rf.at[i,col]).split()) == 3:
+            elif val == 3:
                 count3 = count3+1
+            elif val == 4:
+                count4 = count4+1
 
-        if count1+count2+count3 >=0.75*len(rf):
+        if count1+count2+count3+count4 >=0.75*len(rf):
             col_list.append(col)
             print("dropping column",col)
             rf.drop(col, axis=1,inplace=True)
@@ -237,7 +240,7 @@ def findReviewColumns(df): #input main dataframe
       entity_counter = Counter(entity_list).elements()  #counts the match
       counter_length = sum(1 for x in entity_counter)
       print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
-      if (counter_length >= 0.20*token_len):
+      if (counter_length >= 0.60*token_len):
         col_list.append(col)
     else:
       print("Length of token entities 0")
@@ -330,6 +333,7 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
     print(end-start)
     for idx, topic in lda_model_tfidf.print_topics(-1):
         print('Topic: {} Word: {}'.format(idx, topic)) #printing topics in the corpus
+
 
   ser = []
   append = ser.append

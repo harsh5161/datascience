@@ -157,7 +157,6 @@ def INIT(df,info):
     # ############# OUTLIER removal ###########
 
     ######## TEXT ENGINEERING #######
-    print('\nENTERING TEXT ENGINEERING\n')
     start1 = time.time()
     start = time.time()
     some_list, remove_list = findReviewColumns(X[useless_cols])  #list1 contains list of usable comment columns, list2 contains list of unusable comment columns
@@ -165,8 +164,7 @@ def INIT(df,info):
     print("Extracting Review Columns time",end-start)
     if (some_list is None):
       TEXT_DF = pd.DataFrame(None)
-      lda_models = None
-      remove_list = []
+      lda_models = pd.DataFrame(None)
       print("No review/comment columns found")
     else:
         try:
@@ -201,20 +199,26 @@ def INIT(df,info):
             X.drop(some_list,axis=1,inplace=True)
             X.drop(remove_list,axis=1, inplace=True)
             lda_models.dropna(axis=0,inplace=True)
-        except Exception as exceptionMessage:
             print('#### TEXT ENGINEERING HAD ERRORS ####')
             print('Exception message is {}'.format(exceptionMessage))
             X.drop(useless_cols,axis=1,inplace=True)
             some_list = []
+            X.drop(some_list,inplace=True)
+            if(remove_list):
+                X.drop(remove_list,axis=1,inplace=True)
             remove_list = []
+            some_list = []
             TEXT_DF = pd.DataFrame(None)
-            lda_models = None
+            lda_models = pd.DataFrame(None)
 
     end2= time.time()
 
     print("total text analytics time taken =", end2-start1)
     print("Text Engineering Result", TEXT_DF)
     print('\n#### DONE ####\n')
+
+    #TEXT_DF holds the columns obtained from Text Engineering and
+    #X contains the columns after Text imputation
 
     ########################### TEXT ENGINEERING #############################
 
