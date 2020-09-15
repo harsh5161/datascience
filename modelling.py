@@ -396,7 +396,7 @@ class classification:
 
       if(flag == 1):
         best = {'priors': priorList}
-        df.loc[ind,'Name']='Naive Bayes'
+        df.loc[ind,'Name']='Naive Bayes(Bayesian Statistics)'
         df.loc[ind,'model']=GaussianNB(priors = priorList)
         df.loc[ind,'param']=str(best)
         Start=time.time()
@@ -446,7 +446,7 @@ class classification:
 
       if(flag == 1):
             best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
-            df.loc[ind,'Name']='Neural Net'
+            df.loc[ind,'Name']='Neural Network'
             df.loc[ind,'model']=MLPClassifier(**best)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -532,7 +532,7 @@ class classification:
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
-      df.loc[ind,'Name']=('Ensemble '+name)[:-1]
+      df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
       df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
       df.loc[ind,'param']="Default"
       Start=time.time()
@@ -945,7 +945,7 @@ class Regression:
       #Neural net
       ########################################################################################################
       best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-      df.loc[ind,'Name']='Neural Net'
+      df.loc[ind,'Name']='Neural Network'
       df.loc[ind,'model']=MLPRegressor(**best)
       df.loc[ind,'param']=str(best)
       Start = time.time()
@@ -1032,7 +1032,7 @@ class Regression:
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
-      df.loc[ind,'Name']=('Ensemble '+name)[:-1]
+      df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
       df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
       df.loc[ind,'param']="Defualt"
       Start = time.time()
