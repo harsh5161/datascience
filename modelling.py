@@ -67,7 +67,8 @@ class classification:
 
   #This funciton takes input of training and testing datasets and give out the best model's Name, model with best parameter(can be used directly to score data using 'predcit' function), accuracy on the test dataset and parameters (not usefful)
   ###############################################################################################################################
-  def best_model_class(self,X_train ,X_test, y_train, y_test,priorList,MAX_EVALS=2,CV=5):
+  def best_model_class(self,X_train ,X_test, y_train, y_test,priorList,MAX_EVALS,CV=5):
+      print('Max evals is currently set to {}'.format(MAX_EVALS))
       df=pd.DataFrame()
       ind=0
 
@@ -637,7 +638,8 @@ class Regression:
 
   #This funciton takes input of training and testing datasets and give out the best model's Name, model with best parameter(can be used directly to score data using 'predcit' function), accuracy on the test dataset and parameters (not usefful)
   ###############################################################################################################################
-  def best_model_reg(self,X_train , X_test, y_train, y_test,MAX_EVALS=2,CV=5):
+  def best_model_reg(self,X_train , X_test, y_train, y_test,MAX_EVALS,CV=5):
+      print('Max evals is currently set to {}'.format(MAX_EVALS))
       df=pd.DataFrame()
       ind=0
 
