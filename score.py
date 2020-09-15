@@ -214,7 +214,7 @@ def score(df,init_info,validation=False):
         model_info.drop(['model','param','accuracy'],axis=1).to_csv('MC.csv',index=False)
         del init_info['X_train'],init_info['y_train']                  # This removes the data from dict to avoid storage
         init_info['model'] = mod
-        joblib.dump(init_info,'model_info',compress=True)
+        joblib.dump(init_info,'model_info',compress=9)
 
     preview_length = 100 if len(X_test)>100 else len(X_test)
     if validation:
