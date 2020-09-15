@@ -60,6 +60,7 @@ from sklearn.ensemble import VotingRegressor
 from sklearn.metrics import classification_report
 from sklearn.utils import compute_sample_weight
 from sklearn.utils import class_weight
+
 import xgboost as xgb
 from scipy.stats import ks_2samp
 
@@ -100,7 +101,9 @@ class classification:
         for val in priorList:
           if val <= 0.15:
             flag = 0
-      #XGBoost
+
+
+         #XGBoost
       #########################################################################################################################
       ##XGBoost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
       ########################################################################################################
@@ -263,8 +266,8 @@ class classification:
                   'n_estimators': scope.int(hp.quniform('n_estimators', 100, 1200,50)),
                   "max_depth": scope.int(hp.quniform('max_depth',2,20,1)),
                   'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
-                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,12,1)),
-                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,10,1)),
+                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
+                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
                   'oob_score':False,
                   'bootstrap':  hp.choice('bootstrap',[True, False]),
                   'class_weight':'balanced'
@@ -420,7 +423,41 @@ class classification:
 
       #Logistic regression
       ########################################################################################################
-      best={'max_iter':1000, 'class_weight':'balanced'}
+      def objective(params):
+            print('\n',params)
+            lr = LogisticRegression(**params)
+            result = cross_val_score(lr,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+            print("LR Train done")
+            print('\n',result.min()*100)
+            return (1-result.min())
+
+      Space = {
+               'class_weight': 'balanced',
+               'random_state': 44,
+               'solver':'saga',
+               'max_iter': scope.int(hp.quniform('max_iter',100,1500,50)),
+               'n_jobs':-1,
+               'C' : hp.uniform('C',0.1,10.0),
+               'penalty': hp.choice('penalty',['l2'])
+              }
+
+      bayes_trials = Trials()
+      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
+      print("HyperOP done for LR")
+
+      best['class_weight'] = 'balanced'
+      best['random_state'] = 44
+      best['solver'] = 'saga'
+      best['max_iter'] = int(best['max_iter'])
+      best['n_jobs'] = -1
+      best['C'] = 1.0
+      pen = ['l2']
+      best['penalty'] = pen[best['penalty']]
+
+      print("LR done")
+
+      ##########################################################################################################
+
       df.loc[ind,'Name']='Logistic Regression'
       df.loc[ind,'model']=LogisticRegression(**best)
       df.loc[ind,'param']=str(best)
@@ -469,9 +506,46 @@ class classification:
 
       #Support Vector Machine(linear)
       ########################################################################################################
+
+      def objective(params):
+        print("\n",params)
+        sv = svm.SVC(**params)
+        result = cross_val_score(sv,X=X_train, y=y_train, scoring='accuracy',error_score=np.nan,n_jobs=-1)
+        print("SVC Train done")
+        print("\n",result.min()*100)
+        return (1-result.min())
+
+
+      Space = {
+                'C' : hp.uniform('C',1.0,100.0),
+                'kernel': 'linear',
+                'class_weight':'balanced',
+                'probability':True,
+                'max_iter': scope.int(hp.quniform('max_iter',100,1500,50)),
+                'random_state':44
+               }
+
+
+      bayes_trials = Trials()
+      print("Moving into HyperOp")
+      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
+      print("HyperOP done for SVC")
+
+
+
+      best['C'] = float(best['C'])
+      best['kernel'] = 'linear'
+      best['class_weight'] = 'balanced'
+      best['probability'] = True
+      best['max_iter'] = int(best['max_iter'])
+      best['random_state'] = 44
+
+      print("SVC done ")
+      #########################################################################################################
+
       df.loc[ind,'Name']='Support Vector Machine'
-      df.loc[ind,'model']= svm.SVC(kernel='linear',class_weight='balanced',max_iter=1000,probability=True)
-      df.loc[ind,'param']=None
+      df.loc[ind,'model']= svm.SVC(**best)
+      df.loc[ind,'param']= str(best)
       Start=time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
       support_pred = df.loc[ind,'model'].predict(X_test)
@@ -781,8 +855,8 @@ class Regression:
                   'n_estimators': scope.int(hp.quniform('n_estimators', 100,1200,50)),
                   "max_depth": scope.int(hp.quniform('max_depth',2,30,1)),
                   'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
-                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,12,1)),
-                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,10,1)),
+                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
+                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
                   'oob_score':False,
                   'bootstrap':  hp.choice('bootstrap',[True, False])
                   }
