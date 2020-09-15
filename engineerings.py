@@ -331,7 +331,6 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
     for idx, topic in lda_model_tfidf.print_topics(-1):
         print('Topic: {} Word: {}'.format(idx, topic)) #printing topics in the corpus
 
-
   ser = []
   append = ser.append
   print("Bag of Words Corpus length",len(bow_corpus))
@@ -343,6 +342,5 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
   end = time.time()
   asf = pd.DataFrame(ser)
   print("Time for append", end-start)
-
 
   return asf, lda_model_tfidf
