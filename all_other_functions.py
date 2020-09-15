@@ -97,22 +97,20 @@ def Segregation(df):
     print('Segregation time taken : {}'.format(end-start))
     return numeric,disc,unique
 
-def Visualization(X,Y,class_or_Reg):
+def Visualization(X,Y,class_or_Reg,LE):
     import pydotplus
     if class_or_Reg == 'Classification':
         from sklearn import tree
         from sklearn.tree import DecisionTreeClassifier
         import matplotlib.pyplot as plt
         from sklearn.preprocessing import LabelEncoder
-        le = LabelEncoder()
-        Y = le.fit_transform(Y)#encoding the target variable
         Yt=pd.DataFrame(Y)
         clf = DecisionTreeClassifier(max_depth = 3, min_samples_split=2, min_samples_leaf=0.01, random_state = 1)
         clf.fit(X, Y)
-        class_names=list(le.inverse_transform(sorted(Yt[Yt.columns[0]].unique())))
+        class_names=list(LE.inverse_transform(sorted(Yt[Yt.columns[0]].unique())))
         for i in range(len(class_names)):
             class_names[i]=str(class_names[i])
-        print("value=[n1,n2,n3...] where n1,n2,n3 are the number of samples of the classes in the order     \nvalue="+str(le.inverse_transform(sorted(Yt[Yt.columns[0]].unique()))))
+        print("value=[n1,n2,n3...] where n1,n2,n3 are the number of samples of the classes in the order     \nvalue="+str(LE.inverse_transform(sorted(Yt[Yt.columns[0]].unique()))))
         tree.plot_tree(clf,
                      feature_names =X.columns, #the list of all column names
                      class_names=class_names, #list of the class names
@@ -121,7 +119,7 @@ def Visualization(X,Y,class_or_Reg):
                      rounded=True,
                      fontsize=10);
         dot_data = tree.export_graphviz(clf, out_file=None,
-                            feature_names=X.columns,
+                            feature_names=X.columns, class_names=class_names,
                             filled=True, impurity=False, rounded=True,
                             special_characters=True)
         graph = pydotplus.graph_from_dot_data(dot_data)

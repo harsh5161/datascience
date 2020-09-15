@@ -285,7 +285,7 @@ def INIT(df,info):
 
     print('\n #### DECISION TREE VISUALIZATION ####')
     try:
-        Visualization(X,y,class_or_Reg)
+        Visualization(X,y,class_or_Reg,LE)
     except:
         print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
 
