@@ -741,7 +741,7 @@ class Regression:
               'subsample': hp.uniform('subsample',  0.2,1.0  )
               }
 
-
+      Start = time.time()
       bayes_trials = Trials()
       best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
       print("XGB hyperop done")
@@ -762,10 +762,10 @@ class Regression:
       df.loc[ind,'Name']='XGBoost'
       df.loc[ind,'model']=xgb.XGBRegressor(**best)
       df.loc[ind,'param']=str(best)
-      Start = time.time()
+
       df.loc[ind,'model'].fit(X_train, y_train)
       xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
-      print(type(xgb_reg_prob1))
+      # print(type(xgb_reg_prob1))
       End = time.time()
       df.loc[ind,'accuracy']=r2_score(y_test, xgb_reg_prob1)*100
       df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, xgb_reg_prob1))))
@@ -803,7 +803,7 @@ class Regression:
                   'rsm': hp.uniform('rsm',  0.01,1.0  ),
                   }
 
-
+      Start = time.time()
       bayes_trials = Trials()
       best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
       print("CAT hyperop done")
@@ -823,7 +823,6 @@ class Regression:
       df.loc[ind,'Name']='CatBoost'
       df.loc[ind,'model']=cb.CatBoostRegressor(**best)
       df.loc[ind,'param']=str(best)
-      Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
       cat_reg_prob1 = df.loc[ind,'model'].predict(X_test)
       End = time.time()
@@ -860,7 +859,7 @@ class Regression:
                   'oob_score':False,
                   'bootstrap':  hp.choice('bootstrap',[True, False])
                   }
-
+      Start = time.time()
       bayes_trials = Trials()
       try:
         best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
@@ -890,7 +889,6 @@ class Regression:
       df.loc[ind,'Name']='Random Forest'
       df['model'][ind]=RandomForestRegressor(**best)
       df.loc[ind,'param']=str(best)
-      Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
       random_reg_prob1 = df.loc[ind,'model'].predict(X_test)
       End = time.time()
@@ -928,7 +926,7 @@ class Regression:
                   'bootstrap':  hp.choice('bootstrap',[True, False]),
                   'oob_score':False
                   }
-
+      Start = time.time()
       bayes_trials = Trials()
       try:
         best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
@@ -959,7 +957,6 @@ class Regression:
       df.loc[ind,'Name']='ExtraTrees Regressor'
       df['model'][ind]=ExtraTreesRegressor(**best)
       df.loc[ind,'param']=str(best)
-      Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
       extra_reg_prob1 = df.loc[ind,'model'].predict(X_test)
       End = time.time()

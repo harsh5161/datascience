@@ -263,12 +263,7 @@ def featureSelectionPlot(feat_df):
     plt.show()
 
 def FeatureSelection(X,y,class_or_Reg):
-    class_weights = list(class_weight.compute_class_weight('balanced',
-                                             np.unique(y),
-                                             y))
-    w_array = np.ones(y.shape[0], dtype = 'float')
-    for i,val in enumerate(y):
-        w_array[i] = class_weights[val-1]
+    # class balancing on Feature selection has to be done!
     n_est = 20
     if class_or_Reg == 'Classification':
         selector = XGBClassifier(n_estimators =n_est, max_depth= 6, n_jobs=-1)
@@ -279,7 +274,7 @@ def FeatureSelection(X,y,class_or_Reg):
 
     for i in tqdm(range(10)):
         if class_or_Reg == 'Classification':
-            selector.fit(X, y, sample_weight=w_array)
+            selector.fit(X, y)
         else:
             selector.fit(X, y)
 

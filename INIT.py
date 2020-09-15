@@ -201,7 +201,7 @@ def INIT(df,info):
             lda_models.dropna(axis=0,inplace=True)
         except:
             print('#### TEXT ENGINEERING HAD ERRORS ####')
-            X.drop(some_list,inplace=True)
+            X.drop(some_list,axis=1,inplace=True)
             if(remove_list):
                 X.drop(remove_list,axis=1,inplace=True)
             remove_list = []

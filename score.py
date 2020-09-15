@@ -211,7 +211,10 @@ def score(df,init_info,validation=False):
             plt.show()
     ############ PREDICTION/SCORING #############
     if validation:
-        model_info.drop(['model','param','accuracy'],axis=1).to_csv('MC.csv',index=False)
+        mc = model_info.drop(['model','param','accuracy'],axis=1)
+        if init_info['ML'] == 'Classification':mc.sort_values('F1',ascending=False,inplace=True)
+        else:mc.sort_values('RMSE',ascending=False,inplace=True)
+        mc.to_csv('MC.csv',index=False)
         del init_info['X_train'],init_info['y_train']                  # This removes the data from dict to avoid storage
         init_info['model'] = mod
         joblib.dump(init_info,'model_info',compress=9)
