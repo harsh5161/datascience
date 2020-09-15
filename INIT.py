@@ -199,10 +199,8 @@ def INIT(df,info):
             X.drop(some_list,axis=1,inplace=True)
             X.drop(remove_list,axis=1, inplace=True)
             lda_models.dropna(axis=0,inplace=True)
+        except:
             print('#### TEXT ENGINEERING HAD ERRORS ####')
-            print('Exception message is {}'.format(exceptionMessage))
-            X.drop(useless_cols,axis=1,inplace=True)
-            some_list = []
             X.drop(some_list,inplace=True)
             if(remove_list):
                 X.drop(remove_list,axis=1,inplace=True)
@@ -215,7 +213,6 @@ def INIT(df,info):
 
     print("total text analytics time taken =", end2-start1)
     print("Text Engineering Result", TEXT_DF)
-    print('\n#### DONE ####\n')
 
     #TEXT_DF holds the columns obtained from Text Engineering and
     #X contains the columns after Text imputation
