@@ -10,10 +10,13 @@ import joblib
 def INIT(df,info):
     target = info['target']
     key = info['key']
+    commentCols = info['commentCols']
     cols = info['cols']
     cols.append(target)
     if key:
         cols.append(key)
+    if commentCols:
+        cols.append(commentCols)
     df = df[cols]
     # Print columns with missing data in the descending order
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
@@ -128,11 +131,67 @@ def INIT(df,info):
     print(' #### DONE ####')
     ######## DATE ENGINEERING #######
 
+    ######## TEXT ENGINEERING #######
+    start1 = time.time()
+    if (commentCols is None):
+      TEXT_DF = pd.DataFrame(None)
+      lda_models = pd.DataFrame(None)
+      print("No review/comment columns found")
+    else:
+        try:
+            print('Respective columns will undergo text engineering and will be imputed in the function itself')
+            print('\n#### TEXT ENGINEERING RUNNING WAIT ####')
+            print("The review/comment columns found are", commentCols)
+            start = time.time()
+            sentiment_frame = sentiment_analysis(X[commentCols])
+            sentiment_frame.fillna(value=0.0,inplace=True)
+            print(sentiment_frame)
+            #TEXT_DF = pd.concat([df, sentiment_frame], axis=1, sort=False)
+            TEXT_DF = sentiment_frame.copy()
+            TEXT_DF.reset_index(drop=True,inplace=True)
+            end = time.time()
+            print("Sentiment time",end-start)
+            start = time.time()
+            new_frame = X[commentCols].copy()
+            new_frame.fillna(value="None",inplace=True)
+            lda_models = pd.DataFrame(index= range(5),columns=['Model'])
+            ind = 0
+
+            for col in new_frame.columns:
+                topic_frame, lda_model = topicExtraction(new_frame[[col]])
+                topic_frame.rename(columns={0:str(col)+"_Topic"},inplace=True)
+                print(topic_frame)
+                topic_frame.reset_index(drop=True, inplace=True)
+                TEXT_DF = pd.concat([TEXT_DF, topic_frame], axis=1, sort=False)
+                lda_models['Model'][ind] = lda_model
+                ind = ind+1
+            end = time.time()
+            print("Topic time", end-start)
+            X.drop(commentCols,axis=1,inplace=True)
+            lda_models.dropna(axis=0,inplace=True)
+        except:
+            print('#### TEXT ENGINEERING HAD ERRORS ####')
+            X.drop(commentCols,axis=1,inplace=True)
+            commentCols = []
+            TEXT_DF = pd.DataFrame(None)
+            lda_models = pd.DataFrame(None)
+
+    end2= time.time()
+
+    print("total text analytics time taken =", end2-start1)
+    print("Text Engineering Result", TEXT_DF)
+
+    #TEXT_DF holds the columns obtained from Text Engineering and
+    #X contains the columns after Text imputation
+
+    ########################### TEXT ENGINEERING #############################
+
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
     # Feature Reduction and Segregation of discrete columns
     # joblib.dump(X,'seg');return None,None
     num_df, disc_df, useless_cols = Segregation(X)
+    X.drop(useless_cols,axis=1,inplace=True)
     disc_df = disc_df.astype('category')
     disc_cat = {}
     for column in disc_df:
@@ -155,69 +214,6 @@ def INIT(df,info):
     # y.drop(ourlierRows,inplace=True)
     # print(' #### DONE ####')
     # ############# OUTLIER removal ###########
-
-    ######## TEXT ENGINEERING #######
-    start1 = time.time()
-    start = time.time()
-    some_list, remove_list = findReviewColumns(X[useless_cols])  #list1 contains list of usable comment columns, list2 contains list of unusable comment columns
-    end = time.time()
-    print("Extracting Review Columns time",end-start)
-    if (some_list is None):
-      TEXT_DF = pd.DataFrame(None)
-      lda_models = pd.DataFrame(None)
-      print("No review/comment columns found")
-    else:
-        try:
-            print('Respective columns will undergo text engineering and will be imputed in the function itself')
-            print('\n#### TEXT ENGINEERING RUNNING WAIT ####')
-            print("The review/comment columns found are", some_list)
-            start = time.time()
-            sentiment_frame = sentiment_analysis(X[some_list])
-            sentiment_frame.fillna(value=0.0,inplace=True)
-            print(sentiment_frame)
-            #TEXT_DF = pd.concat([df, sentiment_frame], axis=1, sort=False)
-            TEXT_DF = sentiment_frame.copy()
-            TEXT_DF.reset_index(drop=True,inplace=True)
-            end = time.time()
-            print("Sentiment time",end-start)
-            start = time.time()
-            new_frame = X[some_list].copy()
-            new_frame.fillna(value="None",inplace=True)
-            lda_models = pd.DataFrame(index= range(5),columns=['Model'])
-            ind = 0
-
-            for col in new_frame.columns:
-                topic_frame, lda_model = topicExtraction(new_frame[[col]])
-                topic_frame.rename(columns={0:str(col)+"_Topic"},inplace=True)
-                print(topic_frame)
-                topic_frame.reset_index(drop=True, inplace=True)
-                TEXT_DF = pd.concat([TEXT_DF, topic_frame], axis=1, sort=False)
-                lda_models['Model'][ind] = lda_model
-                ind = ind+1
-            end = time.time()
-            print("Topic time", end-start)
-            X.drop(some_list,axis=1,inplace=True)
-            X.drop(remove_list,axis=1, inplace=True)
-            lda_models.dropna(axis=0,inplace=True)
-        except:
-            print('#### TEXT ENGINEERING HAD ERRORS ####')
-            X.drop(some_list,axis=1,inplace=True)
-            if(remove_list):
-                X.drop(remove_list,axis=1,inplace=True)
-            remove_list = []
-            some_list = []
-            TEXT_DF = pd.DataFrame(None)
-            lda_models = pd.DataFrame(None)
-
-    end2= time.time()
-
-    print("total text analytics time taken =", end2-start1)
-    print("Text Engineering Result", TEXT_DF)
-
-    #TEXT_DF holds the columns obtained from Text Engineering and
-    #X contains the columns after Text imputation
-
-    ########################### TEXT ENGINEERING #############################
 
     ############# PEARSON CORRELATION ############
     print('\n #### PEARSON CORRELATION ####')
@@ -318,6 +314,6 @@ def INIT(df,info):
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
-                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models}
+                'some_list':some_list,'lda_models':lda_models,'commentCols':commentCols}
     print(' #### DONE ####')
     return init_info,validation
