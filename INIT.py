@@ -16,7 +16,7 @@ def INIT(df,info):
     if key:
         cols.append(key)
     if commentCols:
-        cols.append(commentCols)
+        cols.extend(commentCols)
     df = df[cols]
     # Print columns with missing data in the descending order
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
@@ -314,6 +314,6 @@ def INIT(df,info):
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
-                'some_list':some_list,'lda_models':lda_models,'commentCols':commentCols}
+                'lda_models':lda_models,'commentCols':commentCols}
     print(' #### DONE ####')
     return init_info,validation
