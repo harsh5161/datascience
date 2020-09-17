@@ -185,8 +185,8 @@ def getUserInput(df):
 
             # Quick/Slow results for max evals
             quick = quick_slow()
-            if quick:print('MAX EVALS WILL BE SET TO 2')
-            else:print('MAX EVALS WILL BE SET TO 15')
+            if quick:print('QUICK MODELLING WITH DEFAULT PARAMETERS')
+            else:print('HyperOP with MAX EVALS = 15')
 
         info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
 
