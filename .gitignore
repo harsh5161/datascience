@@ -14,3 +14,4 @@ catboost_info/tmp/cat_feature_index.61ab3e5e-487bebee-a54bf65c-a2cc3fe.tmp
 catboost_info/tmp/cat_feature_index.a6d761cf-657b1731-8168ced-bed4d36f.tmp
 catboost_info/tmp/cat_feature_index.d8963a9f-8d2c2608-37161cd7-dd866969.tmp
 *.xlsx
+test.ipynb
