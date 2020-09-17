@@ -182,7 +182,7 @@ class classification:
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
         df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-        print("RF val done")
+        print("LGB val done")
         ind=ind+1
 
 
@@ -240,7 +240,7 @@ class classification:
 
         if(flag == 1):
             best = {'priors': priorList}
-            df.loc[ind,'Name']='Naive Bayes'
+            df.loc[ind,'Name']='Naive Bayes(Bayesisan Statistics)'
             df.loc[ind,'model']=GaussianNB(priors = priorList)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -292,7 +292,7 @@ class classification:
 
         if(flag == 1):
             best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
-            df.loc[ind,'Name']='Neural Net'
+            df.loc[ind,'Name']='Neural Network'
             df.loc[ind,'model']=MLPClassifier(**best)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -528,7 +528,7 @@ class classification:
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
         df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-        print("RF val done")
+        print("LGB val done")
         ind=ind+1
 
 
@@ -637,7 +637,7 @@ class classification:
 
         if(flag == 1):
             best = {'priors': priorList}
-            df.loc[ind,'Name']='Naive Bayes'
+            df.loc[ind,'Name']='Naive Bayes(Bayesian Statistics)'
             df.loc[ind,'model']=GaussianNB(priors = priorList)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -686,7 +686,7 @@ class classification:
 
         if(flag == 1):
                 best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
-                df.loc[ind,'Name']='Neural Net'
+                df.loc[ind,'Name']='Neural Network'
                 df.loc[ind,'model']=MLPClassifier(**best)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
