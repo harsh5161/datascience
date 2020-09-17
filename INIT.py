@@ -19,7 +19,7 @@ def INIT(df,info):
         cols.extend(commentCols)
     df = df[cols]
     # Print columns with missing data in the descending order
-    MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
+    MISSING = pd.DataFrame(((df.drop(commentCols,axis=1).isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
 
     ############ TARGET NUMERIC ENGINEERING ###########

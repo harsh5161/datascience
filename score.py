@@ -152,7 +152,7 @@ def score(df,init_info,validation=False):
             init_info['y_probs_cols'] = y_probs_cols
         else:
             y_probs_cols = init_info['y_probs_cols']
-        y_probas = pd.DataFrame(y_probas,columns=y_probs_cols)
+        y_probas = pd.DataFrame(y_probas)
 
         if validation:
             from sklearn.metrics import classification_report
