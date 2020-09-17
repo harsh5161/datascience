@@ -356,17 +356,13 @@ def removeLowClass(df,target):
             return df
 
 def model_training(X_train,y_train,X_test,y_test,class_or_Reg,priorList,q_s):
-  if not q_s:q_s = 15
-  else:q_s = 2
   # Selecting best model
   if class_or_Reg == 'Classification':
     Classification=classification()
-    # input_X_train,input_y_train=data_model_select(X_train,y_train)
     name,mod,acc,par,model_info = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList,q_s)
   else:#Regression
     regression=Regression()
-    # input_X_train,input_y_train=data_model_select(X_train,y_train)
-    name,mod,acc,par,model_info = regression.best_model_reg(X_train, X_test, y_train, y_test, q_s)
+    name,mod,acc,par,model_info = regression.best_model_reg(X_train, X_test, y_train, y_test,q_s)
   print('Accuracy :',acc)
   return mod,model_info
 

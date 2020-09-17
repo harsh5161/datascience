@@ -25,6 +25,7 @@ import math
 # Model
 import xgboost as xgb
 import catboost as cb
+import lightgbm as lgb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LogisticRegression
@@ -68,11 +69,9 @@ class classification:
 
   #This funciton takes input of training and testing datasets and give out the best model's Name, model with best parameter(can be used directly to score data using 'predcit' function), accuracy on the test dataset and parameters (not usefful)
   ###############################################################################################################################
-  def best_model_class(self,X_train ,X_test, y_train, y_test,priorList,MAX_EVALS,CV=5):
-      print('Max evals is currently set to {}'.format(MAX_EVALS))
+  def best_model_class(self,X_train ,X_test, y_train, y_test,priorList,q_s,MAX_EVALS=15,CV=5):
       df=pd.DataFrame()
-      ind=0
-
+      print("Q_S value passed is!!!!",q_s)
       class_weights = list(class_weight.compute_class_weight('balanced',
                                              np.unique(y_train),
                                              y_train))
@@ -102,387 +101,196 @@ class classification:
           if val <= 0.15:
             flag = 0
 
+      if q_s ==True:  #QUICK RESULTS
+        ind=0
+        best = {}
+        #XGBoost
+        #######################################################################
+        df.loc[ind,'Name']='XGBoost'
+        if check == 1:
+            df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=1000,eta= 0.1,max_depth=10,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
+        elif check ==0:
+            df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=1000,eta= 0.1,max_depth=10,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList))
 
-         #XGBoost
-      #########################################################################################################################
-      ##XGBoost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-          print(params)
-          xg = xgb.XGBClassifier(**params)
-          result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
-          print("XGB train done")
-          print(result.min()*100)
-          return (1-result.min())
-
-      sample_weight = compute_sample_weight('balanced', y_train)
-      Space = {
-              'n_estimators': scope.int(hp.quniform('n_estimators', 50,1250,75)),
-              'eta': hp.uniform('eta', 0.01,0.2 ),
-              'max_depth':  scope.int(hp.quniform('max_depth',2,16,1 )),
-              'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,15,1 )),
-              'colsample_bytree': hp.uniform('colsample_bytree', 0.2,1.0 ),
-              'gamma': scope.int(hp.quniform('gamma', 0,15,1)),
-              'eval_metric':'logloss',
-              'subsample': hp.uniform('subsample',  0.2,1.0  ),
-              # 'sample_weight':sample_weight
-              }
-      if check ==1:
-            if myval >2:
-                Space['scale_pos_weight'] = hp.choice('scale_pos_weight',[1,myval-1,myval,myval+1])
-            else:
-                Space['scale_pos_weight'] = hp.choice('scale_pos_weight',[1,myval])
-
-
-      bayes_trials = Trials()
-      print("Moving into HyperOp for XGB")
-      best = fmin(fn=objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
-      print("HyperOP done for XGB")
-
-      best['n_estimators']=int(best['n_estimators'])
-      best['max_depth']=int(best['max_depth'])
-      best['min_child_weight']=int(best['min_child_weight'])
-      best['gamma'] = int(best['gamma'])
-      best['eval_metric']='logloss'
-      best['subsample'] = float(best['subsample'])
-      if check ==1:
-        if myval >2:
-            wea = [1,myval-1,myval,myval+1]
-            best['scale_pos_weight'] = wea[best['scale_pos_weight']]
-        else:
-            wea = [1,myval]
-            best['scale_pos_weight'] = wea[best['scale_pos_weight']]
-      # best['sample_weight']=sample_weight
-      print('XGB done')
-      ########################################################################################################
-
-
-      ##XGBoost(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='XGBoost'
-      df.loc[ind,'model']=xgb.XGBClassifier(**best)
-      df.loc[ind,'param']=str(best)
-      Start=time.time()
-      eval_set = [(X_test, y_test)]
-      if check ==1:
-            df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
-      else:
-        df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="logloss", eval_set=eval_set,verbose=False)
-
-      xgb_pred = df.loc[ind,'model'].predict(X_test)
-      End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred)
-      df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred)
-      df.loc[ind, 'F1']=f1_score(y_test, xgb_pred)
-      df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
-      df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
-      df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
-      df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, xgb_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("XGB val done")
-      ind=ind+1
-      ########################################################################################################
-
-      #Catboost
-      #########################################################################################################################
-      ##Catboost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-          print('\n',params)
-          cb1 = cb.CatBoostClassifier(**params)
-          result=cross_val_score(cb1,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
-          print("CAT train done")
-          print('\n',1-result.min())
-          return (1-result.min())
-
-      Space = {
-                  'silent': True,
-                  "depth": scope.int(hp.quniform('depth', 2, 16,1)),
-                  'iterations': scope.int(hp.quniform('iterations',50,1250,75)),
-                  'learning_rate': hp.uniform('learning_rate', 0.01,0.1 ),
-                  'random_strength' : hp.uniform('random_strength', 0.01,10 ),
-                  'bagging_temperature': scope.int(hp.quniform('bagging_temperature',  2,20,1 )),
-                  'border_count': 254,
-                  'rsm': hp.uniform('rsm',  0.1,1.0  ),
-                  'auto_class_weights': 'Balanced'
-
-                  }
-
-      bayes_trials = Trials()
-      print("Moving into HyperOp for CAT")
-      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
-      print("HyperOP done for CAT")
-
-      best['depth']=int(best['depth'])
-      best['iterations']=int(best['iterations'])
-      best['bagging_temperature']=int(best['bagging_temperature'])
-      best['learning_rate'] = float(best['learning_rate'])
-      best['rsm'] = float(best['rsm'])
-      best['border_count']=254
-      best['silent']= True
-      best['auto_class_weights']='Balanced'
-      print("CAT done")
-      ########################################################################################################
-
-
-      ##Catboost(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='CatBoost'
-      df.loc[ind,'model']=cb.CatBoostClassifier(**best)
-      df.loc[ind,'param']=str(best)
-      Start=time.time()
-      df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
-      catboost_pred = df.loc[ind,'model'].predict(X_test)
-      End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
-      df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
-      df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
-      df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
-      df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
-      df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
-      df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, catboost_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("CAT val done")
-      ind=ind+1
-      ########################################################################################################
-
-      #Random Forest
-      ########################################################################################################
-      ##Random Forest(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-        print(params)
-        rf = RandomForestClassifier(**params)
-        result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
-        print("RF train done")
-        print(result.min()*100)
-        return (1-result.min())
-
-      DSpace = {
-                  'n_estimators': scope.int(hp.quniform('n_estimators', 100, 1200,50)),
-                  "max_depth": scope.int(hp.quniform('max_depth',2,20,1)),
-                  'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
-                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
-                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
-                  'oob_score':False,
-                  'bootstrap':  hp.choice('bootstrap',[True, False]),
-                  'class_weight':'balanced'
-                  }
-
-      bayes_trials = Trials()
-      print("Moving into HyperOp for RF")
-      try:
-        best = fmin(fn = objective, space = DSpace, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
-        print("HyperOP done for RF")
-      except:
-        print("Hyperparameter tuning failed")
-        best.clear()
-        best['class_weight']='balanced'
-      else:
-        best['n_estimators']=int(best['n_estimators'])
-        best['max_depth']=int(best['max_depth'])
-        best['min_samples_split']=int(best['min_samples_split'])
-        best['min_samples_leaf']=int(best['min_samples_leaf'])
-        fea=['auto', 'sqrt','log2']
-        best['max_features']=fea[best['max_features']]
-        best['oob_score']= False
-        boot=[True, False]
-        best['bootstrap']=boot[best['bootstrap']]
-        best['class_weight']='balanced'
-      print("HyperOP done for RF")
-
-
-      print("RF done")
-      ########################################################################################################
-
-
-
-      ##Random forest(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='Random Forest'
-      df['model'][ind]=RandomForestClassifier(**best)
-      df.loc[ind,'param']= str(best)
-      Start=time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      randomforest_pred = df.loc[ind,'model'].predict(X_test)
-      End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
-      df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
-      df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
-      df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
-      df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
-      df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
-      df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("RF val done")
-      ind=ind+1
-
-      ########################################################################################################
-
-      #ExtraTreesClassifier
-        ##ExtraTrees(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-            print(params)
-            et = ExtraTreesClassifier(**params)
-            result=cross_val_score(et,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
-            print("ET train done")
-            print(result.min()*100)
-            return (1-result.min())
-
-      Space = {
-                        'n_estimators': scope.int(hp.quniform('n_estimators', 100, 1200,50)),
-                        'max_depth': scope.int(hp.quniform('max_depth',2,20,1)),
-                        'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
-                        'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
-                        'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
-                        'bootstrap':  hp.choice('bootstrap',[True, False]),
-                        'class_weight':'balanced',
-                        'oob_score':False
-                        }
-
-      bayes_trials = Trials()
-      print("Moving into HyperOp for ET")
-      try:
-        best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
-        print("HyperOP done for ET")
-      except:
-        print("Hyperparameter tuning failed")
-        best.clear()
-        best['class_weight']='balanced'
-      else:
-        best['n_estimators']=int(best['n_estimators'])
-        best['max_depth']=int(best['max_depth'])
-        best['min_samples_split']=int(best['min_samples_split'])
-        best['min_samples_leaf']=int(best['min_samples_leaf'])
-        fea=['auto', 'sqrt','log2']
-        best['max_features']=fea[best['max_features']]
-        best['oob_score']= False
-        boot=[True, False]
-        best['bootstrap']=boot[best['bootstrap']]
-        best['class_weight']='balanced'
-      print("HyperOP done for ET")
-
-
-      print("ET done")
-
-      ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='Extra Trees Classifier'
-      df['model'][ind]=ExtraTreesClassifier(**best)
-      df.loc[ind,'param']=str(best)
-      Start=time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      extra_pred = df.loc[ind,'model'].predict(X_test)
-      End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
-      df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
-      df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
-      df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
-      df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
-      df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
-      df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, extra_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("ET val done")
-      ind=ind+1
-      #########################################################################################################
-
-      #NaiveBayes
-      ########################################################################################################
-
-      if(flag == 1):
-        best = {'priors': priorList}
-        df.loc[ind,'Name']='Naive Bayes(Bayesian Statistics)'
-        df.loc[ind,'model']=GaussianNB(priors = priorList)
         df.loc[ind,'param']=str(best)
         Start=time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
-        naive_pred = df.loc[ind,'model'].predict(X_test)
+        eval_set = [(X_test, y_test)]
+        if check ==1:
+            df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
+        elif check==0:
+            df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", objective="multi:softmax",eval_set=eval_set,verbose=False)
+
+        xgb_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
-        df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
-        df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
-        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
-        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
-        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
-        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, naive_pred)
+        df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='micro')
+        df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='micro')
+        df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='micro')
+        if check==1:
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
+        elif check==0:
+            df.loc[ind, 'ROC_AUC_score']= ""
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, xgb_pred)
         df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-        print("Naive Bayes done")
+        print("XGB val done")
+        ind=ind+1
+        ########################################################################################################
+
+        ##Catboost
+        ########################################################################################################
+        df.loc[ind,'Name']='CatBoost'
+        df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced")
+        df.loc[ind,'param']=str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
+        catboost_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, catboost_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("CAT val done")
+        ind=ind+1
+        ########################################################################################################
+
+
+        ##LGBM
+        ########################################################################################################
+        df.loc[ind,'Name']='Light GBM'
+        df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=1000,random_state=1,subsample=1.0,num_leaves=31,max_depth=16)
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        randomforest_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("LGB val done")
         ind=ind+1
 
 
-      #Logistic regression
-      ########################################################################################################
-      def objective(params):
-            print('\n',params)
-            lr = LogisticRegression(**params)
-            result = cross_val_score(lr,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
-            print("LR Train done")
-            print('\n',result.min()*100)
-            return (1-result.min())
 
-      Space = {
-               'class_weight': 'balanced',
-               'random_state': 44,
-               'solver':'saga',
-               'max_iter': scope.int(hp.quniform('max_iter',100,1500,50)),
-               'n_jobs':-1,
-               'C' : hp.uniform('C',0.1,10.0),
-               'penalty': hp.choice('penalty',['l2'])
-              }
+        ##Random forest
+        ########################################################################################################
+        df.loc[ind,'Name']='Random Forest'
+        df['model'][ind]=RandomForestClassifier(n_estimators=1000,max_depth=16,class_weight='balanced')
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        randomforest_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("RF val done")
+        ind=ind+1
 
-      bayes_trials = Trials()
-      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
-      print("HyperOP done for LR")
-
-      best['class_weight'] = 'balanced'
-      best['random_state'] = 44
-      best['solver'] = 'saga'
-      best['max_iter'] = int(best['max_iter'])
-      best['n_jobs'] = -1
-      best['C'] = 1.0
-      pen = ['l2']
-      best['penalty'] = pen[best['penalty']]
-
-      print("LR done")
-
-      ##########################################################################################################
-
-      df.loc[ind,'Name']='Logistic Regression'
-      df.loc[ind,'model']=LogisticRegression(**best)
-      df.loc[ind,'param']=str(best)
-      Start=time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      log_pred = df.loc[ind,'model'].predict(X_test)
-      End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
-      df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
-      df.loc[ind, 'F1']=f1_score(y_test, log_pred)
-      df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
-      df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
-      df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
-      df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, log_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("LR done")
-      ind=ind+1
+        ########################################################################################################
 
 
-      #Neural net
-      ########################################################################################################
+        ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
+        ########################################################################################################
+        df.loc[ind,'Name']='Extra Trees Classifier'
+        df['model'][ind]=ExtraTreesClassifier(n_estimators=1000,max_depth=16,class_weight='balanced')
+        df.loc[ind,'param']=str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        extra_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, extra_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("ET val done")
+        ind=ind+1
+        #########################################################################################################
 
-      if(flag == 1):
+        #NaiveBayes
+        ########################################################################################################
+
+        if(flag == 1):
+            best = {'priors': priorList}
+            df.loc[ind,'Name']='Naive Bayes(Bayesisan Statistics)'
+            df.loc[ind,'model']=GaussianNB(priors = priorList)
+            df.loc[ind,'param']=str(best)
+            Start=time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            naive_pred = df.loc[ind,'model'].predict(X_test)
+            End=time.time()
+            df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
+            df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
+            df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
+            df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
+            df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, naive_pred)
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("Naive Bayes done")
+            ind=ind+1
+
+
+        #Logistic Regression
+        ##########################################################################################################
+
+        df.loc[ind,'Name']='Logistic Regression'
+        df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000)
+        df.loc[ind,'param']=str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        log_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, log_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, log_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("LR val done")
+        ind=ind+1
+
+
+
+
+        #Neural net
+        ########################################################################################################
+
+        if(flag == 1):
             best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
             df.loc[ind,'Name']='Neural Network'
             df.loc[ind,'model']=MLPClassifier(**best)
@@ -504,64 +312,422 @@ class classification:
             print("NN done")
             ind=ind+1
 
-      #Support Vector Machine(linear)
-      ########################################################################################################
 
-      def objective(params):
-        print("\n",params)
-        sv = svm.SVC(**params)
-        result = cross_val_score(sv,X=X_train, y=y_train, scoring='accuracy',error_score=np.nan,n_jobs=-1)
-        print("SVC Train done")
-        print("\n",result.min()*100)
-        return (1-result.min())
+        #SVC
+        #########################################################################################################
 
-
-      Space = {
-                'C' : hp.uniform('C',1.0,100.0),
-                'kernel': 'linear',
-                'class_weight':'balanced',
-                'probability':True,
-                'max_iter': scope.int(hp.quniform('max_iter',100,1500,50)),
-                'random_state':44
-               }
-
-
-      bayes_trials = Trials()
-      print("Moving into HyperOp")
-      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
-      print("HyperOP done for SVC")
+        df.loc[ind,'Name']='Support Vector Machine'
+        df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        support_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, support_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("SVC val done ")
+        ind=ind+1
 
 
+      elif q_s == False:
+        ind=0
+        #XGBoost
+        #########################################################################################################################
+        ##XGBoost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
+        ########################################################################################################
+        def objective(params):
+              print(params)
+              xg = xgb.XGBClassifier(**params)
+              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+              print("XGB train done")
+              print(result.min()*100)
+              return (1-result.min())
 
-      best['C'] = float(best['C'])
-      best['kernel'] = 'linear'
-      best['class_weight'] = 'balanced'
-      best['probability'] = True
-      best['max_iter'] = int(best['max_iter'])
-      best['random_state'] = 44
+        sample_weight = compute_sample_weight('balanced', y_train)
+        Space = {
+              'n_estimators': scope.int(hp.quniform('n_estimators', 50,1250,75)),
+              'eta': hp.uniform('eta', 0.01,0.2 ),
+              'max_depth':  scope.int(hp.quniform('max_depth',2,16,1 )),
+              'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,15,1 )),
+              'colsample_bytree': hp.uniform('colsample_bytree', 0.2,1.0 ),
+              'gamma': scope.int(hp.quniform('gamma', 0,15,1)),
+              'subsample': hp.uniform('subsample',  0.2,1.0  ),
+              # 'sample_weight':sample_weight
+              }
+        if check ==1:
+            Space['eval_metric'] = 'logloss'
+            if myval >2:
+                Space['scale_pos_weight'] = hp.choice('scale_pos_weight',[1,myval-1,myval,myval+1])
+            else:
+                Space['scale_pos_weight'] = hp.choice('scale_pos_weight',[1,myval])
+        elif check==0:
+            Space['eval_metric'] = 'mlogloss'
+            Space['objective'] = 'multi:softmax'
+            Space['num_class'] = len(priorList)
 
-      print("SVC done ")
-      #########################################################################################################
 
-      df.loc[ind,'Name']='Support Vector Machine'
-      df.loc[ind,'model']= svm.SVC(**best)
-      df.loc[ind,'param']= str(best)
-      Start=time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      support_pred = df.loc[ind,'model'].predict(X_test)
-      End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
-      df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
-      df.loc[ind, 'F1']=f1_score(y_test, support_pred)
-      df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
-      df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
-      df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
-      df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("SVC done ")
-      ind=ind+1
+        bayes_trials = Trials()
+        print("Moving into HyperOp")
+        best = fmin(fn=objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
+        print("HyperOP done for XGB")
+
+        best['n_estimators']=int(best['n_estimators'])
+        best['max_depth']=int(best['max_depth'])
+        best['min_child_weight']=int(best['min_child_weight'])
+        best['gamma'] = int(best['gamma'])
+        if check==1:
+             best['eval_metric']='logloss'
+        elif check==0:
+             best['eval_metric']='mlogloss'
+             best['objective'] = 'multi:softmax'
+
+        best['subsample'] = float(best['subsample'])
+        if check ==1:
+            if myval >2:
+                wea = [1,myval-1,myval,myval+1]
+                best['scale_pos_weight'] = wea[best['scale_pos_weight']]
+            else:
+                wea = [1,myval]
+                best['scale_pos_weight'] = wea[best['scale_pos_weight']]
+        # best['sample_weight']=sample_weight
+        print('XGB done')
+        ########################################################################################################
+
+
+        ##XGBoost(2) Finding out accuracy on the test dataset
+        ########################################################################################################
+        df.loc[ind,'Name']='XGBoost'
+        df.loc[ind,'model']=xgb.XGBClassifier(**best)
+        df.loc[ind,'param']=str(best)
+        Start=time.time()
+        eval_set = [(X_test, y_test)]
+        if check ==1:
+            df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
+        elif check==0:
+            df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
+
+        xgb_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='micro')
+        df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='micro')
+        df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='micro')
+        if check==1:
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
+        elif check==0:
+            df.loc[ind, 'ROC_AUC_score']= ""
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, xgb_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("XGB val done")
+        ind=ind+1
+        ########################################################################################################
+
+        #Catboost
+        #########################################################################################################################
+        df.loc[ind,'Name']='CatBoost'
+        df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced")
+        df.loc[ind,'param']=str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
+        catboost_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, catboost_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("CAT val done")
+        ind=ind+1
+        ########################################################################################################
+
+
+        #LightGBM(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
+        ########################################################################################################
+
+
+        def objective(params):
+            print('\n',params)
+            lb = lgb.LGBMClassifier(**params)
+            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+            print("LGBM train done")
+            print("\n",result.min()*100)
+            return (1-result.min())
+
+
+        Space = {
+                'boosting_type': 'gbdt',
+                'learning_rate': hp.uniform('learning_rate',0.01,0.2),
+                'class_weight': 'balanced',
+                'n_estimators': scope.int(hp.quniform('n_estimators',50,1250,75)),
+                'random_state':1,
+                'subsample': hp.uniform('subsample',  0.1,1.0  ),
+                'num_leaves': scope.int(hp.quniform('num_leaves',29,43,1)),
+                'max_depth': scope.int(hp.quniform('max_depth',2,16,1 )),
+                'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,16,1 ))
+              }
+
+        if check==1:
+            Space['objective'] = 'binary'
+        elif check==0:
+            Space['objective'] = 'multiclass'
+
+        bayes_trials = Trials()
+        print("Moving into HyperOp")
+        best = fmin(fn=objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
+        print("HyperOP done for LGBM")
+
+        best['boosting_type'] = 'gbdt'
+        best['learning_rate'] = float(best['learning_rate'])
+        best['class_weight'] = 'balanced'
+        best['n_estimators'] = int(best['n_estimators'])
+        best['random_state'] = 1
+        best['subsample'] = float(best['subsample'])
+        best['num_leaves'] = int(best['num_leaves'])
+        best['min_child_weight']=int(best['min_child_weight'])
+        best['max_depth'] = int(best['max_depth'])
+        if check==1:
+            best['objective'] = 'binary'
+        elif check==0:
+            best['objective'] = 'multiclass'
+
+        print("LGBM done")
+
+        ########################################################################################################
+        ##LGBM(2) Finding out accuracy on the test dataset
+        ########################################################################################################
+        df.loc[ind,'Name']='Light GBM'
+        df['model'][ind]=lgb.LGBMClassifier(**best)
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        randomforest_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("LGB val done")
+        ind=ind+1
+
+
+
+        #Random Forest
+        ########################################################################################################
+        ##Random Forest(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
+        ########################################################################################################
+        def objective(params):
+            print(params)
+            rf = RandomForestClassifier(**params)
+            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+            print("RF train done")
+            print(result.min()*100)
+            return (1-result.min())
+
+        DSpace = {
+                  'n_estimators': scope.int(hp.quniform('n_estimators', 100, 1200,50)),
+                  "max_depth": scope.int(hp.quniform('max_depth',2,20,1)),
+                  'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
+                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
+                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
+                  'oob_score':False,
+                  'bootstrap':  hp.choice('bootstrap',[True, False]),
+                  'class_weight':'balanced'
+                  }
+
+        bayes_trials = Trials()
+        print("Moving into HyperOp")
+        try:
+            best = fmin(fn = objective, space = DSpace, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
+            print("HyperOP done for RF")
+        except:
+            print("Hyperparameter tuning failed")
+            best.clear()
+            best['class_weight']='balanced'
+        else:
+            best['n_estimators']=int(best['n_estimators'])
+            best['max_depth']=int(best['max_depth'])
+            best['min_samples_split']=int(best['min_samples_split'])
+            best['min_samples_leaf']=int(best['min_samples_leaf'])
+            fea=['auto', 'sqrt','log2']
+            best['max_features']=fea[best['max_features']]
+            best['oob_score']= False
+            boot=[True, False]
+            best['bootstrap']=boot[best['bootstrap']]
+            best['class_weight']='balanced'
+            print("HyperOP done for RF")
+
+
+        print("RF done")
+        ########################################################################################################
+
+
+
+        ##Random forest(2) Finding out accuracy on the test dataset
+        ########################################################################################################
+        et_dict = best.copy()
+        df.loc[ind,'Name']='Random Forest'
+        df['model'][ind]=RandomForestClassifier(**best)
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        randomforest_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("RF val done")
+        ind=ind+1
+
+        ########################################################################################################
+
+        #ExtraTreesClassifier
+        ########################################################################################################
+        df.loc[ind,'Name']='Extra Trees Classifier'
+        df['model'][ind]=ExtraTreesClassifier(**et_dict)
+        df.loc[ind,'param']=str(et_dict)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        extra_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, extra_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("ET val done")
+        ind=ind+1
+        #########################################################################################################
+
+        #NaiveBayes
+        ########################################################################################################
+
+        if(flag == 1):
+            best = {'priors': priorList}
+            df.loc[ind,'Name']='Naive Bayes(Bayesian Statistics)'
+            df.loc[ind,'model']=GaussianNB(priors = priorList)
+            df.loc[ind,'param']=str(best)
+            Start=time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            naive_pred = df.loc[ind,'model'].predict(X_test)
+            End=time.time()
+            df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
+            df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
+            df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
+            df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
+            df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, naive_pred)
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("Naive Bayes done")
+            ind=ind+1
+
+
+        #Logistic regression
+        ########################################################################################################
+        df.loc[ind,'Name']='Logistic Regression'
+        df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000)
+        df.loc[ind,'param']=""
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        log_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, log_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, log_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("LR val done")
+        ind=ind+1
+
+
+        #Neural net
+        ########################################################################################################
+
+        if(flag == 1):
+                best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
+                df.loc[ind,'Name']='Neural Network'
+                df.loc[ind,'model']=MLPClassifier(**best)
+                df.loc[ind,'param']=str(best)
+                Start=time.time()
+                df.loc[ind,'model'].fit(X_train, y_train)
+                neural_pred = df.loc[ind,'model'].predict(X_test)
+                End=time.time()
+                df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
+                df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
+                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
+                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
+                df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
+                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred)
+                df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, neural_pred)
+                df.loc[ind, 'MCC']=matthews_corrcoef(y_test, neural_pred)
+                df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, neural_pred)
+                df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+                print("NN done")
+                ind=ind+1
+
+        #Support Vector Machine(linear)
+        ########################################################################################################
+
+        df.loc[ind,'Name']='Support Vector Machine'
+        df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        support_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
+        df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
+        df.loc[ind, 'F1']=f1_score(y_test, support_pred)
+        df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
+        df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
+        df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
+        df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("SVC val done ")
+        ind=ind+1
 
 
 
