@@ -96,21 +96,19 @@ def INIT(df,info):
     # Separate comment columns before removing missing cols
     if commentCols:
         commentDF = X[commentCols]
-        commentDF.reset_index(drop=True,inplace=True)
         X.drop(commentCols,axis=1,inplace=True)
 
     # Remove columns and rows with more than 50% missing values
     print('\nRemoving Rows and Columns with more than 50% missing\n')
     X,y = DatasetSelection(X,y)
+    if commentCols:
+        commentDF = commentDF.loc[X.index,:]
+        X = pd.concat([X,commentDF],axis=1)
     X.reset_index(drop=True,inplace=True)
     y.reset_index(drop=True,inplace=True)
 
-    # Concatenate Comment cols
-    if commentCols:
-        X = pd.concat([X,commentDF],axis=1)
-
     # Sampling Data
-    print('Sampling Data!')
+    print('\nSampling Data!\n')
     X,y = data_model_select(X,y)
     print('After sampling:')
     print('Shape of X_train is {}'.format(X.shape))

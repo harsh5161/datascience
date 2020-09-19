@@ -367,6 +367,9 @@ def model_training(X_train,y_train,X_test,y_test,class_or_Reg,priorList,q_s):
   return mod,model_info
 
 def data_model_select(X_train,y_train):
+  print('Before sampling')
+  print('The shape of X is {}'.format(X_train.shape))
+  print('The shape of y is {}'.format(y_train.shape))
   if len(X_train) <= 10000:
     input_X_train = X_train
     input_y_train = y_train
