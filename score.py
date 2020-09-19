@@ -58,13 +58,16 @@ def score(df,init_info,validation=False):
     else:
         disc_df = pd.DataFrame()
 
-    commentCols = init_info['commentCols']
+    if init_info['remove_list'] is not None:
+        X_test.drop(columns=init_info['remove_list'],axis=1,inplace=True)
+
+    some_list = init_info['some_list']
     lda_models = init_info['lda_models']
 
-    if commentCols:
-        print("The review/comment columns found are", commentCols)
+    if some_list:
+        print("The review/comment columns found are", some_list)
         start = time.time()
-        sentiment_frame = sentiment_analysis(X_test[commentCols])
+        sentiment_frame = sentiment_analysis(X_test[some_list])
         sentiment_frame.fillna(value=0.0,inplace=True)
         print(sentiment_frame)
         TEXT_DF = sentiment_frame.copy()
@@ -72,7 +75,7 @@ def score(df,init_info,validation=False):
         end = time.time()
         print("Sentiment time",end-start)
         start = time.time()
-        new_frame = X_test[commentCols].copy()
+        new_frame = X_test[some_list].copy()
         new_frame.fillna(value="None",inplace=True)
         ind = 0
         for col in new_frame.columns:
@@ -82,7 +85,7 @@ def score(df,init_info,validation=False):
             topic_frame.reset_index(drop=True, inplace=True)
             TEXT_DF = pd.concat([TEXT_DF, topic_frame], axis=1, sort=False)
             ind = ind+1
-        X_test.drop(commentCols,axis=1,inplace=True)
+        X_test.drop(some_list,axis=1,inplace=True)
     else:
         TEXT_DF = pd.DataFrame()
 
@@ -152,7 +155,7 @@ def score(df,init_info,validation=False):
             init_info['y_probs_cols'] = y_probs_cols
         else:
             y_probs_cols = init_info['y_probs_cols']
-        y_probas = pd.DataFrame(y_probas)
+        y_probas = pd.DataFrame(y_probas,columns=y_probs_cols)
 
         if validation:
             from sklearn.metrics import classification_report
