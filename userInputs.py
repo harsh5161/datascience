@@ -177,11 +177,6 @@ def getUserInput(df):
             if key:
                 df.drop(key,axis=1,inplace=True)
 
-            # Get comment columns for text analytics
-            commentCols = getCommentColumns()
-            if commentCols:
-                df.drop(commentCols,axis=1,inplace=True)
-
             # Remove User Specified ID Columns
             df = removeUserSpecifiedIDs(df,True)
 
@@ -193,8 +188,7 @@ def getUserInput(df):
             if quick:print('QUICK MODELLING WITH DEFAULT PARAMETERS')
             else:print('HyperOP with MAX EVALS = 15')
 
-        info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),
-                'q_s':quick,'commentCols':commentCols}
+        info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
 
         return info
     else:
@@ -283,26 +277,12 @@ def removeUserSpecifiedIDs(df,successiveTarget=False):
             print('Invalid Entry of columns! No Columns removed')
             return df
 
-######################################################
-######## Get Comment Columns for Text Analytics#######
-######################################################
-
-def getCommentColumns():
-    print('\nEnter the column names below to apply text analytics(Columns with comments/reviews/feedbacks)')
-    inp = input('Enter the column names separated by comma : ')
-    if inp == '':
-        return []
-    else:
-        return [x.strip() for x in inp.split(',')]
-
-
-
 ######################################
 ######## quick_slow Function #######
 ######################################
 
 def quick_slow():
-    inp = input('Do you want quick results or slower results? If quick enter y : ').lower().strip()
+    inp = input('Do you want quick results or slower results? If quick enter y : ').lower()
     return True if inp == 'y' else False
 
 ######################################

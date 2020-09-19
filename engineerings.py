@@ -5,6 +5,7 @@ import numpy as np
 import time
 import holidays
 import swifter
+import spacy
 from collections import Counter
 from string import punctuation
 from textblob import TextBlob
@@ -168,6 +169,110 @@ def date_engineering(df):
 ############################################
 ############## TEXT ANALYTICS ##############
 ############################################
+
+def findReviewColumns(df): #input main dataframe
+
+  rf = df.sample(n=150, random_state=1).dropna(axis=0) if len(df)>150 else df.dropna(axis=0)#use frac=0.25 to get 25% of the data
+
+  #df.dropna(axis=0,inplace=True) #dropping all rows with null values
+
+
+
+  categorical_variables = []
+  for col in rf.columns:
+    if df[col].nunique() <100:  #define threshold for removing unique values #replace with variable threshold
+      rf.drop(col, axis=1,inplace=True) #here df contains object columns, no null rows, no string-categorical,
+
+  col_list =[]
+  rf.reset_index(drop=True,inplace=True)
+  for col in rf.columns:
+        count1,count2,count3,count4 = 0,0,0,0
+        for i in range(len(rf)):
+            val = len(str(rf.at[i,col]).split())
+            if val == 1:
+                count1 = count1+1
+            elif val == 2:
+                count2 = count2+1
+            elif val == 3:
+                count3 = count3+1
+            elif val == 4:
+                count4 = count4+1
+
+        if count1+count2+count3+count4 >=0.75*len(rf):
+            col_list.append(col)
+            print("dropping column",col)
+            rf.drop(col, axis=1,inplace=True)
+
+
+
+
+
+  start = time.time()
+  print(rf.shape)
+  nlp = spacy.load('en_core_web_sm', disable=['tagger','parser','textcat'])
+  sf = pd.DataFrame()
+  for col in rf.columns:
+    sf[col] = rf[col].apply(nlp)
+
+
+  end = time.time()
+  print("Time taken to tokenize the DataFrame",end - start)
+
+  #print("Tokenised Sampled DataFrame",sf)
+  #print("Sampled DataFrame",rf)
+  #print("Actual Dataframe",df)
+
+  start = time.time()
+  #testf = sf.sample(frac=0.10,random_state=44)
+
+  #code to eliminate columns of name, city, address
+  for col in sf.columns:
+    entity_list =[]
+    tokens = nlp(''.join(str(sf[col].tolist()))) #converting one column into tokens
+    #print("the tokens of each column are:", tokens)
+    token_len = sum(1 for x in tokens.ents)
+    print("Length of token entities",token_len)                                    #create two lists that hold the value of actual token entities and matched token entities respectively
+    if token_len>0:
+      for ent in tokens.ents:
+        if (ent.label_ == 'GPE') or (ent.label_ =='PERSON'):  #matching is done on the basis of whether the entity label is
+          entity_list.append(ent.text)          #countries, cities, state, person (includes fictional), nationalities, religious groups, buildings, airports, highways, bridges, companies, agencies, institutes, DATE etc.
+
+      entity_counter = Counter(entity_list).elements()  #counts the match
+      counter_length = sum(1 for x in entity_counter)
+      print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
+      if (counter_length >= 0.60*token_len):
+        col_list.append(col)
+    else:
+      print("Length of token entities 0")
+      print("Length of matched entities 0")
+    counter_length = 0
+    token_len = 0
+
+
+  print("Columns that are going to be removed are ", col_list)   #list of columns that need to be removed
+  ##########IMPORTANT LINE NEXT###############
+  rf = df.copy() #unhide this to immediately work with the entire dataset and not just sampled dataset and vice-versa to work with sampled
+  ##########DO NOT IGNORE ABOVE LINE##########
+  for val in col_list:
+    rf.drop(val, axis=1, inplace=True)
+  end = time.time()
+  print("Time taken for completion of excess column removal:", end-start)
+
+  if (len(rf.columns) ==0):
+    print("No Remarks or Comments Found ")
+    flag = 0
+    return None, None
+  else:
+    flag = 1
+
+  if (flag == 1):
+    main_list = [] #holds all the review columns
+    append = main_list.append
+    for col in rf.columns:
+      append(col)
+
+    return main_list, col_list
+
 def sentiment_analysis(rf):
   bf = pd.DataFrame()
   def getSubjectivity(text):
