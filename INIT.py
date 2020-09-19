@@ -94,6 +94,10 @@ def INIT(df,info):
     print('\nRemoving Rows and Columns with more than 50% missing\n')
     X,y = DatasetSelection(X,y)
 
+    print('After removal of highly missing rows and columns')
+    MISSING = pd.DataFrame(((X.isnull().sum().sort_values(ascending=False)*100/len(X)).round(2)),columns=['Missing in %'])[:10]
+    print(MISSING)
+
     # Sampling Data
     print('Sampling Data!')
     X,y = data_model_select(X,y)
