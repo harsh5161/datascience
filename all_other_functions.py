@@ -309,6 +309,7 @@ def FeatureSelection(X,y,class_or_Reg):
 
 def dataHandler(dx):
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
+        dx.columns = [x.strip() for x in dx.columns] # Removing trailing and leading spaces from column names
         if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
             colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
             dx.columns = colNew                          #Making values stored in colNew as the new column names
