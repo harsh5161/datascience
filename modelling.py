@@ -20,6 +20,7 @@ import ast # ast.literal_eval(str(best))
 from time import process_time
 import time
 from decimal import Decimal
+import math
 
 # Model
 import xgboost as xgb
@@ -60,6 +61,7 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.ensemble import VotingRegressor
 from sklearn.metrics import classification_report
 from sklearn.utils import compute_sample_weight
+from sklearn.utils import class_weight
 
 import xgboost as xgb
 from scipy.stats import ks_2samp
@@ -239,7 +241,7 @@ class classification:
 
         if(flag == 1):
             best = {'priors': priorList}
-            df.loc[ind,'Name']='Naive Bayes'
+            df.loc[ind,'Name']='Naive Bayes(Bayesisan Statistics)'
             df.loc[ind,'model']=GaussianNB(priors = priorList)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -685,8 +687,8 @@ class classification:
         ########################################################################################################
 
         if(flag == 1):
+                df.loc[ind,'Name']='Neural Network'
                 best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
-                df.loc[ind,'Name']='Neural Net'
                 df.loc[ind,'model']=MLPClassifier(**best)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
@@ -775,7 +777,7 @@ class classification:
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
-      df.loc[ind,'Name']=('Ensemble '+name)[:-1]
+      df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
       df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
       df.loc[ind,'param']="Default"
       Start=time.time()
@@ -1472,7 +1474,7 @@ class Regression:
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
-      df.loc[ind,'Name']=('Ensemble '+name)[:-1]
+      df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
       df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
       df.loc[ind,'param']="Defualt"
       Start = time.time()
