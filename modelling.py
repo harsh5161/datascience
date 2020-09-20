@@ -48,6 +48,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
@@ -108,9 +109,9 @@ class classification:
         #######################################################################
         df.loc[ind,'Name']='XGBoost'
         if check == 1:
-            df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=1000,eta= 0.1,max_depth=10,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
+            df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=10,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
         elif check ==0:
-            df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=1000,eta= 0.1,max_depth=10,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList))
+            df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=10,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList))
 
         df.loc[ind,'param']=str(best)
         Start=time.time()
@@ -118,12 +119,12 @@ class classification:
         if check ==1:
             df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
         elif check==0:
-            df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", objective="multi:softmax",eval_set=eval_set,verbose=False)
+            df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
 
         xgb_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, xgb_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, xgb_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='micro')
         df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='micro')
         df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='micro')
@@ -148,8 +149,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
         catboost_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, catboost_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, catboost_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
         df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
@@ -166,14 +167,14 @@ class classification:
         ##LGBM
         ########################################################################################################
         df.loc[ind,'Name']='Light GBM'
-        df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=1000,random_state=1,subsample=1.0,num_leaves=31,max_depth=16)
+        df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16)
         df.loc[ind,'param']= str(best)
         Start=time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
         randomforest_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, randomforest_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
         df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
@@ -182,7 +183,7 @@ class classification:
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
         df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-        print("LGB val done")
+        print("LGBM val done")
         ind=ind+1
 
 
@@ -190,14 +191,14 @@ class classification:
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Name']='Random Forest'
-        df['model'][ind]=RandomForestClassifier(n_estimators=1000,max_depth=16,class_weight='balanced')
+        df['model'][ind]=RandomForestClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
         df.loc[ind,'param']= str(best)
         Start=time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
         randomforest_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, randomforest_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
         df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
@@ -215,14 +216,14 @@ class classification:
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
         df.loc[ind,'Name']='Extra Trees Classifier'
-        df['model'][ind]=ExtraTreesClassifier(n_estimators=1000,max_depth=16,class_weight='balanced')
+        df['model'][ind]=ExtraTreesClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
         df.loc[ind,'param']=str(best)
         Start=time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
         extra_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, extra_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, extra_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
         df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
@@ -247,8 +248,8 @@ class classification:
             df.loc[ind,'model'].fit(X_train, y_train)
             naive_pred = df.loc[ind,'model'].predict(X_test)
             End=time.time()
-            df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
-            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
+            df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, naive_pred)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, naive_pred))))
             df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
             df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
             df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
@@ -271,8 +272,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train)
         log_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, log_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, log_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
         df.loc[ind, 'F1']=f1_score(y_test, log_pred)
@@ -299,8 +300,8 @@ class classification:
             df.loc[ind,'model'].fit(X_train, y_train)
             neural_pred = df.loc[ind,'model'].predict(X_test)
             End=time.time()
-            df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
-            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
+            df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, neural_pred)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, neural_pred))))
             df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
             df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
             df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
@@ -323,8 +324,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train)
         support_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, support_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, support_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
         df.loc[ind, 'F1']=f1_score(y_test, support_pred)
@@ -346,7 +347,7 @@ class classification:
         def objective(params):
               print(params)
               xg = xgb.XGBClassifier(**params)
-              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=6)
               print("XGB train done")
               print(result.min()*100)
               return (1-result.min())
@@ -410,14 +411,14 @@ class classification:
         Start=time.time()
         eval_set = [(X_test, y_test)]
         if check ==1:
-            df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
+            df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss",early_stopping_rounds=30, eval_set=eval_set,verbose=False)
         elif check==0:
-            df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
+            df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array,early_stopping_rounds=30, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
 
         xgb_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, xgb_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, xgb_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='micro')
         df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='micro')
         df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='micro')
@@ -442,8 +443,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
         catboost_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, catboost_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, catboost_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
         df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
@@ -464,7 +465,7 @@ class classification:
         def objective(params):
             print('\n',params)
             lb = lgb.LGBMClassifier(**params)
-            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=6)
             print("LGBM train done")
             print("\n",result.min()*100)
             return (1-result.min())
@@ -511,15 +512,16 @@ class classification:
         ########################################################################################################
         ##LGBM(2) Finding out accuracy on the test dataset
         ########################################################################################################
+        eval_set = [(X_test, y_test)]
         df.loc[ind,'Name']='Light GBM'
         df['model'][ind]=lgb.LGBMClassifier(**best)
         df.loc[ind,'param']= str(best)
         Start=time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
+        df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
         randomforest_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, randomforest_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
         df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
@@ -528,7 +530,7 @@ class classification:
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
         df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-        print("LGB val done")
+        print("LGBM val done")
         ind=ind+1
 
 
@@ -540,7 +542,7 @@ class classification:
         def objective(params):
             print(params)
             rf = RandomForestClassifier(**params)
-            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=-1)
+            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=6)
             print("RF train done")
             print(result.min()*100)
             return (1-result.min())
@@ -594,8 +596,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train)
         randomforest_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, randomforest_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, randomforest_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
         df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
@@ -618,8 +620,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train)
         extra_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, extra_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, extra_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
         df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
@@ -644,8 +646,8 @@ class classification:
             df.loc[ind,'model'].fit(X_train, y_train)
             naive_pred = df.loc[ind,'model'].predict(X_test)
             End=time.time()
-            df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
-            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
+            df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, naive_pred)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, naive_pred))))
             df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
             df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
             df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
@@ -667,8 +669,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train)
         log_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, log_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, log_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
         df.loc[ind, 'F1']=f1_score(y_test, log_pred)
@@ -685,16 +687,16 @@ class classification:
         ########################################################################################################
 
         if(flag == 1):
-                best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
                 df.loc[ind,'Name']='Neural Network'
+                best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
                 df.loc[ind,'model']=MLPClassifier(**best)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
                 df.loc[ind,'model'].fit(X_train, y_train)
                 neural_pred = df.loc[ind,'model'].predict(X_test)
                 End=time.time()
-                df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
-                df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
+                df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, neural_pred)*100
+                df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, neural_pred))))
                 df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
                 df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
                 df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
@@ -716,8 +718,8 @@ class classification:
         df.loc[ind,'model'].fit(X_train, y_train)
         support_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, support_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, support_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
         df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
         df.loc[ind, 'F1']=f1_score(y_test, support_pred)
@@ -755,6 +757,8 @@ class classification:
               if acc>max_acc:
                   max_acc=acc
                   max_seq=seq
+
+      print("this is what you are printing",max_seq)
       ########################################################################################################
 
       ##Ensemble(2) List of the best combination from the above method
@@ -780,8 +784,8 @@ class classification:
       df.loc[ind,'model'].fit(X_train, y_train)
       ensemble_pred = df.loc[ind,'model'].predict(X_test)
       End=time.time()
-      df.loc[ind,'accuracy']=accuracy_score(y_test, ensemble_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, ensemble_pred))))
+      df.loc[ind,'accuracy']=balanced_accuracy_score(y_test, ensemble_pred)*100
+      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, ensemble_pred))))
       df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred)
       df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred)
       df.loc[ind, 'F1']=f1_score(y_test, ensemble_pred)
@@ -878,354 +882,551 @@ class Regression:
 
   #This funciton takes input of training and testing datasets and give out the best model's Name, model with best parameter(can be used directly to score data using 'predcit' function), accuracy on the test dataset and parameters (not usefful)
   ###############################################################################################################################
-  def best_model_reg(self,X_train , X_test, y_train, y_test,MAX_EVALS,CV=5):
-      print('Max evals is currently set to {}'.format(MAX_EVALS))
+  def best_model_reg(self,X_train , X_test, y_train, y_test,q_s,MAX_EVALS=15,CV=5):
       df=pd.DataFrame()
-      ind=0
+      print("The value of Q_S is ",q_s)
 
-      #XGBoost
-      #########################################################################################################################
-      ##XGBoost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-          print(params)
-          xg = xgb.XGBRegressor(**params)
-          result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=-1)
-          print("XGB Training Done")
-          return (1-result.min())
+      if q_s ==True:  #QUICK RESULTS
+        ind=0
+        best = {}
+        #XGBoost
+        #######################################################################
+        df.loc[ind,'Name']='XGBoost'
+        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=100,eta=0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="reg:squarederror",eval_metric='rmse')
+        df.loc[ind,'param']=str(best)
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
+        print(type(xgb_reg_prob1))
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, xgb_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, xgb_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, xgb_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, xgb_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, xgb_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, xgb_reg_prob1,X_train.shape[1])
+        #print("aic done")
+        df.loc[ind,'BIC']=bic.bic(y_test, xgb_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+
+        print("XGB Validation done")
+        ind=ind+1
+        ########################################################################################################
+
+        ##Catboost
+        ########################################################################################################
+        df.loc[ind,'Name']='CatBoost'
+        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,silent=True)
+        df.loc[ind,'param']=str(best)
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        cat_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("CAT Validation done")
+        ind=ind+1
+        ########################################################################################################
 
 
-      Space = {
-              'n_estimators': scope.int(hp.quniform('n_estimators', 50,1250,75)),
-              'eta': hp.uniform('eta', 0.01,0.2 ),
-              'max_depth':  scope.int(hp.quniform('max_depth',2,16,1 )),
-              'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,15,1 )),
-              'colsample_bytree': hp.uniform('colsample_bytree', 0.2,1.0 ),
-              'gamma': scope.int(hp.quniform('gamma', 0,15,1)),
-              'eval_metric': 'rmse',
-              'objective': 'reg:squarederror',
-              'subsample': hp.uniform('subsample',  0.2,1.0  )
+        ##LGBM
+        ########################################################################################################
+        eval_set = [(X_test, y_test)]
+        df.loc[ind,'Name']='Light GBM'
+        df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16)
+        df.loc[ind,'param']= str(best)
+        Start=time.time()
+        df.loc[ind,'model'].fit(X_train, y_train,verbose=False)
+        lightgbm_pred = df.loc[ind,'model'].predict(X_test)
+        End=time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("LGBM val done")
+        ind=ind+1
+        ########################################################################################################
+
+
+        ##Random forest
+        ########################################################################################################
+        df.loc[ind,'Name']='Random Forest'
+        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=20)
+        df.loc[ind,'param']=str(best)
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        random_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, random_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, random_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, random_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, random_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, random_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, random_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, random_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("RF Validation done")
+        ind=ind+1
+
+        ########################################################################################################
+
+
+        ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
+        ########################################################################################################
+        df.loc[ind,'Name']='ExtraTrees Regressor'
+        df['model'][ind]=ExtraTreesRegressor(n_estimators=100,max_depth=20)
+        df.loc[ind,'param']=str(best)
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        extra_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, extra_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, extra_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, extra_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, extra_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, extra_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, extra_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, extra_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("ET Validation done")
+        ind=ind+1
+        #########################################################################################################
+
+
+        #Linear Regression
+        ##########################################################################################################
+
+        df.loc[ind,'Name']='Linear Regression'
+        df.loc[ind,'model']=LinearRegression()
+        df.loc[ind,'param']=None
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        logr_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, logr_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, logr_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, logr_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, logr_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, logr_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, logr_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, logr_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+
+        print("linear reg done")
+        ind=ind+1
+
+        #Ridge Regression
+        ##########################################################################################################
+
+        df.loc[ind,'Name']='Ridge Regression'
+        df.loc[ind,'model']=Ridge()
+        df.loc[ind,'param']=None
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        ridge_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, ridge_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, ridge_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, ridge_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, ridge_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, ridge_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, ridge_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, ridge_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        print("ridge reg done")
+        ind=ind+1
+
+        #Neural net
+        ########################################################################################################
+
+        best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
+        df.loc[ind,'Name']='Neural Network'
+        df.loc[ind,'model']=MLPRegressor(**best)
+        df.loc[ind,'param']=str(best)
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        try:
+            df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
+        except:
+            print("Neural Net threw an error")
+        else:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+
+            print("neural net done")
+            ind=ind+1
+
+        #SVC
+        #########################################################################################################
+
+        df.loc[ind,'Name']='Support Vector Machine'
+        df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
+        df.loc[ind,'param']=None
+        Start = time.time()
+        df.loc[ind,'model'].fit(X_train, y_train)
+        svc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        End = time.time()
+        df.loc[ind,'accuracy']=r2_score(y_test, svc_reg_prob1)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, svc_reg_prob1))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, svc_reg_prob1))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, svc_reg_prob1)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, svc_reg_prob1)
+        #df.loc[ind,'AIC']=aic.aic(y_test, svc_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, svc_reg_prob1,X_train.shape[1])
+        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+
+        print("SVC done")
+        ind=ind+1
+
+      elif q_s==False:
+            ind = 0
+            #XGBoost
+            #########################################################################################################################
+            ##XGBoost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
+            ########################################################################################################
+            def objective(params):
+                  print(params)
+                  xg = xgb.XGBRegressor(**params)
+                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  print("XGB Training Done")
+                  return (1-result.min())
+
+
+            Space = {
+                  'n_estimators': scope.int(hp.quniform('n_estimators', 50,1250,75)),
+                  'eta': hp.uniform('eta', 0.01,0.2 ),
+                  'max_depth':  scope.int(hp.quniform('max_depth',2,16,1 )),
+                  'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,15,1 )),
+                  'colsample_bytree': hp.uniform('colsample_bytree', 0.2,1.0 ),
+                  'gamma': scope.int(hp.quniform('gamma', 0,15,1)),
+                  'eval_metric': 'rmse',
+                  'objective': 'reg:linear',
+                  'subsample': hp.uniform('subsample',  0.2,1.0  )
               }
 
-      Start = time.time()
-      bayes_trials = Trials()
-      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
-      print("XGB hyperop done")
+
+            bayes_trials = Trials()
+            best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
+            print("XGB hyperop done")
 
 
-      best['n_estimators']=int(best['n_estimators'])
-      best['max_depth']=int(best['max_depth'])
-      best['gamma'] = int(best['gamma'])
-      best['subsample']= float(best['subsample'])
-      best['min_child_weight']=int(best['min_child_weight'])
-      best['objective']='reg:squarederror'
-      best['eval_metric']='rmse'
-      ########################################################################################################
+            best['n_estimators']=int(best['n_estimators'])
+            best['max_depth']=int(best['max_depth'])
+            best['gamma'] = int(best['gamma'])
+            best['subsample']= float(best['subsample'])
+            best['min_child_weight']=int(best['min_child_weight'])
+            best['objective']='reg:squarederror'
+            best['eval_metric']='rmse'
+            ########################################################################################################
 
 
-      ##XGBoost(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='XGBoost'
-      df.loc[ind,'model']=xgb.XGBRegressor(**best)
-      df.loc[ind,'param']=str(best)
+            ##XGBoost(2) Finding out accuracy on the test dataset
+            ########################################################################################################
+            eval_set = [(X_test, y_test)]
+            df.loc[ind,'Name']='XGBoost'
+            df.loc[ind,'model']=xgb.XGBRegressor(**best)
+            df.loc[ind,'param']=str(best)
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train,eval_metric="rmse", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+            xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
+            print(type(xgb_reg_prob1))
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, xgb_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, xgb_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, xgb_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, xgb_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, xgb_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, xgb_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, xgb_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
 
-      df.loc[ind,'model'].fit(X_train, y_train)
-      xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
-      # print(type(xgb_reg_prob1))
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, xgb_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, xgb_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, xgb_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, xgb_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, xgb_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, xgb_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, xgb_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-
-      print("XGB Validation done")
-      ind=ind+1
-      ########################################################################################################
+            print("XGB Validation done")
+            ind=ind+1
+            ########################################################################################################
 
 
-      #Catboost
-      #########################################################################################################################
-      ##Catboost(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-          print('\n',params)
-          cb1 = cb.CatBoostRegressor(**params)
-          result=cross_val_score(cb1,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=-1)
-          print("CAT Training done")
-          return (1-result.min())
+            #Catboost
+            #########################################################################################################################
+            ##Catboost
+            ########################################################################################################
+            df.loc[ind,'Name']='CatBoost'
+            df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,silent=True)
+            df.loc[ind,'param']=str(best)
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            cat_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("CAT Validation done")
+            ind=ind+1
+            ########################################################################################################
 
-      Space = {
-                  'silent': True,
-                  "depth": scope.int(hp.quniform('depth', 2, 16,1)),
-                  'iterations': scope.int(hp.quniform('iterations',50,1250,75)),
-                  'learning_rate': hp.uniform('learning_rate', 0.01,0.1 ),
-                  'random_strength' : hp.uniform('random_strength', 0.01,10 ),
-                  'bagging_temperature': scope.int(hp.quniform('bagging_temperature',  2,20,1 )),
-                  'border_count': 254,
-                  'rsm': hp.uniform('rsm',  0.01,1.0  ),
+
+            #LightGBM
+            ########################################################################################################
+            ##LightGBM(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
+            ########################################################################################################
+
+            def objective(params):
+                  print(params)
+                  xg = lgb.LGBMRegressor(**params)
+                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  print("XGB Training Done")
+                  return (1-result.min())
+
+
+            Space = {
+                'boosting_type': 'gbdt',
+                'learning_rate': hp.uniform('learning_rate',0.01,0.2),
+                'n_estimators': scope.int(hp.quniform('n_estimators',50,1250,75)),
+                'random_state':1,
+                'subsample': hp.uniform('subsample',  0.1,1.0  ),
+                'num_leaves': scope.int(hp.quniform('num_leaves',29,43,1)),
+                'max_depth': scope.int(hp.quniform('max_depth',2,16,1 )),
+                'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,16,1 ))
+              }
+
+            bayes_trials = Trials()
+            print("Moving into HyperOp")
+            best = fmin(fn=objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
+            print("HyperOP done for LGBM")
+
+            best['boosting_type'] = 'gbdt'
+            best['learning_rate'] = float(best['learning_rate'])
+            best['n_estimators'] = int(best['n_estimators'])
+            best['random_state'] = 1
+            best['subsample'] = float(best['subsample'])
+            best['num_leaves'] = int(best['num_leaves'])
+            best['min_child_weight']=int(best['min_child_weight'])
+            best['max_depth'] = int(best['max_depth'])
+
+            print("LGBM done")
+
+            ##LightGBM(2) Finding out accuracy on the test dataset
+            ########################################################################################################
+            eval_set = [(X_test, y_test)]
+            df.loc[ind,'Name']='Light GBM'
+            df['model'][ind]=lgb.LGBMRegressor(**best)
+            df.loc[ind,'param']= str(best)
+            Start=time.time()
+            df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+            lightgbm_pred = df.loc[ind,'model'].predict(X_test)
+            End=time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("LGBM val done")
+            ind=ind+1
+
+
+            #Random forest
+            #########################################################################################################################
+            ##Random forest(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
+            ########################################################################################################
+            def objective(params):
+                  print(params)
+                  rf = RandomForestRegressor(**params)
+                  result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  print("Random Forest Training done")
+                  return (1-result.min())
+
+            Space = {
+                      'n_estimators': scope.int(hp.quniform('n_estimators', 100,1200,50)),
+                      "max_depth": scope.int(hp.quniform('max_depth',2,30,1)),
+                      'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
+                      'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
+                      'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
+                      'oob_score':False,
+                      'bootstrap':  hp.choice('bootstrap',[True, False])
                   }
 
-      Start = time.time()
-      bayes_trials = Trials()
-      best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals=MAX_EVALS, trials = bayes_trials)
-      print("CAT hyperop done")
+            bayes_trials = Trials()
+            try:
+                best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
+                print("HyperOP done for RF")
+            except:
+                print("Hyperparameter tuning failed")
+                best.clear()
+                best['oob_score']=False
+            else:
+                best['n_estimators']=int(best['n_estimators'])
+                best['max_depth']=int(best['max_depth'])
+                best['min_samples_split']=int(best['min_samples_split'])
+                best['min_samples_leaf']=int(best['min_samples_leaf'])
+                fea=['auto', 'sqrt','log2']
+                best['max_features']=fea[best['max_features']]
+                best['oob_score']= False
+                boot=[True, False]
+                best['bootstrap']=boot[best['bootstrap']]
+                print("RF Hyperop done")
 
-      best['depth']=int(best['depth'])
-      best['iterations']=int(best['iterations'])
-      best['learning_rate'] = float(best['learning_rate'])
-      best['rsm'] = float(best['rsm'])
-      best['bagging_temperature']=int(best['bagging_temperature'])
-      best['border_count']=254
-      best['silent']= True
-      ########################################################################################################
-
-
-      ##Catboost(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='CatBoost'
-      df.loc[ind,'model']=cb.CatBoostRegressor(**best)
-      df.loc[ind,'param']=str(best)
-      df.loc[ind,'model'].fit(X_train, y_train)
-      cat_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("CAT Validation done")
-      ind=ind+1
-      ########################################################################################################
+            print("RF done")
+            ########################################################################################################
 
 
-      #Random forest
-      #########################################################################################################################
-      ##Random forest(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-          print(params)
-          rf = RandomForestRegressor(**params)
-          result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=-1)
-          print("Random Forest Training done")
-          return (1-result.min())
+            ##Random forest(2) Finding out accuracy on the test dataset
+            ########################################################################################################
+            et_dict = best.copy()
+            df.loc[ind,'Name']='Random Forest'
+            df['model'][ind]=RandomForestRegressor(**best)
+            df.loc[ind,'param']=str(best)
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            random_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, random_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, random_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, random_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, random_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, random_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, random_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, random_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("RF Validation done")
+            ind=ind+1
 
-      Space = {
-                  'n_estimators': scope.int(hp.quniform('n_estimators', 100,1200,50)),
-                  "max_depth": scope.int(hp.quniform('max_depth',2,30,1)),
-                  'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
-                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
-                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1,20,1)),
-                  'oob_score':False,
-                  'bootstrap':  hp.choice('bootstrap',[True, False])
-                  }
-      Start = time.time()
-      bayes_trials = Trials()
-      try:
-        best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
-        print("HyperOP done for RF")
-      except:
-        print("Hyperparameter tuning failed")
-        best.clear()
-        best['oob_score']=False
-      else:
-        best['n_estimators']=int(best['n_estimators'])
-        best['max_depth']=int(best['max_depth'])
-        best['min_samples_split']=int(best['min_samples_split'])
-        best['min_samples_leaf']=int(best['min_samples_leaf'])
-        fea=['auto', 'sqrt','log2']
-        best['max_features']=fea[best['max_features']]
-        best['oob_score']= False
-        boot=[True, False]
-        best['bootstrap']=boot[best['bootstrap']]
-      print("RF Hyperop done")
-
-      print("RF done")
-      ########################################################################################################
+            ########################################################################################################
 
 
-      ##Random forest(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='Random Forest'
-      df['model'][ind]=RandomForestRegressor(**best)
-      df.loc[ind,'param']=str(best)
-      df.loc[ind,'model'].fit(X_train, y_train)
-      random_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, random_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, random_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, random_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, random_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, random_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, random_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, random_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("RF Validation done")
-      ind=ind+1
+            #ExtraTrees Regression
+            #########################################################################################################################
+            df.loc[ind,'Name']='ExtraTrees Regressor'
+            df['model'][ind]=ExtraTreesRegressor(**et_dict)
+            df.loc[ind,'param']=str(best)
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            extra_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, extra_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, extra_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, extra_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, extra_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, extra_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, extra_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, extra_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("ETextra_reg_prob1 Validation done")
+            ind=ind+1
 
-      ########################################################################################################
-
-
-      #ExtraTrees Regression
-      #########################################################################################################################
-      ##ExtraTrees Regression(1) Finding Best hyperparamter using Bayesian Hyperparameter Optimization
-      ########################################################################################################
-      def objective(params):
-          print(params)
-          et = ExtraTreesRegressor(**params)
-          result=cross_val_score(et,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=-1)
-          print("ExtraTrees Training done")
-          return (1-result.min())
-
-      Space = {
-                  'n_estimators': scope.int(hp.quniform('n_estimators', 100, 1200,50)),
-                  "max_depth": scope.int(hp.quniform('max_depth',2,20,1)),
-                  'max_features': hp.choice('max_features',['auto', 'sqrt','log2']),
-                  'min_samples_split': scope.int(hp.quniform('min_samples_split',2,15,1)),
-                  'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1, 20,1)),
-                  'bootstrap':  hp.choice('bootstrap',[True, False]),
-                  'oob_score':False
-                  }
-      Start = time.time()
-      bayes_trials = Trials()
-      try:
-        best = fmin(fn = objective, space = Space, algo = hyperopt.tpe.suggest,max_evals = MAX_EVALS, trials = bayes_trials)
-        print("HyperOP done for ET")
-      except:
-        print("Hyperparameter tuning failed")
-        best.clear()
-        best['oob_score'] = False
-      else:
-        best['n_estimators']=int(best['n_estimators'])
-        best['max_depth']=int(best['max_depth'])
-        best['min_samples_split']=int(best['min_samples_split'])
-        best['min_samples_leaf']=int(best['min_samples_leaf'])
-        fea=['auto', 'sqrt','log2']
-        best['max_features']=fea[best['max_features']]
-        best['oob_score']= False
-        boot=[True, False]
-        best['bootstrap']=boot[best['bootstrap']]
-      print("HyperOP done for ET")
+            ########################################################################################################
 
 
-      print("ET done")
-      ########################################################################################################
+            #Ridge Regression
+            ########################################################################################################
+            df.loc[ind,'Name']='Ridge Regression'
+            df.loc[ind,'model']=Ridge()
+            df.loc[ind,'param']=None
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            ridge_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, ridge_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, ridge_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, ridge_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, ridge_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, ridge_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, ridge_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, ridge_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("ridge reg done")
+            ind=ind+1
+
+            #Linear regression
+            ########################################################################################################
+            df.loc[ind,'Name']='Linear Regression'
+            df.loc[ind,'model']=LinearRegression()
+            df.loc[ind,'param']=None
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            logr_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, logr_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, logr_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, logr_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, logr_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, logr_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, logr_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, logr_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+
+            print("linear reg done")
+            ind=ind+1
+
+            #Neural net
+            ########################################################################################################
+            best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
+            df.loc[ind,'Name']='Neural Net'
+            df.loc[ind,'model']=MLPRegressor(**best)
+            df.loc[ind,'param']=str(best)
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            try:
+                df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
+            except:
+                print("Neural Net threw an error")
+            else:
+                df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
+                df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
+                df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
+                df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
+                #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
+                df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
+                df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+
+                print("neural net done")
+                ind=ind+1
 
 
-      ##ExtraTrees Regression(2) Finding out accuracy on the test dataset
-      ########################################################################################################
-      df.loc[ind,'Name']='ExtraTrees Regressor'
-      df['model'][ind]=ExtraTreesRegressor(**best)
-      df.loc[ind,'param']=str(best)
-      df.loc[ind,'model'].fit(X_train, y_train)
-      extra_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, extra_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, extra_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, extra_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, extra_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, extra_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, extra_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, extra_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("ETextra_reg_prob1 Validation done")
-      ind=ind+1
-
-      ########################################################################################################
-
-
-      #Ridge Regression
-      ########################################################################################################
-      df.loc[ind,'Name']='Ridge Regression'
-      df.loc[ind,'model']=Ridge()
-      df.loc[ind,'param']=None
-      Start = time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      ridge_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, ridge_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, ridge_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, ridge_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, ridge_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, ridge_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, ridge_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, ridge_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-      print("ridge reg done")
-      ind=ind+1
-
-      #Linear regression
-      ########################################################################################################
-      df.loc[ind,'Name']='Linear Regression'
-      df.loc[ind,'model']=LinearRegression()
-      df.loc[ind,'param']=None
-      Start = time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      logr_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, logr_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, logr_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, logr_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, logr_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, logr_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, logr_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, logr_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-
-      print("linear reg done")
-      ind=ind+1
-
-      #Neural net
-      ########################################################################################################
-      best={'hidden_layer_sizes':(100,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-      df.loc[ind,'Name']='Neural Network'
-      df.loc[ind,'model']=MLPRegressor(**best)
-      df.loc[ind,'param']=str(best)
-      Start = time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-
-      print("neural net done")
-      ind=ind+1
-
-      #Support Vector Machine
-      ########################################################################################################
-      df.loc[ind,'Name']='Support Vector Machine'
-      df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
-      df.loc[ind,'param']=None
-      Start = time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
-      svc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-      End = time.time()
-      df.loc[ind,'accuracy']=r2_score(y_test, svc_reg_prob1)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, svc_reg_prob1))))
-      df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, svc_reg_prob1))
-      df.loc[ind,'MSE'] = mean_squared_error(y_test, svc_reg_prob1)
-      df.loc[ind,'MAE']=mean_absolute_error(y_test, svc_reg_prob1)
-      df.loc[ind,'AIC']=aic.aic(y_test, svc_reg_prob1,X_train.shape[1])
-      df.loc[ind,'BIC']=bic.bic(y_test, svc_reg_prob1,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
-
-      print("SVC done")
-      ind=ind+1
-
-      #Support Vector Machine(Linear)
-      ########################################################################################################
+            #Support Vector Machine
+            ########################################################################################################
+            df.loc[ind,'Name']='Support Vector Machine'
+            df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
+            df.loc[ind,'param']=None
+            Start = time.time()
+            df.loc[ind,'model'].fit(X_train, y_train)
+            svc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            End = time.time()
+            df.loc[ind,'accuracy']=r2_score(y_test, svc_reg_prob1)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, svc_reg_prob1))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, svc_reg_prob1))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, svc_reg_prob1)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, svc_reg_prob1)
+            #df.loc[ind,'AIC']=aic.aic(y_test, svc_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, svc_reg_prob1,X_train.shape[1])
+            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            print("SVC done")
+            ind=ind+1
 
 
 
@@ -1251,6 +1452,8 @@ class Regression:
               if acc>max_acc:
                   max_acc=acc
                   max_seq=seq
+
+      print("this is what you are printing",max_seq)
 
       ##############################################################################
 
@@ -1283,7 +1486,7 @@ class Regression:
       df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, ensemble_pred))
       df.loc[ind,'MSE']=mean_squared_error(y_test, ensemble_pred)
       df.loc[ind,'MAE']=mean_absolute_error(y_test, ensemble_pred)
-      df.loc[ind,'AIC']=aic.aic(y_test, ensemble_pred,X_train.shape[1])
+      # df.loc[ind,'AIC']=aic.aic(y_test, ensemble_pred,X_train.shape[1])
       df.loc[ind,'BIC']=bic.bic(y_test, ensemble_pred,X_train.shape[1])
       df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
       ind=ind+1
