@@ -173,17 +173,19 @@ def date_engineering(df):
 def findReviewColumns(df): #input main dataframe
 
   rf = df.sample(n=150, random_state=1).dropna(axis=0) if len(df)>150 else df.dropna(axis=0)#use frac=0.25 to get 25% of the data
-
+  
   #df.dropna(axis=0,inplace=True) #dropping all rows with null values
 
 
 
-  categorical_variables = []
+  #categorical_variables = []
+  col_list =[]
   for col in rf.columns:
-    if df[col].nunique() <100:  #define threshold for removing unique values #replace with variable threshold
+    if df[col].nunique() <100:
+      col_list.append(col)           #define threshold for removing unique values #replace with variable threshold
       rf.drop(col, axis=1,inplace=True) #here df contains object columns, no null rows, no string-categorical,
 
-  col_list =[]
+
   rf.reset_index(drop=True,inplace=True)
   for col in rf.columns:
         count1,count2,count3,count4 = 0,0,0,0
@@ -197,6 +199,7 @@ def findReviewColumns(df): #input main dataframe
                 count3 = count3+1
             elif val == 4:
                 count4 = count4+1
+        print(col,"count of words is",count1,"-",count2,"-",count3,"-",count4,"-")
 
         if count1+count2+count3+count4 >=0.75*len(rf):
             col_list.append(col)
