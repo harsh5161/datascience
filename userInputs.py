@@ -108,7 +108,7 @@ def importFile(path,nrows=None):
                 col.writerow(sheet.row_values(row))
 
             # read csv file and convert into a dataframe object
-            df = pd.DataFrame(pd.read_csv("SheetSheetSheet.csv",nrows=nrows))
+            df = pd.read_csv("SheetSheetSheet.csv",nrows=nrows)
             return df
             #######
         except FileNotFoundError:
