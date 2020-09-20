@@ -73,6 +73,10 @@ def Segregation(df):
             print('{} has top 5 levels that contribute to less than 10% of data!'.format(col))
             print('{} is unique\n'.format(col))
             unique.append(col)
+        elif obj_df[col].nunique() >= 50000:
+            print('{} has more than 50000 unique levels!'.format(col))
+            print('{} is unique\n'.format(col))
+            unique.append(col)
         else:
             print('{} has top 5 levels that contribute to more than 10% of data!'.format(col))
             print('{} has {} levels before grouping'.format(col,obj_df[col].nunique()))
