@@ -73,6 +73,8 @@ class classification:
   def best_model_class(self,X_train ,X_test, y_train, y_test,priorList,q_s,MAX_EVALS=15,CV=5):
       df=pd.DataFrame()
       print("Q_S value passed is!!!!",q_s)
+      if q_s ==True:print('QUICK RESULTS')#QUICK RESULTS
+      else:print('HYPER OP')
       class_weights = list(class_weight.compute_class_weight('balanced',
                                              np.unique(y_train),
                                              y_train))
@@ -885,7 +887,8 @@ class Regression:
   def best_model_reg(self,X_train , X_test, y_train, y_test,q_s,MAX_EVALS=15,CV=5):
       df=pd.DataFrame()
       print("The value of Q_S is ",q_s)
-
+      if q_s ==True:print('QUICK RESULTS')#QUICK RESULTS
+      else:print('HYPER OP')
       if q_s ==True:  #QUICK RESULTS
         ind=0
         best = {}
