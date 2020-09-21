@@ -106,9 +106,11 @@ def importFile(path,nrows=None):
             # writing the data into csv file
             for row in range(sheet.nrows):
                 col.writerow(sheet.row_values(row))
+            print('\nxlrd')
 
             # read csv file and convert into a dataframe object
-            df = pd.read_csv("SheetSheetSheet.csv",nrows=nrows)
+            df = pd.DataFrame(pd.read_csv("SheetSheetSheet.csv"))
+            print(df.head(5))
             return df
             #######
         except FileNotFoundError:
