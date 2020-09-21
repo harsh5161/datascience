@@ -30,14 +30,14 @@ def numeric_engineering(df):
     def returnMoney(col):
         # Remove Commas from currencies
         try:
-            return pd.to_numeric(col.str.replace(',',''))
+            return pd.to_numeric(col.str.replace([',','$','€','£','¥'],''))
         except:
             return col
 
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     # print(f'object type columns are {obj_columns}')
     print(f'\t\t stripping spaces, symbols, and lower casing all entries')
-    df[obj_columns]=df[obj_columns].apply(lambda x: x.astype(str).str.strip(' %$€£¥+-').str.lower())
+    df[obj_columns]=df[obj_columns].apply(lambda x: x.astype(str).str.strip(' %$€£¥+').str.lower())
     print('done ...')
     print(f'\t\t Replacing empty and invalid strings')
     possible_empties = ['-','n/a','na','nan','nil',np.inf,-np.inf,'']
