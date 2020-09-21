@@ -366,10 +366,10 @@ def model_training(X_train,y_train,X_test,y_test,class_or_Reg,priorList,q_s):
   # Selecting best model
   if class_or_Reg == 'Classification':
     Classification=classification()
-    name,mod,acc,par,model_info = Classification.best_model_class(input_X_train, X_test, input_y_train.values, y_test.values,priorList,q_s)
+    name,mod,acc,par,model_info = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList,q_s)
   else:#Regression
     regression=Regression()
-    name,mod,acc,par,model_info = regression.best_model_reg(input_X_train, X_test, input_y_train, y_test,q_s)
+    name,mod,acc,par,model_info = regression.best_model_reg(X_train, X_test, y_train, y_test,q_s)
   print('Accuracy :',acc)
   return mod,model_info
 
