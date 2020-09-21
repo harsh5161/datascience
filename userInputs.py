@@ -116,6 +116,13 @@ def importFile(path,nrows=None):
             error = True
             return None
 
+    # def importExcel(path):
+    #     try:
+    #         pass
+    #     except FileNotFoundError:
+    #         print('File not found, Check the name, path, spelling mistakes')
+    #         error = True
+    #         return None
 
     def importTable(path):
         try:
