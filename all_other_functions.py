@@ -271,20 +271,31 @@ def featureSelectionPlot(feat_df):
     plt.show()
 
 def FeatureSelection(X,y,class_or_Reg):
-    # class balancing on Feature selection has to be done!
-    n_est = 20
+    print(X.shape)
     if class_or_Reg == 'Classification':
-        selector = XGBClassifier(n_estimators =n_est, max_depth= 6, n_jobs=-1)
         print('runnning classifier selector')
+        classes_num = y.nunique() #Checking Number of classes in Target
+        if classes_num == 2:
+            print("\nBinary Classification")
+            k = y.value_counts()
+            if k[0]>k[1]: impact_ratio = k[0]/k[1]
+            else: impact_ratio = k[1]/k[0]
+            selector = XGBClassifier(n_estimators =20, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
+        else:
+            print("\nMulticlass Classification")
+
+            # Creating weight array for balancing
+            class_weights = list(class_weight.compute_class_weight('balanced', np.unique(y),y))
+            w_array = np.ones(y.shape[0], dtype = 'float')
+            for i,val in enumerate(y):
+              w_array[i] = class_weights[val-1]
+
+            selector = XGBClassifier(n_estimators =20, sample_weight = w_array, max_depth= 5, n_jobs=-1);
     else :
-        selector = XGBRegressor(n_estimators =n_est, max_depth= 6, n_jobs=-1)
-        print('runnning regressor selector')
+        selector = XGBRegressor(n_estimators =20, max_depth= 5, n_jobs=-1);print('runnning regressor selector')
 
     for i in tqdm(range(10)):
-        if class_or_Reg == 'Classification':
-            selector.fit(X, y)
-        else:
-            selector.fit(X, y)
+        selector.fit(X, y)
 
     # all columns container
     cols = pd.DataFrame(X.columns)
@@ -302,6 +313,7 @@ def FeatureSelection(X,y,class_or_Reg):
 
     # threshold two(The mean of the remaining features is used as a thres)
     thresh2 = new_1['scores1'].mean(); l2 = k>thresh2
+    print('\nthresh2: {}'.format(thresh2))
     sheet2 = pd.concat([cols, k, l2], axis =1)
     sheet2.columns = ['col_name','scores2','t/f']
     new_2 = sheet2.loc[(sheet2['t/f'] == True)]
@@ -313,7 +325,7 @@ def FeatureSelection(X,y,class_or_Reg):
 
     rejected_cols = set(X.columns) - set(new_2.col_name)
     print('\n{} columns are eliminated during Feature Selection which are:\n{}' .format(len(rejected_cols), rejected_cols))
-    return list(rejected_cols),new_2.drop(['t/f'],axis=1)
+    return list(rejected_cols)
 
 def dataHandler(dx):
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
