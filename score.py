@@ -21,7 +21,6 @@ def score(df,init_info,validation=False):
         else:
             priorList = None
 
-
     if validation:
         X_test = df.drop(init_info['Target'],axis=1)
         y_test = df[init_info['Target']]
