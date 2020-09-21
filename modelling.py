@@ -1494,7 +1494,7 @@ class Regression:
       df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
       ind=ind+1
 
-      best_info=df.sort_values('RMSE',ignore_index=True,ascending=False).loc[0,:]
+      best_info=df.sort_values('RMSE',ignore_index=True,ascending=True).loc[0,:]
       best_name=best_info['Name']
       best_mod=best_info['model']
       best_acc=best_info['accuracy']

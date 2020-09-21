@@ -173,7 +173,7 @@ def date_engineering(df):
 def findReviewColumns(df): #input main dataframe
 
   rf = df.sample(n=150, random_state=1).dropna(axis=0) if len(df)>150 else df.dropna(axis=0)#use frac=0.25 to get 25% of the data
-  
+
   #df.dropna(axis=0,inplace=True) #dropping all rows with null values
 
 
