@@ -109,7 +109,7 @@ def importFile(path,nrows=None):
             print('\nxlrd')
 
             # read csv file and convert into a dataframe object
-            df = pd.DataFrame(pd.read_csv("SheetSheetSheet.csv"))
+            df = pd.read_csv("SheetSheetSheet.csv")
             print(df.head(5))
             return df
             #######
@@ -117,14 +117,6 @@ def importFile(path,nrows=None):
             print('File not found, Check the name, path, spelling mistakes')
             error = True
             return None
-
-    # def importExcel(path):
-    #     try:
-    #         pass
-    #     except FileNotFoundError:
-    #         print('File not found, Check the name, path, spelling mistakes')
-    #         error = True
-    #         return None
 
     def importTable(path):
         try:
