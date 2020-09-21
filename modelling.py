@@ -1500,4 +1500,6 @@ class Regression:
       best_acc=best_info['accuracy']
       best_param=best_info['param']
 
+      print(best_name)
+
       return best_name,best_mod, best_acc, best_param,df
