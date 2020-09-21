@@ -21,10 +21,12 @@ def score(df,init_info,validation=False):
         else:
             priorList = None
 
-    X_test = df.drop(init_info['Target'],axis=1)
+
     if validation:
+        X_test = df.drop(init_info['Target'],axis=1)
         y_test = df[init_info['Target']]
     else:
+        X_test = df
         y_test = pd.Series()
 
     if init_info['KEY']:

@@ -412,7 +412,7 @@ def removeOutliers(df):
 
 def getDF(df,model):
     try:
-        mdf = df[model['init_cols'].remove(model['Target'])]
+        mdf = df[model['init_cols'].drop(model['Target'])]
         print('Columns Match!')
         return mdf
     except KeyError as e:
