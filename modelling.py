@@ -78,9 +78,10 @@ class classification:
       class_weights = list(class_weight.compute_class_weight('balanced',
                                              np.unique(y_train),
                                              y_train))
+      class_w = pd.Series(class_weights,index=np.unique(y_train))
       w_array = np.ones(y_train.shape[0], dtype = 'float')
       for i,val in enumerate(y_train):
-        w_array[i] = class_weights[val-1]
+        w_array[i] = class_w[val]
 
       maxval = priorList.max()
       print(maxval)

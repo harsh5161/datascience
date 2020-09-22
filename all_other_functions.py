@@ -286,9 +286,10 @@ def FeatureSelection(X,y,class_or_Reg):
 
             # Creating weight array for balancing
             class_weights = list(class_weight.compute_class_weight('balanced', np.unique(y),y))
+            class_w=pd.Series(class_weights,index=np.unique(y))
             w_array = np.ones(y.shape[0], dtype = 'float')
             for i,val in enumerate(y):
-              w_array[i] = class_weights[val-1]
+              w_array[i] = class_w[val]
 
             selector = XGBClassifier(n_estimators =20, sample_weight = w_array, max_depth= 5, n_jobs=-1);
     else :
