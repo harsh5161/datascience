@@ -781,7 +781,7 @@ class classification:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
+      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft')
       df.loc[ind,'param']="Default"
       Start=time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
@@ -1479,7 +1479,7 @@ class Regression:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
+      df.loc[ind,'model']=VotingRegressor(df_en.values)
       df.loc[ind,'param']="Defualt"
       Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
