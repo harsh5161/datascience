@@ -102,7 +102,7 @@ def Segregation(df):
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')
     print(disc.nunique())
     end = time.time()
-    print('Segregation time taken : {}'.format(end-start))
+    print('\nSegregation time taken : {}'.format(end-start))
     return numeric,disc,unique
 
 def Visualization(X,Y,class_or_Reg,LE):

@@ -134,14 +134,17 @@ def INIT(df,info):
 
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
-    # Feature Reduction and Segregation of discrete columns
-    # joblib.dump(X,'seg');return None,None
-    num_df, disc_df, useless_cols = Segregation(X)
-    disc_df = disc_df.astype('category')
-    disc_cat = {}
-    for column in disc_df:
-        disc_cat[column] = disc_df[column].cat.categories
 
+    num_df, disc_df, useless_cols = Segregation(X)
+    if not disc_df.empty:
+        disc_df = disc_df.astype('category')
+        disc_cat = {}
+        for column in disc_df:
+            disc_cat[column] = disc_df[column].cat.categories
+    else:
+        disc_df = pd.DataFrame()
+        disc_cat = {}
+    print('Segregation Done!')
     ############# OUTLIER WINSORIZING ###########
     print('\n#### OUTLIER WINSORIZING ####')
     num_df.clip(lower=num_df.quantile(0.1),upper=num_df.quantile(0.9),inplace=True,axis=1)
