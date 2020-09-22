@@ -1330,7 +1330,7 @@ class Regression:
             def objective(params):
                   print(params)
                   rf = RandomForestRegressor(**params)
-                  result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("Random Forest Training done")
                   return (1-result.min())
 
