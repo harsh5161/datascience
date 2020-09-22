@@ -350,7 +350,7 @@ class classification:
         def objective(params):
               print(params)
               xg = xgb.XGBClassifier(**params)
-              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=6)
+              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan)
               print("XGB train done")
               print(result.min()*100)
               return (1-result.min())
@@ -468,7 +468,7 @@ class classification:
         def objective(params):
             print('\n',params)
             lb = lgb.LGBMClassifier(**params)
-            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=6)
+            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan)
             print("LGBM train done")
             print("\n",result.min()*100)
             return (1-result.min())
@@ -545,7 +545,7 @@ class classification:
         def objective(params):
             print(params)
             rf = RandomForestClassifier(**params)
-            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan,n_jobs=6)
+            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan)
             print("RF train done")
             print(result.min()*100)
             return (1-result.min())
@@ -1108,7 +1108,7 @@ class Regression:
             def objective(params):
                   print(params)
                   xg = xgb.XGBRegressor(**params)
-                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("XGB Training Done")
                   return (1-result.min())
 
@@ -1198,7 +1198,7 @@ class Regression:
             def objective(params):
                   print(params)
                   xg = lgb.LGBMRegressor(**params)
-                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("XGB Training Done")
                   return (1-result.min())
 
@@ -1259,7 +1259,7 @@ class Regression:
             def objective(params):
                   print(params)
                   rf = RandomForestRegressor(**params)
-                  result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan,n_jobs=6)
+                  result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("Random Forest Training done")
                   return (1-result.min())
 
