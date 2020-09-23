@@ -110,6 +110,8 @@ def score(df,init_info,validation=False):
     X_test = pd.DataFrame(init_info['PowerTransformer'].transform(X_test),columns=init_info['TrainingColumns'])
     new_mm = MinMaxScaler()
     X_test = pd.DataFrame(new_mm.fit_transform(X_test),columns=init_info['TrainingColumns'])
+    print('\nThis is final shape of X_test : {}'.format(X_test.shape))
+
     # joblib.dump(X_test,'Xt')
     # joblib.dump(X_train,'XT')
     # joblib.dump(y_train,'YT')

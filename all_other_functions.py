@@ -5,10 +5,11 @@ from xgboost import *
 from tqdm.notebook import tqdm
 from modelling import *
 from collections import defaultdict
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder,OneHotEncoder
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.utils import class_weight
+import pydotplus
 
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
@@ -105,12 +106,6 @@ def Segregation(df):
     print('\nSegregation time taken : {}'.format(end-start))
     return numeric,disc,unique
 
-def Visualization(X,Y,class_or_Reg,disc_df_columns):
-    pass
-
-
-
-
 def DatasetSelection(X,Y):
   X1=X.copy()
   X2=X.copy()
@@ -144,13 +139,13 @@ def DatasetSelection(X,Y):
     print("Shape of the target column {}".format(Y.shape))
     return X2,Y
 
-def SampleEquation(X,Y,class_or_Reg):
-    num_df = X.select_dtypes('number')
-    obj_df = X.select_dtypes('category')
+def SampleEquation(X,Y,class_or_Reg,disc_df_columns):
+    obj_df = pd.DataFrame(X[disc_df_columns])
+    X.drop(disc_df_columns,axis=1,inplace=True)
     d = defaultdict(LabelEncoder)
     obj_df = obj_df.apply(lambda x: d[x.name].fit_transform(x.astype(str)))
     print('LABEL ENCODED FOR SAMPLE EQUATION\n')
-    X = pd.concat([num_df,obj_df],axis=1)
+    X = pd.concat([X,obj_df],axis=1)
     from sklearn.feature_selection import f_classif, f_regression
     if class_or_Reg == 'Classification':# for classification
         from sklearn.linear_model import LogisticRegression

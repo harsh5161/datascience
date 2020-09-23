@@ -6,6 +6,7 @@ from engineerings import *
 from sklearn.preprocessing import LabelEncoder,PowerTransformer,MinMaxScaler
 from category_encoders import TargetEncoder
 import joblib
+from Viz import *
 
 def INIT(df,info):
     target = info['target']
@@ -275,13 +276,18 @@ def INIT(df,info):
     te_start = time.time()
     X = TE.fit_transform(X,y)
     te_end = time.time()
+    print(X.shape)
+    print(y.shape)
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
     print('\n #### FEATURE SELECTION ####')
     fe_s = time.time()
     rem,feat_df = FeatureSelection(X,y,class_or_Reg)
     fe_e = time.time()
+    print(X.shape)
+    print(y.shape)
     print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
     X.drop(rem,axis=1,inplace=True)
+    TrainingColumns = X.columns
     fe_s = time.time()
 
     try:
@@ -290,36 +296,49 @@ def INIT(df,info):
         print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
     fe_e = time.time()
     print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
-
+    print(X.shape)
+    print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
     try:
-        Visualization(X,y,class_or_Reg,LE)
+        vis_disc_cols = []
+        for col in disc_df.columns:
+            if col in X.columns:
+                vis_disc_cols.append(col)
+        Visualization(X_old[X.columns],y,class_or_Reg,vis_disc_cols)
     except:
         print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
-
-    TrainingColumns = X.columns
-
-    print('\n #### Printing Sample Equation of the DATA ####')
-    try:
-        SampleEquation(X_old[X.columns],y,class_or_Reg)
-    except:
-        print('SAMPLE EQUATION DID NOT RUN AND HAD ERRORS!!!')
-    print(' #### DONE ####')
-
+    print(X.shape)
+    print(y.shape)
     print('\n #### NORMALIZATION ####')
-    # MM = None
     MM = MinMaxScaler(feature_range=(1, 2))
     X = pd.DataFrame(MM.fit_transform(X),columns=TrainingColumns)
     print(' #### DONE ####')
+    print(X.shape)
+    print(y.shape)
     print('\n #### POWER TRANSFORMATIONS ####')
     PT = PowerTransformer(method = 'box-cox')
     X = pd.DataFrame(PT.fit_transform(X),columns=TrainingColumns)
     new_mm = MinMaxScaler()
     X = pd.DataFrame(new_mm.fit_transform(X),columns=TrainingColumns)
-    # PT = None
+    print(' #### DONE ####')
+    print(X.shape)
+    print(y.shape)
+    print('\n #### Printing Sample Equation of the DATA ####')
+    try:
+        vis_disc_cols = []
+        for col in disc_df.columns:
+            if col in X.columns:
+                vis_disc_cols.append(col)
+        SampleEquation(X.copy(),y.copy(),class_or_Reg,vis_disc_cols)
+    except Exception as e:
+        print(e)
+        print('SAMPLE EQUATION DID NOT RUN AND HAD ERRORS!!!')
     print(' #### DONE ####')
 
-    print('\n #### SAVING MODEL INFORMATION ####')
+    print('\nThis is final shape of X_train : {}'.format(X.shape))
+    print('This is final shape of Y_train : {}\n'.format(y.shape))
+
+    print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
                 'DateColumns':date_cols,'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
