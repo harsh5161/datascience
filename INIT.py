@@ -299,8 +299,8 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
-    joblib.dump(X_old[X.columns],'X')
-    joblib.dump(y,'y')
+    # joblib.dump(X_old[X.columns],'X')
+    # joblib.dump(y,'y')
     try:
         vis_disc_cols = []
         for col in disc_df.columns:
