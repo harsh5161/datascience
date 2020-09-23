@@ -133,7 +133,7 @@ class classification:
           df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred)
           df.loc[ind, 'F1']=f1_score(y_test, xgb_pred)
           df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
-            
+
         elif check==0:   # if multiclass classification
           df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
           df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
@@ -901,7 +901,7 @@ class classification:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
+      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft')
       df.loc[ind,'param']="Default"
       Start=time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
@@ -1603,7 +1603,7 @@ class Regression:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
+      df.loc[ind,'model']=VotingRegressor(df_en.values)
       df.loc[ind,'param']="Defualt"
       Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
