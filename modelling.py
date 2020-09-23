@@ -128,17 +128,21 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='weighted')
-        if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred,average='weighted')
-        #elif check==0:
-            #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred,average='weighted',multi_class='ovo')
+        if check==1:    # if binary classification
+          df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred)
+          df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred)
+          df.loc[ind, 'F1']=f1_score(y_test, xgb_pred)
+          df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
+            
+        elif check==0:   # if multiclass classification
+          df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
+          df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
+          df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='weighted')
+          #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, xgb_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("XGB val done")
         ind=ind+1
         ########################################################################################################
@@ -157,17 +161,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, catboost_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred,average='weighted')
-        #elif check==0:
-            #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_testbin, catboost_pred,average='weighted',multi_class='ovo')
+          df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
+          df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
+          df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
+          df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
+        elif check==0:
+          df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
+          df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
+          df.loc[ind, 'F1']=f1_score(y_test, catboost_pred,average='weighted')
+          #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_testbin, catboost_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, catboost_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("CAT val done")
         ind=ind+1
         ########################################################################################################
@@ -190,17 +197,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, lightgbm_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, lightgbm_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, lightgbm_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, lightgbm_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("LGBM val done")
         ind=ind+1
 
@@ -217,17 +227,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("RF val done")
         ind=ind+1
 
@@ -245,17 +258,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, extra_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, extra_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, extra_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("ET val done")
         ind=ind+1
         #########################################################################################################
@@ -274,17 +290,20 @@ class classification:
             End=time.time()
             df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
             df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
-            df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, naive_pred,average='weighted')
             if check==1:
-                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred,average='weighted')
-            #elif check==0:
+                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
+                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
+                df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
+                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
+            elif check==0:
+                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
+                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
+                df.loc[ind, 'F1']=f1_score(y_test, naive_pred,average='weighted')
                 #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred,average='weighted',multi_class='ovo')
             df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
             df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
             #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, naive_pred)
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("Naive Bayes done")
             ind=ind+1
 
@@ -301,17 +320,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, log_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, log_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, log_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, log_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("LR val done")
         ind=ind+1
 
@@ -332,17 +354,20 @@ class classification:
             End=time.time()
             df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
             df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
-            df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, neural_pred,average='weighted')
             if check==1:
-                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred,average='weighted')
-            #elif check==0:
+                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
+                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
+                df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
+                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred)
+            elif check==0:
+                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
+                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
+                df.loc[ind, 'F1']=f1_score(y_test, neural_pred,average='weighted')
                 #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred,average='weighted',multi_class='ovo')
             df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, neural_pred)
             df.loc[ind, 'MCC']=matthews_corrcoef(y_test, neural_pred)
             #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, neural_pred)
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("NN done")
             ind=ind+1
 
@@ -359,17 +384,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, support_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, support_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, support_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("SVC val done ")
         ind=ind+1
 
@@ -387,7 +415,7 @@ class classification:
               print("XGB train done")
               print(result.min()*100)
               return (1-result.min())
-
+        Start=time.time()
         sample_weight = compute_sample_weight('balanced', y_train)
         Space = {
               'n_estimators': 100, #scope.int(hp.quniform('n_estimators', 50,500,50)),
@@ -444,7 +472,6 @@ class classification:
         df.loc[ind,'Name']='XGBoost'
         df.loc[ind,'model']=xgb.XGBClassifier(**best)
         df.loc[ind,'param']=str(best)
-        Start=time.time()
         eval_set = [(X_test, y_test)]
         if check ==1:
             df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss",early_stopping_rounds=30, eval_set=eval_set,verbose=False)
@@ -455,17 +482,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, xgb_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, xgb_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("XGB val done")
         ind=ind+1
         ########################################################################################################
@@ -485,17 +515,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, catboost_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, catboost_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, catboost_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("CAT val done")
         ind=ind+1
         ########################################################################################################
@@ -513,7 +546,7 @@ class classification:
             print("\n",result.min()*100)
             return (1-result.min())
 
-
+        Start=time.time()
         Space = {
                 'boosting_type': 'gbdt',
                 'learning_rate': hp.uniform('learning_rate',0.01,0.2),
@@ -563,7 +596,6 @@ class classification:
         df.loc[ind,'Name']='Light GBM'
         df['model'][ind]=lgb.LGBMClassifier(**best)
         df.loc[ind,'param']= str(best)
-        Start=time.time()
         if check==1:
             df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
         elif check==0:
@@ -572,17 +604,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, lightgbm_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, lightgbm_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, lightgbm_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, lightgbm_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("LGBM val done")
         ind=ind+1
 
@@ -599,7 +634,7 @@ class classification:
             print("RF train done")
             print(result.min()*100)
             return (1-result.min())
-
+        Start=time.time()
         DSpace = {
                   'n_estimators': 100, # scope.int(hp.quniform('n_estimators', 100, 1200,50)),
                   "max_depth": 16, # scope.int(hp.quniform('max_depth',2,20,1)),
@@ -645,23 +680,25 @@ class classification:
         df.loc[ind,'Name']='Random Forest'
         df['model'][ind]=RandomForestClassifier(**best)
         df.loc[ind,'param']= str(best)
-        Start=time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
         randomforest_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomforest_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("RF val done")
         ind=ind+1
 
@@ -678,17 +715,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, extra_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, extra_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, extra_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("ET val done")
         ind=ind+1
         #########################################################################################################
@@ -707,17 +747,20 @@ class classification:
             End=time.time()
             df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
             df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
-            df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, naive_pred,average='weighted')
             if check==1:
-                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred,average='weighted')
-            #elif check==0:
+                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
+                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
+                df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
+                df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
+            elif check==0:
+                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
+                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
+                df.loc[ind, 'F1']=f1_score(y_test, naive_pred,average='weighted')
                 #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred,average='weighted',multi_class='ovo')
             df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
             df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
             #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, naive_pred)
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("Naive Bayes done")
             ind=ind+1
 
@@ -733,17 +776,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, log_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, log_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, log_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, log_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("LR val done")
         ind=ind+1
 
@@ -762,17 +808,20 @@ class classification:
                 End=time.time()
                 df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
                 df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
-                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
-                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
-                df.loc[ind, 'F1']=f1_score(y_test, neural_pred,average='weighted')
                 if check==1:
-                    df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred,average='weighted')
-                #elif check==0:
+                    df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
+                    df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
+                    df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
+                    df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred)
+                elif check==0:
+                    df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
+                    df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
+                    df.loc[ind, 'F1']=f1_score(y_test, neural_pred,average='weighted')
                     #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred,average='weighted',multi_class='ovo')
                 df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, neural_pred)
                 df.loc[ind, 'MCC']=matthews_corrcoef(y_test, neural_pred)
                 #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, neural_pred)
-                df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+                df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
                 print("NN done")
                 ind=ind+1
 
@@ -788,17 +837,20 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
-        df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
-        df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
-        df.loc[ind, 'F1']=f1_score(y_test, support_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred,average='weighted')
-        #elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, support_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
+        elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, support_pred,average='weighted')
             #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred,average='weighted',multi_class='ovo')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
         #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("SVC val done ")
         ind=ind+1
 
@@ -857,17 +909,20 @@ class classification:
       End=time.time()
       df.loc[ind,'accuracy']=accuracy_score(y_test, ensemble_pred)*100
       df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, ensemble_pred))))
-      df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred,average='weighted')
-      df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred,average='weighted')
-      df.loc[ind, 'F1']=f1_score(y_test, ensemble_pred,average='weighted')
       if check==1:
-          df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, ensemble_pred,average='weighted')
-      #elif check==0:
-          #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, ensemble_pred,average='weighted',multi_class='ovo')
+            df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred)
+            df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred)
+            df.loc[ind, 'F1']=f1_score(y_test, ensemble_pred)
+            df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, ensemble_pred)
+      elif check==0:
+            df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred,average='weighted')
+            df.loc[ind, 'F1']=f1_score(y_test, ensemble_pred,average='weighted')
+            #df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, ensemble_pred,average='weighted',multi_class='ovo')
       df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, ensemble_pred)
       df.loc[ind, 'MCC']=matthews_corrcoef(y_test, ensemble_pred)
       #df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, ensemble_pred)
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+      df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
       ind=ind+1
 
       ##Best Model
@@ -982,7 +1037,7 @@ class Regression:
         #df.loc[ind,'AIC']=aic.aic(y_test, xgb_reg_prob1,X_train.shape[1])
         #print("aic done")
         df.loc[ind,'BIC']=bic.bic(y_test, xgb_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
         print("XGB Validation done")
         ind=ind+1
@@ -1004,7 +1059,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("CAT Validation done")
         ind=ind+1
         ########################################################################################################
@@ -1027,7 +1082,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("LGBM val done")
         ind=ind+1
         ########################################################################################################
@@ -1049,7 +1104,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, random_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, random_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, random_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("RF Validation done")
         ind=ind+1
 
@@ -1072,7 +1127,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, extra_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, extra_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, extra_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("ET Validation done")
         ind=ind+1
         #########################################################################################################
@@ -1095,7 +1150,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, logr_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, logr_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, logr_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
         print("linear reg done")
         ind=ind+1
@@ -1117,7 +1172,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, ridge_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, ridge_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, ridge_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("ridge reg done")
         ind=ind+1
 
@@ -1143,7 +1198,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
             print("neural net done")
             ind=ind+1
@@ -1165,7 +1220,7 @@ class Regression:
         df.loc[ind,'MAE']=mean_absolute_error(y_test, svc_reg_prob1)
         #df.loc[ind,'AIC']=aic.aic(y_test, svc_reg_prob1,X_train.shape[1])
         df.loc[ind,'BIC']=bic.bic(y_test, svc_reg_prob1,X_train.shape[1])
-        df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+        df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
         print("SVC done")
         ind=ind+1
@@ -1183,7 +1238,7 @@ class Regression:
                   print("XGB Training Done")
                   return (1-result.min())
 
-
+            Start=time.time()
             Space = {
                   'n_estimators': 100, # scope.int(hp.quniform('n_estimators', 50,1250,75)),
                   'eta': hp.uniform('eta', 0.01,0.2 ),
@@ -1218,7 +1273,6 @@ class Regression:
             df.loc[ind,'Name']='XGBoost'
             df.loc[ind,'model']=xgb.XGBRegressor(**best)
             df.loc[ind,'param']=str(best)
-            Start = time.time()
             df.loc[ind,'model'].fit(X_train, y_train,eval_metric="rmse", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
             print(type(xgb_reg_prob1))
@@ -1230,7 +1284,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, xgb_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, xgb_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, xgb_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
             print("XGB Validation done")
             ind=ind+1
@@ -1255,7 +1309,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("CAT Validation done")
             ind=ind+1
             ########################################################################################################
@@ -1273,7 +1327,7 @@ class Regression:
                   print("XGB Training Done")
                   return (1-result.min())
 
-
+            Start=time.time()
             Space = {
                 'boosting_type': 'gbdt',
                 'learning_rate': hp.uniform('learning_rate',0.01,0.2),
@@ -1307,7 +1361,6 @@ class Regression:
             df.loc[ind,'Name']='Light GBM'
             df['model'][ind]=lgb.LGBMRegressor(**best)
             df.loc[ind,'param']= str(best)
-            Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             lightgbm_pred = df.loc[ind,'model'].predict(X_test)
             End=time.time()
@@ -1318,7 +1371,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LGBM val done")
             ind=ind+1
 
@@ -1333,7 +1386,7 @@ class Regression:
                   result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("Random Forest Training done")
                   return (1-result.min())
-
+            Start=time.time()
             Space = {
                       'n_estimators': 100, #scope.int(hp.quniform('n_estimators', 100,1200,50)),
                       "max_depth": 20, # scope.int(hp.quniform('max_depth',2,30,1)),
@@ -1374,7 +1427,6 @@ class Regression:
             df.loc[ind,'Name']='Random Forest'
             df['model'][ind]=RandomForestRegressor(**best)
             df.loc[ind,'param']=str(best)
-            Start = time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
             random_reg_prob1 = df.loc[ind,'model'].predict(X_test)
             End = time.time()
@@ -1385,7 +1437,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, random_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, random_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, random_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("RF Validation done")
             ind=ind+1
 
@@ -1408,7 +1460,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, extra_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, extra_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, extra_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ETextra_reg_prob1 Validation done")
             ind=ind+1
 
@@ -1431,7 +1483,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, ridge_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, ridge_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, ridge_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ridge reg done")
             ind=ind+1
 
@@ -1451,7 +1503,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, logr_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, logr_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, logr_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
             print("linear reg done")
             ind=ind+1
@@ -1477,7 +1529,7 @@ class Regression:
                 df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
                 #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
                 df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-                df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+                df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
                 print("neural net done")
                 ind=ind+1
@@ -1499,7 +1551,7 @@ class Regression:
             df.loc[ind,'MAE']=mean_absolute_error(y_test, svc_reg_prob1)
             #df.loc[ind,'AIC']=aic.aic(y_test, svc_reg_prob1,X_train.shape[1])
             df.loc[ind,'BIC']=bic.bic(y_test, svc_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
             print("SVC done")
             ind=ind+1
@@ -1564,7 +1616,7 @@ class Regression:
       df.loc[ind,'MAE']=mean_absolute_error(y_test, ensemble_pred)
       #df.loc[ind,'AIC']=aic.aic(y_test, ensemble_pred,X_train.shape[1])
       df.loc[ind,'BIC']=bic.bic(y_test, ensemble_pred,X_train.shape[1])
-      df.loc[ind,'Total time(mins)']= ((End-Start) / 60.0)
+      df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
       ind=ind+1
 
       best_info=df.sort_values('RMSE',ignore_index=True,ascending=True).loc[0,:]
