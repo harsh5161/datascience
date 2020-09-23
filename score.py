@@ -110,6 +110,8 @@ def score(df,init_info,validation=False):
     X_test = pd.DataFrame(init_info['PowerTransformer'].transform(X_test),columns=init_info['TrainingColumns'])
     new_mm = MinMaxScaler()
     X_test = pd.DataFrame(new_mm.fit_transform(X_test),columns=init_info['TrainingColumns'])
+    print('\nThis is final shape of X_test : {}'.format(X_test.shape))
+
     # joblib.dump(X_test,'Xt')
     # joblib.dump(X_train,'XT')
     # joblib.dump(y_train,'YT')
@@ -163,14 +165,17 @@ def score(df,init_info,validation=False):
             print(classification_report(y_test,y_pred))
 
             skplt.metrics.plot_confusion_matrix(y_test, y_pred)
-            skplt.metrics.plot_lift_curve(y_test, y_probas)
-            skplt.metrics.plot_cumulative_gain(y_test, y_probas)
+            if len(priorList) ==2:
+
+                skplt.metrics.plot_lift_curve(y_test, y_probas)
+                skplt.metrics.plot_cumulative_gain(y_test, y_probas)
             skplt.metrics.plot_roc(y_test, y_probas)
 
     else:
         if validation:
             import seaborn as sns
             import math
+            from tabulate import tabulate
 
             #residual plot
             fig1 = sns.residplot('y_test','y_pred',regplotdf)
@@ -200,7 +205,9 @@ def score(df,init_info,validation=False):
                 plt.xticks(df_mean['Decile'])
                 tidy = pd.melt(df_mean, id_vars='Decile', value_vars= ['Actualvalue_mean','Predictedvalue_mean'],value_name='Mean values per decile')
                 sns.lineplot(x='Decile', y='Mean values per decile', hue='variable', data=tidy, ax=ax1)
-                print(df_mean)
+                pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql', showindex = False)
+                print("Distribution of Mean of Actual and Predicted Values by Deciles:")
+                print(pdtabulate(df_mean))
 
             # decile plot
             decileplot(regplotdf)
