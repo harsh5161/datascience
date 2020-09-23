@@ -36,8 +36,8 @@ def Segregation(df):
     num = df._get_numeric_data().columns
     obj = list(set(df.columns)-set(num))
 
-    nu = df[num].nunique()>5
-    print('\nCurrently the numeric/cat num threshold is set to 5\n')
+    nu = df[num].nunique()>9
+    print('\nCurrently the numeric/cat num threshold is set to 9\n')
     numeric = df[nu[nu == True].index]
     cat_num = df[list(set(num) - set(numeric.columns))]
     numeric.fillna(numeric.mean(),inplace=True)
