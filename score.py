@@ -227,7 +227,6 @@ def score(df,init_info,validation=False):
         init_info['model'] = mod
         joblib.dump(init_info,'model_info',compress=9)
 
-    preview_length = 100 if len(X_test)>100 else len(X_test)
     if validation:
         preview = pd.DataFrame({k_test.name:k_test.tolist(),
                                 'Actual Values':y_test.tolist(),
