@@ -238,7 +238,7 @@ def score(df,init_info,validation=False):
 
     if init_info['ML'] == 'Classification':
         preview = pd.concat([preview,y_probas],axis=1)
-    preview = preview[:preview_length]
+
     if validation:
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
