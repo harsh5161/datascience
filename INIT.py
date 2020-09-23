@@ -299,14 +299,18 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
+    joblib.dump(X_old[X.columns],'X')
+    joblib.dump(y,'y')
     try:
         vis_disc_cols = []
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
-        Visualization(X_old[X.columns],y,class_or_Reg,vis_disc_cols)
-    except:
+                Visualization(X_old[X.columns],y,class_or_Reg,vis_disc_cols)
+    except Exception as e:
         print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
+        print('The error message received is : ')
+        print(e)
     print(X.shape)
     print(y.shape)
     print('\n #### NORMALIZATION ####')

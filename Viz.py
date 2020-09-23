@@ -3,12 +3,12 @@ from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 import numpy as np
 import re
-def Visualization(X, Y, class_or_Reg, disc_df_columns):
+def Visualization(X, Y, class_or_Reg):
 	ohe = OneHotEncoder()
-	cc = pd.DataFrame(X[disc_df_columns])
+	cc = pd.DataFrame(X.select_dtypes('category')).astype(str)
 	X_enc = ohe.fit_transform(cc)
 	X_con = pd.get_dummies(X, columns = cc.columns)
-	if (pd.DataFrame(Y)[pd.DataFrame(Y).columns[0]].nunique()<=10):
+	if class_or_Reg == 'Classification':
 		from sklearn.tree import DecisionTreeClassifier
 		from sklearn import tree
 		import matplotlib.pyplot as plt
