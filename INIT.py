@@ -322,7 +322,7 @@ def INIT(df,info):
     print('\n #### POWER TRANSFORMATIONS ####')
     PT = PowerTransformer(method = 'box-cox')
     X = pd.DataFrame(PT.fit_transform(X),columns=TrainingColumns)
-    new_mm = MinMaxScaler()
+    new_mm = MinMaxScaler(feature_range=(0,100))
     X = pd.DataFrame(new_mm.fit_transform(X),columns=TrainingColumns)
     print(' #### DONE ####')
     print(X.shape)

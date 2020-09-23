@@ -108,7 +108,7 @@ def score(df,init_info,validation=False):
     X_test.clip(mm.data_min_,mm.data_max_,inplace=True,axis=1) #Clip the data with training min and max, important
     X_test = mm.transform(X_test)
     X_test = pd.DataFrame(init_info['PowerTransformer'].transform(X_test),columns=init_info['TrainingColumns'])
-    new_mm = MinMaxScaler()
+    new_mm = MinMaxScaler(feature_range=(0,100))
     X_test = pd.DataFrame(new_mm.fit_transform(X_test),columns=init_info['TrainingColumns'])
     print('\nThis is final shape of X_test : {}'.format(X_test.shape))
 
