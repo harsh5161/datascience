@@ -108,7 +108,7 @@ def score(df,init_info,validation=False):
     X_test.clip(mm.data_min_,mm.data_max_,inplace=True,axis=1) #Clip the data with training min and max, important
     X_test = mm.transform(X_test)
     X_test = pd.DataFrame(init_info['PowerTransformer'].transform(X_test),columns=init_info['TrainingColumns'])
-    new_mm = MinMaxScaler(feature_range=(0,100))
+    new_mm = MinMaxScaler()
     X_test = pd.DataFrame(new_mm.fit_transform(X_test),columns=init_info['TrainingColumns'])
     print('\nThis is final shape of X_test : {}'.format(X_test.shape))
 
@@ -141,7 +141,7 @@ def score(df,init_info,validation=False):
         ############# PREDICTION/SCORING #############
     else:
         mod = init_info['model']
-    y_pred = pd.Series(mod.predict(X_test))
+    y_pred = mod.predict(X_test)
 
     if validation:
         regplotdf=pd.DataFrame()
@@ -227,6 +227,7 @@ def score(df,init_info,validation=False):
         init_info['model'] = mod
         joblib.dump(init_info,'model_info',compress=9)
 
+    preview_length = 100 if len(X_test)>100 else len(X_test)
     if validation:
         preview = pd.DataFrame({k_test.name:k_test.tolist(),
                                 'Actual Values':y_test.tolist(),
@@ -237,7 +238,7 @@ def score(df,init_info,validation=False):
 
     if init_info['ML'] == 'Classification':
         preview = pd.concat([preview,y_probas],axis=1)
-
+    preview = preview[:preview_length]
     if validation:
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
