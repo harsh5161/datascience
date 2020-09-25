@@ -212,11 +212,11 @@ def score(df,init_info,validation=False):
             # decile plot
             decileplot(regplotdf)
 
-            y_probas = pd.Series()
-            fig3 = plt.figure()
-            plt.plot(y_pred, figure =fig3)
-            plt.plot(np.ones(len(y_pred))*y_pred.mean(), figure=fig3)
-            plt.show()
+            # y_probas = pd.Series()
+            # fig3 = plt.figure()
+            # plt.plot(y_pred, figure =fig3)
+            # plt.plot(np.ones(len(y_pred))*y_pred.mean(), figure=fig3)
+            # plt.show()
     ############ PREDICTION/SCORING #############
     if validation:
         mc = model_info.drop(['model','param','accuracy'],axis=1)
