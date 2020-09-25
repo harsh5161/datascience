@@ -395,7 +395,6 @@ def userInteractVisualization(df1,targ):
         B.remove(targ)
         l=[]
         numlist = list(df1.select_dtypes(include=['int64','float64']).columns)
-        numlist.remove(targ)
         objectlist = list(df1.select_dtypes(include=['object']).columns)
         x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
         if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
