@@ -50,11 +50,14 @@ def INIT(df,info):
 
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
-    # ues = time.time()
-    # if key:userInteractVisualization(df.drop(key,axis=1),target)
-    # else:userInteractVisualization(df,target)
-    # uee = time.time()
-    # print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
+    ues = time.time()
+    if key:
+        x = df.drop(key,axis=1)
+        userInteractVisualization(x,target)
+    else:
+        userInteractVisualization(df,target)
+    uee = time.time()
+    print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
@@ -299,18 +302,14 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
-    # joblib.dump(X_old[X.columns],'X')
-    # joblib.dump(y,'y')
     try:
         vis_disc_cols = []
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
-                Visualization(X_old[X.columns],y,class_or_Reg,vis_disc_cols)
-    except Exception as e:
+        Visualization(X_old[vis_disc_cols],y,class_or_Reg)
+    except:
         print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
-        print('The error message received is : ')
-        print(e)
     print(X.shape)
     print(y.shape)
     print('\n #### NORMALIZATION ####')
@@ -322,7 +321,7 @@ def INIT(df,info):
     print('\n #### POWER TRANSFORMATIONS ####')
     PT = PowerTransformer(method = 'box-cox')
     X = pd.DataFrame(PT.fit_transform(X),columns=TrainingColumns)
-    new_mm = MinMaxScaler(feature_range=(0,100))
+    new_mm = MinMaxScaler()
     X = pd.DataFrame(new_mm.fit_transform(X),columns=TrainingColumns)
     print(' #### DONE ####')
     print(X.shape)
