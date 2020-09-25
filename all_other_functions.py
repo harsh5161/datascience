@@ -36,8 +36,7 @@ def Segregation(df):
     num = df._get_numeric_data().columns
     obj = list(set(df.columns)-set(num))
 
-    nu = df[num].nunique()>9
-    print('\nCurrently the numeric/cat num threshold is set to 9\n')
+    nu = df[num].nunique()>5
     numeric = df[nu[nu == True].index]
     cat_num = df[list(set(num) - set(numeric.columns))]
     numeric.fillna(numeric.mean(),inplace=True)
@@ -392,30 +391,38 @@ def bivar_ploter(df1,targ,base_var,ax1):
       return a
 
 def userInteractVisualization(df1,targ):
-        B=list(df1.columns);B.remove(targ);l=[]
+        B=list(df1.columns)
+        B.remove(targ)
+        l=[]
+        numlist = list(df1.select_dtypes(include=['int64','float64']).columns)
+        objectlist = list(df1.select_dtypes(include=['object']).columns)
         x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
-        if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=np.sum(df1.dtypes==np.object)-np.sum(x)
-        else:j=len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1
+        if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
+        else:j=abs(len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1)
         nr=int((j/4)+0.99)
-        print('\t Applying bivar_plotting to create Images ...') # For Testing
         start = time.time()
-        fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(20,6*nr));axes=axes.ravel();i=0
-        if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
-            for c in (df1.dtypes.loc[(df1.dtypes==np.object).values].index):
-                #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
-                if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):continue
-                try:
-                    bivar_ploter(df1,c,targ,axes[i]);i=i+1
-                except:
-                    pass
-        else:
-            for c in B:
-                #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
-                if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10 and df1[c].dtype==np.object):continue
-                try:
-                    bivar_ploter(df1,targ,c,axes[i]);i=i+1
-                except:
-                    pass
-        for c in range(i,(4*nr)):axes[c].set_visible(False)
-        print('\n Target analysis');fig.suptitle(targ);fig.tight_layout();fig.show()
-        print(f'\t Done with Bivar plotting in time {time.time() - start} seconds ')
+        if numlist:
+            print("Generating Histograms for numeric columns")
+            df1[numlist].hist(bins=20, figsize=(30, 30))
+        if objectlist:
+            fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(20,6*nr));axes=axes.ravel();i=0
+            print('\t Applying bivar_plotting to create Images ...') # For Testing
+            if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
+                for c in (df1.dtypes.loc[(df1.dtypes==np.object).values].index):
+                    #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
+                    if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):continue
+                    try:
+                        bivar_ploter(df1,c,targ,axes[i]);i=i+1
+                    except:
+                        pass
+            else:
+                for c in B:
+                    #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
+                    if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10 and df1[c].dtype==np.object):continue
+                    try:
+                        bivar_ploter(df1,targ,c,axes[i]);i=i+1
+                    except:
+                        pass
+            for c in range(i,(4*nr)):axes[c].set_visible(False)
+            print('\n Target analysis');fig.suptitle(targ);fig.tight_layout();fig.show()
+            print(f'\t Done with Bivar plotting in time {time.time() - start} seconds ')
