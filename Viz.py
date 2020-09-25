@@ -34,7 +34,7 @@ def Visualization(X, Y, class_or_Reg):
 		new_dot = dot_data
 		for i, col in enumerate(sx):
 			for cat in ohe.categories_[i]:
-				new_dot = re.sub(f"{col}_{cat} &le; 0.5", f"{col} &ne; {cat}", new_dot)
+				new_dot = re.sub(f"{re.escape(col)}_{re.escape(cat)} &le; 0.5", f"{col} &ne; {cat}", new_dot)
 		graph = pydotplus.graph_from_dot_data(new_dot)
 		graph.write_png('Dtree.png')
 	else:
@@ -52,6 +52,6 @@ def Visualization(X, Y, class_or_Reg):
 		new_dot = dot_data
 		for i, col in enumerate(sx):
 			for cat in ohe.categories_[i]:
-				new_dot = re.sub(f"{col}_{cat} &le; 0.5", f"{col} &ne; {cat}", new_dot)
+				new_dot = re.sub(f"{re.escape(col)}_{re.escape(cat)} &le; 0.5", f"{col} &ne; {cat}", new_dot)
 		graph = pydotplus.graph_from_dot_data(new_dot)
 		graph.write_png('Dtree.png')
