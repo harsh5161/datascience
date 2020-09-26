@@ -9,6 +9,7 @@ import joblib
 from Viz import *
 
 def INIT(df,info):
+    print("Length of the dataframe is", df.shape[0])
     target = info['target']
     key = info['key']
     cols = info['cols']
@@ -102,10 +103,12 @@ def INIT(df,info):
     MISSING = pd.DataFrame(((X.isnull().sum().sort_values(ascending=False)*100/len(X)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
 
-    # Sampling Data
-    print('Sampling Data!')
-    X,y = data_model_select(X,y)
-    print('After sampling:')
+    # print("length of X going into sampling!!!!!!!!!!!!",len(X))
+    # print("length of y going into sampling!!!!!!!!!!!!",len(y))
+    # # Sampling Data
+    # print('Sampling Data!')
+    # X,y = data_model_select(X,y)
+    # print('After sampling:')
     print('Shape of X_train is {}'.format(X.shape))
     print('Shape of y_train is {}'.format(y.shape))
     if class_or_Reg == 'Classification':
@@ -272,7 +275,7 @@ def INIT(df,info):
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
     concat_list = [num_df,disc_df,DATE_DF,TEXT_DF]
     X = pd.concat(concat_list,axis=1)
-    X_old = X.copy() # X_old is before Target Encoding
+    X_old = X.copy()# X_old is before Target Encoding
     print('\n #### TRANSFORMATIONS ####')
     TE = TargetEncoder(cols=disc_df.columns)
     print('\n #### TARGET ENCODING ####')
@@ -304,11 +307,14 @@ def INIT(df,info):
     print('\n #### DECISION TREE VISUALIZATION ####')
     try:
         vis_disc_cols = []
+        print("DISCRETE COLUMNS ARE:",disc_df)
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
+        print("DISCRETE COLUMNS ARE!!!!!!!:",vis_disc_cols)
         Visualization(X_old[vis_disc_cols],y,class_or_Reg)
-    except:
+    except Exception as e:
+        print(e)
         print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     print(X.shape)
     print(y.shape)
