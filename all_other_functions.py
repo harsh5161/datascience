@@ -347,15 +347,15 @@ def data_model_select(X_train,y_train):
     input_X_train = X_train
     input_y_train = y_train
     print('Less than 10k rows, no sampling needed')
-  elif len(X_train) > 10000 & len(X_train) <= 100000:
+  elif len(X_train) > 10000 and len(X_train) <= 100000:
     input_X_train = X_train.sample(frac=0.8, random_state=1)
     input_y_train = y_train.sample(frac=0.8, random_state=1)
     print('Sampling 80% of the data')
-  elif len(X_train) > 100000 & len(X_train) < 1000000:
+  elif len(X_train) > 100000 and len(X_train) <= 1000000:
     input_X_train = X_train.sample(frac=0.7, random_state=1)
     input_y_train = y_train.sample(frac=0.7, random_state=1)
     print('Sampling 70% of the data')
-  else:
+  elif len(X_train) >1000000:
     input_X_train = X_train.sample(frac=0.5, random_state=1)
     input_y_train = y_train.sample(frac=0.5, random_state=1)
     print('Sampling 50% of the data')
@@ -396,11 +396,17 @@ def bivar_ploter(df1,targ,base_var,ax1):
 
 def userInteractVisualization(df,targ):
         df1 = df.sample(n=1000,random_state=1) if len(df)>1000 else df.copy()
+        print(df1.shape)
         B=list(df1.columns)
         B.remove(targ)
         l=[]
         numlist = list(df1.select_dtypes(include=['int64','float64']).columns)
+        for col in numlist:
+            if df1[col].nunique()<100:
+                numlist.remove(col)
         objectlist = list(df1.select_dtypes(include=['object']).columns)
+        print("NumList is as follows",numlist)
+        print("Objectlist is as follows",objectlist)
         x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
         if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
         else:j=abs(len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1)
@@ -408,7 +414,10 @@ def userInteractVisualization(df,targ):
         start = time.time()
         if numlist:
             print("Generating Histograms for numeric columns")
-            df1[numlist].hist(bins=20, figsize=(30, 30))
+            try:
+                df1[numlist].hist(bins=15, figsize=(15, 15))
+            except:
+                pass
         if objectlist:
             fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(20,6*nr));axes=axes.ravel();i=0
             print('\t Applying bivar_plotting to create Images ...') # For Testing
