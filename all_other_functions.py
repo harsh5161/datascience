@@ -420,7 +420,7 @@ def userInteractVisualization(df,targ):
             except:
                 pass
         if objectlist:
-            fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(20,6*nr));axes=axes.ravel();i=0
+            fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(60,60));axes=axes.ravel();i=0
             print('\t Applying bivar_plotting to create Images ...') # For Testing
             if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
                 for c in (df1.dtypes.loc[(df1.dtypes==np.object).values].index):
