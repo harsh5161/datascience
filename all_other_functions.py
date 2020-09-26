@@ -229,23 +229,27 @@ def FeatureSelection(X,y,class_or_Reg):
         classes_num = y.nunique() #Checking Number of classes in Target
         if classes_num == 2:
             print("\nBinary Classification")
-            k = y.value_counts()
-            if k[0]>k[1]: impact_ratio = k[0]/k[1]
-            else: impact_ratio = k[1]/k[0]
-            selector = XGBClassifier(n_estimators =20, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
+#             k = y.value_counts()
+#             if k[0]>k[1]: impact_ratio = k[0]/k[1]
+#             else: impact_ratio = k[1]/k[0]
+#             selector = XGBClassifier(n_estimators =100, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
+            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='binary')
         else:
             print("\nMulticlass Classification")
 
-            # Creating weight array for balancing
-            class_weights = list(class_weight.compute_class_weight('balanced', np.unique(y),y))
-            class_w=pd.Series(class_weights,index=np.unique(y))
-            w_array = np.ones(y.shape[0], dtype = 'float')
-            for i,val in enumerate(y):
-              w_array[i] = class_w[val]
+            #Creating weight array for balancing
+#             class_weights = list(class_weight.compute_class_weight('balanced', np.unique(y),y))
+#             class_w=pd.Series(class_weights,index=np.unique(y))
+#             w_array = np.ones(y.shape[0], dtype = 'float')
+#             for i,val in enumerate(y):
+#               w_array[i] = class_w[val]
 
-            selector = XGBClassifier(n_estimators =20, sample_weight = w_array, max_depth= 5, n_jobs=-1);
+#             selector = XGBClassifier(n_estimators =100, sample_weight = w_array, max_depth= 5, n_jobs=-1);
+            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss')
     else :
-        selector = XGBRegressor(n_estimators =20, max_depth= 5, n_jobs=-1);print('runnning regressor selector')
+#         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
+        selector = lgb.LGBMRegressor(n_estimators=100,random_state=1)
+        print('runnning regressor selector')
 
     for i in tqdm(range(10)):
         selector.fit(X, y)
@@ -390,7 +394,8 @@ def bivar_ploter(df1,targ,base_var,ax1):
       ax1.set_ylabel('Frequency')
       return a
 
-def userInteractVisualization(df1,targ):
+def userInteractVisualization(df,targ):
+        df1 = df.sample(n=1000,random_state=1) if len(df)>1000 else df.copy()
         B=list(df1.columns)
         B.remove(targ)
         l=[]
