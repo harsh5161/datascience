@@ -8,6 +8,10 @@ def Visualization(X, Y, class_or_Reg):
 	cc = pd.DataFrame(X.select_dtypes('category')).astype(str)
 	X_enc = ohe.fit_transform(cc)
 	X_con = pd.get_dummies(X, columns = cc.columns)
+	print("Categorical Columns considered:\n")
+	print(cc.columns)
+	print("Non-Categorical Columns considered:\n")
+	print(X.drop(columns = cc.columns).columns)
 	if class_or_Reg == 'Classification':
 		from sklearn.tree import DecisionTreeClassifier
 		from sklearn import tree
@@ -32,9 +36,12 @@ def Visualization(X, Y, class_or_Reg):
 		coX = list(zip(cc.columns, ohe.categories_))
 		sx = list(cc.columns)
 		new_dot = dot_data
+		new_dot = re.sub('&le;', '&ge;', new_dot)
 		for i, col in enumerate(sx):
 			for cat in ohe.categories_[i]:
-				new_dot = re.sub(f"{re.escape(col)}_{re.escape(cat)} &le; 0.5", f"{col} &ne; {cat}", new_dot)
+				new_dot = re.sub(f"{re.escape(col)}_{re.escape(cat)} &ge; 0.5", f"{col} = {cat}", new_dot)
+		new_dot = re.sub('labelangle=45, headlabel="True"', 'labelangle=45, headlabel="False"', new_dot)
+		new_dot = re.sub('labelangle=-45, headlabel="False"', 'labelangle=-45, headlabel="True"', new_dot)
 		graph = pydotplus.graph_from_dot_data(new_dot)
 		graph.write_png('Dtree.png')
 	else:
@@ -50,8 +57,11 @@ def Visualization(X, Y, class_or_Reg):
 		coX = list(zip(cc.columns, ohe.categories_))
 		sx = list(cc.columns)
 		new_dot = dot_data
+		new_dot = re.sub('&le;', '&ge;', new_dot)
 		for i, col in enumerate(sx):
 			for cat in ohe.categories_[i]:
-				new_dot = re.sub(f"{re.escape(col)}_{re.escape(cat)} &le; 0.5", f"{col} &ne; {cat}", new_dot)
+				new_dot = re.sub(f"{re.escape(col)}_{re.escape(cat)} &ge; 0.5", f"{col} = {cat}", new_dot)
+		new_dot = re.sub('labelangle=45, headlabel="True"', 'labelangle=45, headlabel="False"', new_dot)
+		new_dot = re.sub('labelangle=-45, headlabel="False"', 'labelangle=-45, headlabel="True"', new_dot)
 		graph = pydotplus.graph_from_dot_data(new_dot)
 		graph.write_png('Dtree.png')
