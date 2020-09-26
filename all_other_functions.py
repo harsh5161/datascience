@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from sklearn.utils import class_weight
 import pydotplus
 
+
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -396,7 +397,7 @@ def bivar_ploter(df1,targ,base_var,ax1):
 
 def userInteractVisualization(df,targ):
         df1 = df.sample(n=1000,random_state=1) if len(df)>1000 else df.copy()
-        print(df1.shape)
+        # print(df1.shape)
         B=list(df1.columns)
         B.remove(targ)
         l=[]
@@ -405,8 +406,8 @@ def userInteractVisualization(df,targ):
             if df1[col].nunique()<100:
                 numlist.remove(col)
         objectlist = list(df1.select_dtypes(include=['object']).columns)
-        print("NumList is as follows",numlist)
-        print("Objectlist is as follows",objectlist)
+        # print("NumList is as follows",numlist)
+        # print("Objectlist is as follows",objectlist)
         x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
         if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
         else:j=abs(len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1)
@@ -415,7 +416,7 @@ def userInteractVisualization(df,targ):
         if numlist:
             print("Generating Histograms for numeric columns")
             try:
-                df1[numlist].hist(bins=15, figsize=(15, 15))
+                df1[numlist].hist(bins=15, figsize=(30, 30))
             except:
                 pass
         if objectlist:
