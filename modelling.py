@@ -72,7 +72,6 @@ class classification:
   ###############################################################################################################################
   def best_model_class(self,X_train ,X_test, y_train, y_test,priorList,q_s,MAX_EVALS=15,CV=5):
       df=pd.DataFrame()
-      print("Q_S value passed is!!!!",q_s)
       if q_s ==True:print('QUICK RESULTS')#QUICK RESULTS
       else:print('HYPER OP')
       class_weights = list(class_weight.compute_class_weight('balanced',
@@ -870,7 +869,28 @@ class classification:
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("SVC val done ")
-        ind=ind+1
+        
+      
+      y_val = pd.Series(y_test)
+      print("##Dropping models that behave poorly##")
+      drop = 0
+      for i in range(0,len(df)):
+          name = df.loc[i, 'Name']
+          model = df.loc[i,'model']
+          pred = model.predict(X_test)
+          for key in y_val.unique():
+              f1 = f1_score(y_test,pred,pos_label=key)
+              if(f1 == 0):
+                  print(f'Dropping model {name} because of poor performance')
+                  drop = 1
+                  df.drop(index=i,inplace=True,axis=0)
+                  break
+               
+      if drop ==1: # if any model was dropped 
+          df.reset_index(drop=True,inplace=True)
+          ind = len(df) +1
+      elif drop ==0: # if model was not dropped
+          ind = ind + 1
 
 
 
@@ -952,7 +972,23 @@ class classification:
       best_acc=best_info['accuracy']
       best_param=best_info['param']
       ########################################################################################################
+      # Testing area for model performance comparison
+    #   for ind in range(0,len(df)-1):
+    #       print("!!!!!!!!!!Individual Model  Scores!!!!!!!!",df.at[ind,'Name'])
+    #       print("Length of y_train",len(y_train))
+    #       pred = df.loc[ind,'model'].predict(X_train)
+    #       print("length of train pred",len(pred))
+    #       print("Train accuracy=",roc_auc_score(y_train,pred))
+    #       print("Train report\n", classification_report(y_train,pred))
+    #       print("Train F1 score",f1_score(y_train,pred,average='weighted'))
+    #       pred = df.loc[ind,'model'].predict(X_test)
+    #       print("len of test pred",len(pred))
+    #       print("Test accuracy=",roc_auc_score(y_test,pred))
+    #       print("Test report\n",classification_report(y_test,pred))
+    #       print("Test F1 score",f1_score(y_test,pred,average='weighted'))
 
+
+      
       return best_name,best_mod, best_acc, best_param,df
 
 

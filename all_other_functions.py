@@ -419,7 +419,7 @@ def userInteractVisualization(df,targ):
                 df1[numlist].hist(bins=15, figsize=(30, 30))
             except:
                 pass
-        if objectlist:
+        if len(objectlist)>2:
             fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(60,60));axes=axes.ravel();i=0
             print('\t Applying bivar_plotting to create Images ...') # For Testing
             if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
