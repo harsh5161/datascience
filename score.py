@@ -158,6 +158,11 @@ def score(df,init_info,validation=False):
             init_info['y_probs_cols'] = y_probs_cols
         else:
             y_probs_cols = init_info['y_probs_cols']
+        # print("!!!!!!!!!!!!!!!!!!!!!!!")
+        # print("YPROBAS IS AS FOLLOWS",y_probas)
+        # print("YPRED IS AS FOLLOWS",y_pred)
+        # print("YPROBSCOLUMNS ARE AS FOLLOWS",y_probs_cols)
+        # print("!!!!!!!!!!!!!!!!!!!!!!!")
         y_probas = pd.DataFrame(y_probas,columns=y_probs_cols)
 
         if validation:
