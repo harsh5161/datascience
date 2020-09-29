@@ -109,7 +109,7 @@ class classification:
         best = {}
         #XGBoost
         #######################################################################
-        df.loc[ind,'Name']='XGBoost'
+        df.loc[ind,'Machine Learning Model']='XGBoost'
         if check == 1:
             df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
         elif check ==0:
@@ -127,18 +127,14 @@ class classification:
         xgb_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))       
+        df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred, average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred, average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, xgb_pred, average='weighted')
         if check==1:    # if binary classification
-          df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred)
-          df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred)
-          df.loc[ind, 'F1']=f1_score(y_test, xgb_pred)
           df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
-            
         elif check==0:   # if multiclass classification
-          df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
-          df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
-          df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='weighted')
-          df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_probas,average='weighted',multi_class='ovr')
+          df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_probas, average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, xgb_pred)
@@ -149,7 +145,7 @@ class classification:
 
         ##Catboost
         ########################################################################################################
-        df.loc[ind,'Name']='CatBoost'
+        df.loc[ind,'Machine Learning Model']='CatBoost'
         if check==1:
             df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced")
         elif check==0:
@@ -162,15 +158,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, catboost_pred,average='weighted')
         if check==1:
-          df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
-          df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
-          df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
           df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
         elif check==0:
-          df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
-          df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
-          df.loc[ind, 'F1']=f1_score(y_test, catboost_pred,average='weighted')
           df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
@@ -183,7 +176,7 @@ class classification:
 
         ##LGBM
         ########################################################################################################
-        df.loc[ind,'Name']='Light GBM'
+        df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
         if check==1:
             df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='binary')
         elif check==0:
@@ -199,15 +192,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, lightgbm_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred, average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred, average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, lightgbm_pred, average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, lightgbm_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, lightgbm_pred)
@@ -220,7 +210,7 @@ class classification:
 
         ##Random forest
         ########################################################################################################
-        df.loc[ind,'Name']='Random Forest'
+        df.loc[ind,'Machine Learning Model']='Random Forest'
         df['model'][ind]=RandomForestClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
         df.loc[ind,'param']= str(best)
         Start=time.time()
@@ -230,15 +220,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, randomforest_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
@@ -252,7 +239,7 @@ class classification:
 
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
-        df.loc[ind,'Name']='Extra Trees Classifier'
+        df.loc[ind,'Machine Learning Model']='Extra Trees Classifier'
         df['model'][ind]=ExtraTreesClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
         df.loc[ind,'param']=str(best)
         Start=time.time()
@@ -262,15 +249,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, extra_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, extra_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
@@ -285,7 +269,7 @@ class classification:
 
         if(flag == 1):
             best = {'priors': priorList}
-            df.loc[ind,'Name']='Naive Bayes(Bayesisan Statistics)'
+            df.loc[ind,'Machine Learning Model']='Naive Bayes(Bayesisan Statistics)'
             df.loc[ind,'model']=GaussianNB(priors = priorList)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -295,15 +279,12 @@ class classification:
             End=time.time()
             df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
             df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
+            df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
+            df.loc[ind, 'Weighted F1']=f1_score(y_test, naive_pred,average='weighted')
             if check==1:
-                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
-                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
-                df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
                 df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
             elif check==0:
-                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
-                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
-                df.loc[ind, 'F1']=f1_score(y_test, naive_pred,average='weighted')
                 df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_probas,average='weighted',multi_class='ovr')
             df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
             df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
@@ -316,7 +297,7 @@ class classification:
         #Logistic Regression
         ##########################################################################################################
 
-        df.loc[ind,'Name']='Logistic Regression'
+        df.loc[ind,'Machine Learning Model']='Logistic Regression'
         df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
         df.loc[ind,'param']=""
         Start=time.time()
@@ -326,15 +307,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, log_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, log_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, log_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
@@ -350,7 +328,7 @@ class classification:
         ########################################################################################################
 
         if(flag == 1):
-            df.loc[ind,'Name']='Neural Network'
+            df.loc[ind,'Machine Learning Model']='Neural Network'
             best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
             df.loc[ind,'model']=MLPClassifier(**best)
             df.loc[ind,'param']=str(best)
@@ -361,15 +339,12 @@ class classification:
             End=time.time()
             df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
             df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
+            df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
+            df.loc[ind, 'Weighted F1']=f1_score(y_test, neural_pred,average='weighted')
             if check==1:
-                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
-                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
-                df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
                 df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred)
             elif check==0:
-                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
-                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
-                df.loc[ind, 'F1']=f1_score(y_test, neural_pred,average='weighted')
                 df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_probas,average='weighted',multi_class='ovr')
             df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, neural_pred)
             df.loc[ind, 'MCC']=matthews_corrcoef(y_test, neural_pred)
@@ -382,7 +357,7 @@ class classification:
         #SVC
         #########################################################################################################
 
-        df.loc[ind,'Name']='Support Vector Machine'
+        df.loc[ind,'Machine Learning Model']='Support Vector Machine'
         df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
         df.loc[ind,'param']= str(best)
         Start=time.time()
@@ -392,15 +367,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, support_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, support_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, support_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
@@ -477,7 +449,7 @@ class classification:
 
         ##XGBoost(2) Finding out accuracy on the test dataset
         ########################################################################################################
-        df.loc[ind,'Name']='XGBoost'
+        df.loc[ind,'Machine Learning Model']='XGBoost'
         df.loc[ind,'model']=xgb.XGBClassifier(**best)
         df.loc[ind,'param']=str(best)
         eval_set = [(X_test, y_test)]
@@ -491,15 +463,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, xgb_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, xgb_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, xgb_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, xgb_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, xgb_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, xgb_pred)
@@ -511,7 +480,7 @@ class classification:
 
         #Catboost
         #########################################################################################################################
-        df.loc[ind,'Name']='CatBoost'
+        df.loc[ind,'Machine Learning Model']='CatBoost'
         if check==1:
             df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced")
         elif check==0:
@@ -525,15 +494,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, catboost_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, catboost_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, catboost_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, catboost_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, catboost_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, catboost_pred)
@@ -603,7 +569,7 @@ class classification:
         ##LGBM(2) Finding out accuracy on the test dataset
         ########################################################################################################
         eval_set = [(X_test, y_test)]
-        df.loc[ind,'Name']='Light GBM'
+        df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
         df['model'][ind]=lgb.LGBMClassifier(**best)
         df.loc[ind,'param']= str(best)
         if check==1:
@@ -615,15 +581,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, lightgbm_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, lightgbm_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, lightgbm_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, lightgbm_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, lightgbm_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, lightgbm_pred)
@@ -688,7 +651,7 @@ class classification:
         ##Random forest(2) Finding out accuracy on the test dataset
         ########################################################################################################
         et_dict = best.copy()
-        df.loc[ind,'Name']='Random Forest'
+        df.loc[ind,'Machine Learning Model']='Random Forest'
         df['model'][ind]=RandomForestClassifier(**best)
         df.loc[ind,'param']= str(best)
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -697,15 +660,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, randomforest_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, randomforest_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, randomforest_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, randomforest_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, randomforest_pred)
@@ -718,7 +678,7 @@ class classification:
 
         #ExtraTreesClassifier
         ########################################################################################################
-        df.loc[ind,'Name']='Extra Trees Classifier'
+        df.loc[ind,'Machine Learning Model']='Extra Trees Classifier'
         df['model'][ind]=ExtraTreesClassifier(**et_dict)
         df.loc[ind,'param']=str(et_dict)
         Start=time.time()
@@ -728,15 +688,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, extra_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, extra_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, extra_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, extra_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, extra_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, extra_pred)
@@ -751,7 +708,7 @@ class classification:
 
         if(flag == 1):
             best = {'priors': priorList}
-            df.loc[ind,'Name']='Naive Bayes(Bayesian Statistics)'
+            df.loc[ind,'Machine Learning Model']='Naive Bayes(Bayesian Statistics)'
             df.loc[ind,'model']=GaussianNB(priors = priorList)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -761,15 +718,12 @@ class classification:
             End=time.time()
             df.loc[ind,'accuracy']=accuracy_score(y_test, naive_pred)*100
             df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, naive_pred))))
+            df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
+            df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
+            df.loc[ind, 'Weighted F1']=f1_score(y_test, naive_pred,average='weighted')
             if check==1:
-                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred)
-                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred)
-                df.loc[ind, 'F1']=f1_score(y_test, naive_pred)
                 df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_pred)
             elif check==0:
-                df.loc[ind, 'Precision']=precision_score(y_test, naive_pred,average='weighted')
-                df.loc[ind, 'Recall']=recall_score(y_test, naive_pred,average='weighted')
-                df.loc[ind, 'F1']=f1_score(y_test, naive_pred,average='weighted')
                 df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, naive_probas,average='weighted',multi_class='ovr')
             df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, naive_pred)
             df.loc[ind, 'MCC']=matthews_corrcoef(y_test, naive_pred)
@@ -781,7 +735,7 @@ class classification:
 
         #Logistic regression
         ########################################################################################################
-        df.loc[ind,'Name']='Logistic Regression'
+        df.loc[ind,'Machine Learning Model']='Logistic Regression'
         df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
         df.loc[ind,'param']=""
         Start=time.time()
@@ -791,15 +745,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, log_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, log_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, log_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, log_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, log_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, log_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, log_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, log_pred)
@@ -809,11 +760,11 @@ class classification:
         ind=ind+1
 
 
-        #Neural net
+        #Neural network
         ########################################################################################################
 
         if(flag == 1):
-                df.loc[ind,'Name']='Neural Network'
+                df.loc[ind,'Machine Learning Model']='Neural Network'
                 best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
                 df.loc[ind,'model']=MLPClassifier(**best)
                 df.loc[ind,'param']=str(best)
@@ -824,15 +775,12 @@ class classification:
                 End=time.time()
                 df.loc[ind,'accuracy']=accuracy_score(y_test, neural_pred)*100
                 df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, neural_pred))))
+                df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
+                df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
+                df.loc[ind, 'Weighted F1']=f1_score(y_test, neural_pred,average='weighted')
                 if check==1:
-                    df.loc[ind, 'Precision']=precision_score(y_test, neural_pred)
-                    df.loc[ind, 'Recall']=recall_score(y_test, neural_pred)
-                    df.loc[ind, 'F1']=f1_score(y_test, neural_pred)
                     df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_pred)
                 elif check==0:
-                    df.loc[ind, 'Precision']=precision_score(y_test, neural_pred,average='weighted')
-                    df.loc[ind, 'Recall']=recall_score(y_test, neural_pred,average='weighted')
-                    df.loc[ind, 'F1']=f1_score(y_test, neural_pred,average='weighted')
                     df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, neural_probas,average='weighted',multi_class='ovr')
                 df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, neural_pred)
                 df.loc[ind, 'MCC']=matthews_corrcoef(y_test, neural_pred)
@@ -844,7 +792,7 @@ class classification:
         #Support Vector Machine(linear)
         ########################################################################################################
 
-        df.loc[ind,'Name']='Support Vector Machine'
+        df.loc[ind,'Machine Learning Model']='Support Vector Machine'
         df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
         df.loc[ind,'param']= str(best)
         Start=time.time()
@@ -854,15 +802,12 @@ class classification:
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
         df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
+        df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
+        df.loc[ind, 'Weighted F1']=f1_score(y_test, support_pred,average='weighted')
         if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, support_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, support_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, support_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_pred)
         elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, support_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, support_probas,average='weighted',multi_class='ovr')
         df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, support_pred)
         df.loc[ind, 'MCC']=matthews_corrcoef(y_test, support_pred)
@@ -875,11 +820,11 @@ class classification:
       print("##Dropping models that behave poorly##")
       drop = 0
       for i in range(0,len(df)):
-          name = df.loc[i, 'Name']
+          name = df.loc[i, 'Machine Learning Model']
           model = df.loc[i,'model']
           pred = model.predict(X_test)
           for key in y_val.unique():
-              f1 = f1_score(y_test,pred,pos_label=key)
+              f1 = f1_score(y_test,pred,pos_label=key, average = 'weighted')
               if(f1 == 0):
                   print(f'Dropping model {name} because of poor performance')
                   drop = 1
@@ -925,12 +870,12 @@ class classification:
       ##Ensemble(2) List of the best combination from the above method
       ########################################################################################################
       name=''
-      df_en=pd.DataFrame(index = range(1000), columns=['Name','model'])
+      df_en=pd.DataFrame(index = range(1000), columns=['Machine Learning Model','model'])
       for i in range(0,len(max_seq)):
-          df_en.at[i,'Name']= df.at[max_seq[i],'Name']
+          df_en.at[i,'Machine Learning Model']= df.at[max_seq[i],'Machine Learning Model']
           val = df.at[max_seq[i],'model']
           df_en['model'][i] = val
-          name=name+df['Name'][max_seq[i]]+'+'
+          name=name+df['Machine Learning Model'][max_seq[i]]+'+'
 
       df_en.dropna(axis=0,inplace=True)
       ########################################################################################################
@@ -938,7 +883,7 @@ class classification:
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
-      df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
+      df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
       df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
       df.loc[ind,'param']="Default"
       Start=time.time()
@@ -948,15 +893,12 @@ class classification:
       End=time.time()
       df.loc[ind,'accuracy']=accuracy_score(y_test, ensemble_pred)*100
       df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, ensemble_pred))))
+      df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred,average='weighted')
+      df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred,average='weighted')
+      df.loc[ind, 'Weighted F1']=f1_score(y_test, ensemble_pred,average='weighted')
       if check==1:
-            df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred)
-            df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred)
-            df.loc[ind, 'F1']=f1_score(y_test, ensemble_pred)
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, ensemble_pred)
       elif check==0:
-            df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred,average='weighted')
-            df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred,average='weighted')
-            df.loc[ind, 'F1']=f1_score(y_test, ensemble_pred,average='weighted')
             df.loc[ind, 'ROC_AUC_score']=roc_auc_score(y_test, ensemble_probas,average='weighted',multi_class='ovr')
       df.loc[ind, 'Kappa']=cohen_kappa_score(y_test, ensemble_pred)
       df.loc[ind, 'MCC']=matthews_corrcoef(y_test, ensemble_pred)
@@ -966,8 +908,8 @@ class classification:
 
       ##Best Model
       ########################################################################################################
-      best_info=df.sort_values('F1',ignore_index=True,ascending=False).loc[0,:]
-      best_name=best_info['Name']
+      best_info=df.sort_values('Weighted F1',ignore_index=True,ascending=False).loc[0,:]
+      best_name=best_info['Machine Learning Model']
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
@@ -1076,7 +1018,7 @@ class Regression:
         best = {}
         #XGBoost
         #######################################################################
-        df.loc[ind,'Name']='XGBoost'
+        df.loc[ind,'Machine Learning Model']='XGBoost'
         df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=100,eta=0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="reg:squarederror",eval_metric='rmse')
         df.loc[ind,'param']=str(best)
         Start = time.time()
@@ -1100,7 +1042,7 @@ class Regression:
 
         ##Catboost
         ########################################################################################################
-        df.loc[ind,'Name']='CatBoost'
+        df.loc[ind,'Machine Learning Model']='CatBoost'
         df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,silent=True)
         df.loc[ind,'param']=str(best)
         Start = time.time()
@@ -1123,7 +1065,7 @@ class Regression:
         ##LGBM
         ########################################################################################################
         eval_set = [(X_test, y_test)]
-        df.loc[ind,'Name']='Light GBM'
+        df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
         df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16)
         df.loc[ind,'param']= str(best)
         Start=time.time()
@@ -1145,7 +1087,7 @@ class Regression:
 
         ##Random forest
         ########################################################################################################
-        df.loc[ind,'Name']='Random Forest'
+        df.loc[ind,'Machine Learning Model']='Random Forest'
         df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=20)
         df.loc[ind,'param']=str(best)
         Start = time.time()
@@ -1168,7 +1110,7 @@ class Regression:
 
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
-        df.loc[ind,'Name']='ExtraTrees Regressor'
+        df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
         df['model'][ind]=ExtraTreesRegressor(n_estimators=100,max_depth=20)
         df.loc[ind,'param']=str(best)
         Start = time.time()
@@ -1191,7 +1133,7 @@ class Regression:
         #Linear Regression
         ##########################################################################################################
 
-        df.loc[ind,'Name']='Linear Regression'
+        df.loc[ind,'Machine Learning Model']='Linear Regression'
         df.loc[ind,'model']=LinearRegression()
         df.loc[ind,'param']=None
         Start = time.time()
@@ -1213,7 +1155,7 @@ class Regression:
         #Ridge Regression
         ##########################################################################################################
 
-        df.loc[ind,'Name']='Ridge Regression'
+        df.loc[ind,'Machine Learning Model']='Ridge Regression'
         df.loc[ind,'model']=Ridge()
         df.loc[ind,'param']=None
         Start = time.time()
@@ -1231,11 +1173,11 @@ class Regression:
         print("ridge reg done")
         ind=ind+1
 
-        #Neural net
+        #Neural network
         ########################################################################################################
 
         best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-        df.loc[ind,'Name']='Neural Network'
+        df.loc[ind,'Machine Learning Model']='Neural Network'
         df.loc[ind,'model']=MLPRegressor(**best)
         df.loc[ind,'param']=str(best)
         Start = time.time()
@@ -1261,7 +1203,7 @@ class Regression:
         #SVC
         #########################################################################################################
 
-        df.loc[ind,'Name']='Support Vector Machine'
+        df.loc[ind,'Machine Learning Model']='Support Vector Machine'
         df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
         df.loc[ind,'param']=None
         Start = time.time()
@@ -1325,7 +1267,7 @@ class Regression:
             ##XGBoost(2) Finding out accuracy on the test dataset
             ########################################################################################################
             eval_set = [(X_test, y_test)]
-            df.loc[ind,'Name']='XGBoost'
+            df.loc[ind,'Machine Learning Model']='XGBoost'
             df.loc[ind,'model']=xgb.XGBRegressor(**best)
             df.loc[ind,'param']=str(best)
             df.loc[ind,'model'].fit(X_train, y_train,eval_metric="rmse", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
@@ -1350,7 +1292,7 @@ class Regression:
             #########################################################################################################################
             ##Catboost
             ########################################################################################################
-            df.loc[ind,'Name']='CatBoost'
+            df.loc[ind,'Machine Learning Model']='CatBoost'
             df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,silent=True)
             df.loc[ind,'param']=str(best)
             Start = time.time()
@@ -1413,7 +1355,7 @@ class Regression:
             ##LightGBM(2) Finding out accuracy on the test dataset
             ########################################################################################################
             eval_set = [(X_test, y_test)]
-            df.loc[ind,'Name']='Light GBM'
+            df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
             df['model'][ind]=lgb.LGBMRegressor(**best)
             df.loc[ind,'param']= str(best)
             df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
@@ -1479,7 +1421,7 @@ class Regression:
             ##Random forest(2) Finding out accuracy on the test dataset
             ########################################################################################################
             et_dict = best.copy()
-            df.loc[ind,'Name']='Random Forest'
+            df.loc[ind,'Machine Learning Model']='Random Forest'
             df['model'][ind]=RandomForestRegressor(**best)
             df.loc[ind,'param']=str(best)
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -1501,7 +1443,7 @@ class Regression:
 
             #ExtraTrees Regression
             #########################################################################################################################
-            df.loc[ind,'Name']='ExtraTrees Regressor'
+            df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
             df['model'][ind]=ExtraTreesRegressor(**et_dict)
             df.loc[ind,'param']=str(best)
             Start = time.time()
@@ -1524,7 +1466,7 @@ class Regression:
 
             #Ridge Regression
             ########################################################################################################
-            df.loc[ind,'Name']='Ridge Regression'
+            df.loc[ind,'Machine Learning Model']='Ridge Regression'
             df.loc[ind,'model']=Ridge()
             df.loc[ind,'param']=None
             Start = time.time()
@@ -1544,7 +1486,7 @@ class Regression:
 
             #Linear regression
             ########################################################################################################
-            df.loc[ind,'Name']='Linear Regression'
+            df.loc[ind,'Machine Learning Model']='Linear Regression'
             df.loc[ind,'model']=LinearRegression()
             df.loc[ind,'param']=None
             Start = time.time()
@@ -1566,7 +1508,7 @@ class Regression:
             #Neural net
             ########################################################################################################
             best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-            df.loc[ind,'Name']='Neural Net'
+            df.loc[ind,'Machine Learning Model']='Neural Network'
             df.loc[ind,'model']=MLPRegressor(**best)
             df.loc[ind,'param']=str(best)
             Start = time.time()
@@ -1592,7 +1534,7 @@ class Regression:
 
             #Support Vector Machine
             ########################################################################################################
-            df.loc[ind,'Name']='Support Vector Machine'
+            df.loc[ind,'Machine Learning Model']='Support Vector Machine'
             df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
             df.loc[ind,'param']=None
             Start = time.time()
@@ -1643,12 +1585,12 @@ class Regression:
       ##Ensemble(2) List of the best combination from the above method
       ########################################################################################################
       name=''
-      df_en=pd.DataFrame(index = range(1000), columns=['Name','model'])
+      df_en=pd.DataFrame(index = range(1000), columns=['Machine Learning Model','model'])
       for i in range(0,len(max_seq)):
-        df_en.at[i,'Name']= df.at[max_seq[i],'Name']
+        df_en.at[i,'Machine Learning Model']= df.at[max_seq[i],'Machine Learning Model']
         val = df.at[max_seq[i],'model']
         df_en['model'][i] = val
-        name=name+df['Name'][max_seq[i]]+'+'
+        name=name+df['Machine Learning Model'][max_seq[i]]+'+'
 
 
       df_en.dropna(axis=0,inplace=True)
@@ -1657,9 +1599,9 @@ class Regression:
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
-      df.loc[ind,'Name']=('Ensemble '+'(' + name[:-1] + ')')
+      df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
       df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
-      df.loc[ind,'param']="Defualt"
+      df.loc[ind,'param']="Default"
       Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
       ensemble_pred = df.loc[ind,'model'].predict(X_test)
@@ -1675,7 +1617,7 @@ class Regression:
       ind=ind+1
 
       best_info=df.sort_values('RMSE',ignore_index=True,ascending=True).loc[0,:]
-      best_name=best_info['Name']
+      best_name=best_info['Machine Learning Model']
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
