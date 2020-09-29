@@ -216,7 +216,7 @@ def featureSelectionPlot(feat_df):
     f = 20
     plt.figure(figsize=(8,8))
     plt.title('Feature Importance Plot',fontsize=f)
-    sns.barplot(x='scores2',y='col_name',data=feat_df,palette="Blues_d")
+    sns.barplot(x='scores2',y='col_name',data=feat_df,palette="Spectral")
     plt.xlabel('Importance',fontsize=f)
     plt.ylabel('Feature',fontsize=f)
     plt.xticks(fontsize=12,rotation=90)
@@ -416,7 +416,9 @@ def userInteractVisualization(df,targ):
         if numlist:
             print("Generating Histograms for numeric columns")
             try:
-                df1[numlist].hist(bins=15, figsize=(30, 30))
+                for c in numlist:
+                    df1.hist( column=c, bins=15, color=np.random.rand(3,))
+                
             except:
                 pass
         if len(objectlist)>2:

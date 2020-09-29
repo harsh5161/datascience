@@ -312,7 +312,7 @@ def INIT(df,info):
             if col in X.columns:
                 vis_disc_cols.append(col)
         print("DISCRETE COLUMNS ARE!!!!!!!:",vis_disc_cols)
-        Visualization(X_old[vis_disc_cols],y,class_or_Reg)
+        Visualization(X_old[vis_disc_cols],y,class_or_Reg,LE)
     except Exception as e:
         print(e)
         print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')

@@ -169,7 +169,10 @@ def score(df,init_info,validation=False):
             from sklearn.metrics import classification_report
             print(classification_report(y_test,y_pred))
 
-            skplt.metrics.plot_confusion_matrix(y_test, y_pred)
+            axcm= plt.subplot()
+            skplt.metrics.plot_confusion_matrix(y_test, y_pred, cmap= 'RdPu', ax =axcm)
+            axcm.set_xlabel('Predicted value');
+            axcm.set_ylabel('Actual value');
             if len(priorList) ==2:
 
                 skplt.metrics.plot_lift_curve(y_test, y_probas)
@@ -190,7 +193,7 @@ def score(df,init_info,validation=False):
             plt.show(fig1)
 
             #lm plot
-            fig2 = sns.lmplot('y_pred','y_test',regplotdf,fit_reg =True)
+            fig2 = sns.lmplot('y_pred','y_test',regplotdf,fit_reg =True, line_kws={'color': 'red'})
             plt.xlabel("Predicted Values")
             plt.ylabel("Actual Values")
             plt.title("Predicted vs Actual")
@@ -225,7 +228,7 @@ def score(df,init_info,validation=False):
     ############ PREDICTION/SCORING #############
     if validation:
         mc = model_info.drop(['model','param','accuracy'],axis=1)
-        if init_info['ML'] == 'Classification':mc.sort_values('F1',ascending=False,inplace=True)
+        if init_info['ML'] == 'Classification':mc.sort_values('Weighted F1',ascending=False,inplace=True)
         else:mc.sort_values('RMSE',ascending=True,inplace=True)
         mc.to_csv('MC.csv',index=False)
         del init_info['X_train'],init_info['y_train']                  # This removes the data from dict to avoid storage
