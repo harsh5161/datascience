@@ -90,19 +90,24 @@ class classification:
       print(myval)
 
       print("PRIOR LIST IS",priorList)
-      flag = 1
-      check = 1
+      flag = 1 #initial setting NB and NN will get executed
+      check = 1 #initial setting is binary
+      imbalance = 0 #intial imbalance is false
       if len(priorList) == 2:
         check =1  #binary classification problem
         for val in priorList:
           if val <= 0.25:
-            flag = 0
+            flag = 0  #NN and NB wont get executed
             check =1  #binary classification problem
+            if val <= 0.10:
+                imbalance = 1 # we are triggering the imbalanced learning
       elif len(priorList) >2:
         check =0 #multiclassification problem
         for val in priorList:
-          if val <= 0.15:
-            flag = 0
+          if val <= 0.15: 
+            flag = 0 #NN and NB will not get executed
+            if val <=0.04:
+                imbalance = 1 #triggering imbalanced learning
 
       if q_s ==True:  #QUICK RESULTS
         ind=0
@@ -127,7 +132,10 @@ class classification:
         xgb_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))       
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, xgb_pred))))      
         df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred, average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred, average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, xgb_pred, average='weighted')
@@ -157,7 +165,10 @@ class classification:
         catboost_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, catboost_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, catboost_pred,average='weighted')
@@ -191,7 +202,10 @@ class classification:
         lightgbm_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, lightgbm_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, lightgbm_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred, average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred, average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, lightgbm_pred, average='weighted')
@@ -219,7 +233,10 @@ class classification:
         randomforest_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, randomforest_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, randomforest_pred,average='weighted')
@@ -248,7 +265,10 @@ class classification:
         extra_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, extra_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, extra_pred,average='weighted')
@@ -306,7 +326,10 @@ class classification:
         log_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, log_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, log_pred,average='weighted')
@@ -366,7 +389,10 @@ class classification:
         support_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, support_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, support_pred,average='weighted')
@@ -391,7 +417,7 @@ class classification:
         def objective(params):
               print(params)
               xg = xgb.XGBClassifier(**params)
-              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan)
+              result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
               print("XGB train done")
               print(result.min()*100)
               return (1-result.min())
@@ -434,7 +460,7 @@ class classification:
              best['eval_metric']='mlogloss'
              best['objective'] = 'multi:softmax'
 
-        best['subsample'] = float(best['subsample'])
+        best['subsample'] = float(best['subsample']) 
         if check ==1:
             if myval >2:
                 wea = [1,myval-1,myval,myval+1]
@@ -462,7 +488,10 @@ class classification:
         xgb_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, xgb_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, xgb_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, xgb_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, xgb_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, xgb_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, xgb_pred,average='weighted')
@@ -493,7 +522,10 @@ class classification:
         catboost_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, catboost_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, catboost_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, catboost_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, catboost_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, catboost_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, catboost_pred,average='weighted')
@@ -517,7 +549,7 @@ class classification:
         def objective(params):
             print('\n',params)
             lb = lgb.LGBMClassifier(**params)
-            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan)
+            result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
             print("LGBM train done")
             print("\n",result.min()*100)
             return (1-result.min())
@@ -580,7 +612,10 @@ class classification:
         lightgbm_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, lightgbm_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, lightgbm_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, lightgbm_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, lightgbm_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, lightgbm_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, lightgbm_pred,average='weighted')
@@ -604,7 +639,7 @@ class classification:
         def objective(params):
             print(params)
             rf = RandomForestClassifier(**params)
-            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='accuracy',error_score=np.nan)
+            result=cross_val_score(rf,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
             print("RF train done")
             print(result.min()*100)
             return (1-result.min())
@@ -659,7 +694,10 @@ class classification:
         randomforest_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, randomforest_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, randomforest_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, randomforest_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, randomforest_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, randomforest_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, randomforest_pred,average='weighted')
@@ -687,7 +725,10 @@ class classification:
         extra_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, extra_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, extra_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, extra_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, extra_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, extra_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, extra_pred,average='weighted')
@@ -744,7 +785,10 @@ class classification:
         log_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, log_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, log_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, log_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, log_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, log_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, log_pred,average='weighted')
@@ -801,7 +845,10 @@ class classification:
         support_probas = df.loc[ind,'model'].predict_proba(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=accuracy_score(y_test, support_pred)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred))))
+        if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, support_pred)))) 
+        elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, support_pred))))
         df.loc[ind, 'Precision']=precision_score(y_test, support_pred,average='weighted')
         df.loc[ind, 'Recall']=recall_score(y_test, support_pred,average='weighted')
         df.loc[ind, 'Weighted F1']=f1_score(y_test, support_pred,average='weighted')
@@ -814,28 +861,28 @@ class classification:
         df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("SVC val done ")
-        
-      
-      y_val = pd.Series(y_test)
-      print("##Dropping models that behave poorly##")
+
       drop = 0
-      for i in range(0,len(df)):
-          name = df.loc[i, 'Machine Learning Model']
-          model = df.loc[i,'model']
-          pred = model.predict(X_test)
-          for key in y_val.unique():
-              f1 = f1_score(y_test,pred,pos_label=key, average = 'weighted')
-              if(f1 == 0):
-                  print(f'Dropping model {name} because of poor performance')
-                  drop = 1
-                  df.drop(index=i,inplace=True,axis=0)
-                  break
-               
-      if drop ==1: # if any model was dropped 
-          df.reset_index(drop=True,inplace=True)
-          ind = len(df) +1
-      elif drop ==0: # if model was not dropped
-          ind = ind + 1
+      if check == 1:
+          y_val = pd.Series(y_test)
+          print("##Dropping models that behave poorly##")
+          for i in range(0,len(df)):
+              name = df.loc[i, 'Machine Learning Model']
+              model = df.loc[i,'model']
+              pred = model.predict(X_test)
+              for key in y_val.unique():
+                  f1 = f1_score(y_test,pred,pos_label=key) #dont add any parameters to this
+                  if(f1 == 0):
+                      print(f'Dropping model {name} because of poor performance')
+                      drop = 1
+                      df.drop(index=i,inplace=True,axis=0)
+                      break
+                
+          if drop ==1: # if any model was dropped 
+              df.reset_index(drop=True,inplace=True)
+              ind = len(df) +1
+          elif drop ==0: # if model was not dropped
+              ind = ind + 1
 
 
 
@@ -892,7 +939,10 @@ class classification:
       ensemble_probas = df.loc[ind,'model'].predict_proba(X_test)
       End=time.time()
       df.loc[ind,'accuracy']=accuracy_score(y_test, ensemble_pred)*100
-      df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, ensemble_pred))))
+      if imbalance == 0:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(accuracy_score(y_test, ensemble_pred)))) 
+      elif imbalance == 1:
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(balanced_accuracy_score(y_test, ensemble_pred))))
       df.loc[ind, 'Precision']=precision_score(y_test, ensemble_pred,average='weighted')
       df.loc[ind, 'Recall']=recall_score(y_test, ensemble_pred,average='weighted')
       df.loc[ind, 'Weighted F1']=f1_score(y_test, ensemble_pred,average='weighted')
