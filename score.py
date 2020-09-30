@@ -189,14 +189,14 @@ def score(df,init_info,validation=False):
             fig1 = sns.residplot('y_test','y_pred',regplotdf)
             plt.xlabel("Actual Values")
             plt.ylabel("Residuals of Predicted Values")
-            plt.title("Residual Plot")
+            plt.title("\n\nResidual Plot")
             plt.show(fig1)
 
             #lm plot
             fig2 = sns.lmplot('y_pred','y_test',regplotdf,fit_reg =True, line_kws={'color': 'red'})
             plt.xlabel("Predicted Values")
             plt.ylabel("Actual Values")
-            plt.title("Predicted vs Actual")
+            plt.title("\n\nPredicted vs Actual")
             plt.show(fig2)
 
             # decile plot function
@@ -214,7 +214,7 @@ def score(df,init_info,validation=False):
                 tidy = pd.melt(df_mean, id_vars='Decile', value_vars= ['Actualvalue_mean','Predictedvalue_mean'],value_name='Mean values per decile')
                 sns.lineplot(x='Decile', y='Mean values per decile', hue='variable', data=tidy, ax=ax1)
                 pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql', showindex = False)
-                print("Distribution of Mean of Actual and Predicted Values by Deciles:")
+                print("\nDistribution of Mean of Actual and Predicted Values by Deciles:")
                 print(pdtabulate(df_mean))
 
             # decile plot
@@ -246,7 +246,13 @@ def score(df,init_info,validation=False):
 
     if init_info['ML'] == 'Classification':
         preview = pd.concat([preview,y_probas],axis=1)
+        yp={}
+        for i in y_probas.columns:
+            yp[i] = str(i).replace("Probabilities", "Probability")
+        preview.rename(columns = yp, inplace = True)       # to rename columns
+    
     preview = preview[:preview_length]
+       
     if validation:
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
