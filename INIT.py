@@ -284,6 +284,7 @@ def INIT(df,info):
     te_end = time.time()
     print(X.shape)
     print(y.shape)
+    X_bold = X.copy() #taking after target encoding for CART
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
     print('\n #### FEATURE SELECTION ####')
     fe_s = time.time()
@@ -305,6 +306,20 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
+    X_bold.reset_index(drop=True, inplace=True)
+    y_cart = y.copy()
+    if class_or_Reg=='Classification':
+        passingList = y_cart.value_counts(normalize=True).values
+    else:
+        passingList = []
+    y_cart.reset_index(drop=True, inplace=True)
+    cart_list =[X_bold,y_cart]
+    cart_df = pd.concat(cart_list,axis=1)
+    try:
+        cart_decisiontree(cart_df,target,class_or_Reg,passingList)
+    except Exception as e:
+        print(e)
+        print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     try:
         vis_disc_cols = []
         print("DISCRETE COLUMNS ARE:",disc_df)
@@ -315,7 +330,7 @@ def INIT(df,info):
         Visualization(X_old[vis_disc_cols],y,class_or_Reg,LE)
     except Exception as e:
         print(e)
-        print('#### VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
+        print('#### SKLEARN VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     print(X.shape)
     print(y.shape)
     print('\n #### NORMALIZATION ####')
