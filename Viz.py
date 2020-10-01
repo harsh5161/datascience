@@ -17,19 +17,18 @@ grdevices = importr('grDevices')
 # utils.install_packages('RColorBrewer',repos="https://mirror.niser.ac.in/cran/")
 
 def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
-	with localconverter(ro.default_converter + pandas2ri.converter):
+	with localconverter(ro.default_converter + pandas2ri.converter): 
 		r_from_pd_df = ro.conversion.py2rpy(df)
 		# class_or_Reg = ro.conversion.py2rpy(typer)
 		
 	print("What you want",class_or_Reg)		
-	
 	rstring1="""
 			function(data1){
 			library(rpart)
 			library(rattle)
 			library(rpart.plot)
 			library(RColorBrewer)
-			fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,parms = priors,cp=0,maxdepth = 4,minbucket = 1,minsplit = 3)
+			fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,parms = priors,cp=0,maxdepth = 4,minsplit=6)
 			rpart.plot(fit,roundint=TRUE)
 			}
 			"""
@@ -40,11 +39,11 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
 				library(rattle)
 				library(rpart.plot)
 				library(RColorBrewer)
-				fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,cp=0,maxdepth = 4,minbucket = 1,minsplit = 3)
+				fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,cp=0,maxdepth = 4,minsplit=6)
 				rpart.plot(fit,roundint=TRUE)
 				}
 				"""
-	grdevices.png(file="dec_tree.png", width=1000, height=1000)#
+	grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100)#
 	if class_or_Reg =='Classification':
 			rfunc=ro.r(rstring1)#
 			p=rfunc(r_from_pd_df) 
@@ -54,7 +53,7 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
 			p=rfunc(r_from_pd_df) 
 	grdevices.dev_off()#
 	from IPython.display import Image, display
-	display(Image('dec_tree.png'))
+	display(Image('dec_tree.jpeg'))
 
 
 
