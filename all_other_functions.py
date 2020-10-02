@@ -37,7 +37,7 @@ def Segregation(df):
     num = df._get_numeric_data().columns
     obj = list(set(df.columns)-set(num))
 
-    nu = df[num].nunique()>5
+    nu = df[num].nunique()>8
     numeric = df[nu[nu == True].index]
     cat_num = df[list(set(num) - set(numeric.columns))]
     numeric.fillna(numeric.mean(),inplace=True)
@@ -140,13 +140,16 @@ def DatasetSelection(X,Y):
     print("Shape of the target column {}".format(Y.shape))
     return X2,Y
 
-def SampleEquation(X,Y,class_or_Reg,disc_df_columns):
+def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     obj_df = pd.DataFrame(X[disc_df_columns])
-    X.drop(disc_df_columns,axis=1,inplace=True)
-    d = defaultdict(LabelEncoder)
-    obj_df = obj_df.apply(lambda x: d[x.name].fit_transform(x.astype(str)))
-    print('LABEL ENCODED FOR SAMPLE EQUATION\n')
-    X = pd.concat([X,obj_df],axis=1)
+    if not obj_df.empty:
+        X.drop(disc_df_columns,axis=1,inplace=True)
+        d = defaultdict(LabelEncoder)
+        dummy=obj_df.copy()     
+        obj_df = obj_df.apply(lambda x: d[x.name].fit_transform(x.astype(str)))
+        print('LABEL ENCODED FOR SAMPLE EQUATION\n')
+        X = pd.concat([X,obj_df],axis=1)
+        
     from sklearn.feature_selection import f_classif, f_regression
     if class_or_Reg == 'Classification':# for classification
         from sklearn.linear_model import LogisticRegression
@@ -161,8 +164,9 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns):
                 if bool:
                     new_features.append(feature)
             X=X[new_features]
-
+           
         model.fit(X,Y)
+        print("\nLOGISTIC REGRESSION EQUATION:\n\n")
         if Y.nunique()==2: #if there are only two classes
             for i in range(len(model.coef_)): # for dispaying the equation curresponding to all classes
                 s=""
@@ -170,18 +174,26 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns):
                     s=s+str(model.coef_[i][j])+"*"+X.columns[j]+" + "
                 s=s+str(model.intercept_[i])
 
-                print("LogisticRegression Equation = "+s+"\n")
-                print("Probability(Y=1) = exp(Power term)/(exp(Power term) + 1)\n")
+                lbls = LE.inverse_transform(model.classes_)       #to display class names of target instead of numbers
+                print("ln(odds) = " + s)
+                print("\n=> odds = exp ( "+s+" )")
+                print("\nWhere, odds = P(class={}) / 1 - P(class={}) \n".format(lbls[i],lbls[i]))
+                print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/5 or 20%.")
+                
+                
         else:#multiclass classification
             for i in range(len(model.coef_)): # for dispaying the equation curresponding to all classes
                 s=""
                 for j in range(len(model.coef_[i])):
                     s=s+str((model.coef_[i][j]))+"*"+X.columns[j]+" + "
                 s=s+str(model.intercept_[i])
-
-                print("Prediction of class "+ str(model.classes_[i])+"\n\n")
-                print("LogisticRegression Equation = " + s)
-                print("\nPrediction(class={}) = exp(Power term)/(exp(Power term) + 1)\n".format(model.classes_[i]))
+                lbls = LE.inverse_transform(model.classes_)    #to display class names of target instead of numbers
+                print("Prediction of class "+ str(lbls[i])+":\n")
+                print("ln(odds) = " + s)
+                print("\n=> odds = exp ( "+s+" )")
+                print("\nWhere, odds= P(class={}) / 1 - P(class={}) \n".format(lbls[i],lbls[i]))
+            print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/5 or 20%.")
+            
     else:#regression problem
         from mlxtend.feature_selection import SequentialFeatureSelector as SFS
         from sklearn.linear_model import LinearRegression
@@ -193,6 +205,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns):
                floating=False,
                scoring = 'r2',
                cv = 0)
+
             sfs.fit(X,Y)
             X=X[list(sfs.k_feature_names_)]
         model.fit(X,Y)
@@ -201,16 +214,34 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns):
         for i in range(len(coeff)):
             equation= equation+str(coeff[i])+"*"+X.columns[i]+" + "
         equation=equation+str(model.intercept_)
-
-        print('Linear Regression Equation is : {}'.format(equation))
+        print("\nLINEAR REGRESSION EQUATION:\n\n")
+        print('Predicted value = {}'.format(equation))
+    
+    dum2=pd.DataFrame()  
+    list_dfs=[]
     if len(obj_df.columns)!=0:
-        new_df = pd.DataFrame()
-        print('\nWHERE, the encoded information is as follows : \n')
-        for k,v in d.items():
-            new_df[str(k)] = pd.Series(v.classes_)
-            new_df[str(k) + ' encoded info'] = pd.Series(d[k].transform(new_df[k].dropna()))
-        print(new_df)
-        print('\n')
+            print("\nWhere the columns are encoded like this:\n")             
+            for i in obj_df.columns:      
+                dum=dummy.drop_duplicates(subset=[i])      
+                dum2=obj_df.drop_duplicates(subset=[i])   
+                dum2.rename(columns = {i:str(i)+" encoded"}, inplace = True)      
+                dum3=(pd.concat([dum[i],dum2[str(i)+" encoded"]],axis=1)).sort_values (str(i)+" encoded")
+                list_dfs.append(dum3)
+
+    from IPython.display import display,HTML
+    def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
+        html_table = "<table style='width:100%; border:0px'>{content}</table>"
+        html_row = "<tr style='border:0px'>{content}</tr>"
+        html_cell = "<td style='width:{width}%;vertical-align:top;border:0px'>{{content}}</td>"
+        html_cell = html_cell.format(width=100/cols)
+
+        cells = [ html_cell.format(content=df.to_html(index=False)) for df in list_dfs ]
+        cells += (cols - (len(list_dfs)%cols)) * [html_cell.format(content="")] # pad
+        rows = [ html_row.format(content="".join(cells[i:i+cols])) for i in range(0,len(cells),cols)]
+        display(HTML(html_table.format(content="".join(rows))))
+        
+    multi_column_df_display(list_dfs)
+
 
 def featureSelectionPlot(feat_df):
     f = 20

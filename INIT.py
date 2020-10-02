@@ -293,6 +293,7 @@ def INIT(df,info):
     print(y.shape)
     print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
     X.drop(rem,axis=1,inplace=True)
+    X_old.drop(rem,axis=1,inplace=True)  # removing columns through feature selection without target encoding
     TrainingColumns = X.columns
     fe_s = time.time()
 
@@ -360,7 +361,8 @@ def INIT(df,info):
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
-        SampleEquation(X.copy(),y.copy(),class_or_Reg,vis_disc_cols)
+        SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE)
+        
     except Exception as e:
         print(e)
         print('SAMPLE EQUATION DID NOT RUN AND HAD ERRORS!!!')
