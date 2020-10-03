@@ -153,6 +153,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     from sklearn.feature_selection import f_classif, f_regression
     if class_or_Reg == 'Classification':# for classification
         from sklearn.linear_model import LogisticRegression
+        from sklearn.metrics import f1_score
         from sklearn.feature_selection import SelectKBest
         model=LogisticRegression(max_iter=400,class_weight='balanced')
         kb = SelectKBest( score_func=f_classif,k=8) #for selecting the 8 best features
@@ -166,6 +167,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
             X=X[new_features]
            
         model.fit(X,Y)
+        Y_pred = model.predict(X)
         print("\nLOGISTIC REGRESSION EQUATION:\n\n")
         if Y.nunique()==2: #if there are only two classes
             for i in range(len(model.coef_)): # for dispaying the equation curresponding to all classes
@@ -179,8 +181,9 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                 print("\n=> odds = exp ( "+s+" )")
                 print("\nWhere, odds = P(class={}) / 1 - P(class={}) \n".format(lbls[i],lbls[i]))
                 print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/5 or 20%.")
-                
-                
+                print("\nEstimated f1 score = ","{:.2%}".format(Decimal(str(f1_score(Y,Y_pred,average='weighted')))) )
+                print("(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)")
+                               
         else:#multiclass classification
             for i in range(len(model.coef_)): # for dispaying the equation curresponding to all classes
                 s=""
@@ -193,6 +196,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                 print("\n=> odds = exp ( "+s+" )")
                 print("\nWhere, odds= P(class={}) / 1 - P(class={}) \n".format(lbls[i],lbls[i]))
             print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/5 or 20%.")
+            print("\nEstimated f1 score = ","{:.2%}".format(Decimal(str(f1_score(Y,Y_pred,average='weighted')))) )
+            print("(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)")
             
     else:#regression problem
         from mlxtend.feature_selection import SequentialFeatureSelector as SFS
@@ -216,6 +221,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
         equation=equation+str(model.intercept_)
         print("\nLINEAR REGRESSION EQUATION:\n\n")
         print('Predicted value = {}'.format(equation))
+        print("\nR squared =", model.score(X,Y))
+        print("(The closer R squared is to 1, the better the model is)")
     
     dum2=pd.DataFrame()  
     list_dfs=[]
@@ -232,7 +239,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
         html_table = "<table style='width:100%; border:0px'>{content}</table>"
         html_row = "<tr style='border:0px'>{content}</tr>"
-        html_cell = "<td style='width:{width}%;vertical-align:top;border:0px'>{{content}}</td>"
+        html_cell = "<td style='width:{width}%;vertical-align:top;text-align:center;border:0px;border:solid black'>{{content}}</td>"
         html_cell = html_cell.format(width=100/cols)
 
         cells = [ html_cell.format(content=df.to_html(index=False)) for df in list_dfs ]
@@ -410,7 +417,8 @@ def getDF(df,model):
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
 
-def bivar_ploter(df1,targ,base_var,ax1):
+def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var stores target name!!
+
       l=[]
       for b in set(df1[targ]):l.append((df1[df1[targ]==b].groupby(base_var).count()[targ]).rename(b))
       c=pd.concat(l,axis=1)
@@ -418,12 +426,29 @@ def bivar_ploter(df1,targ,base_var,ax1):
           a=list(c.sum(axis=0).sort_values(ascending=False)[:4].index)
           c=pd.concat([c[a],pd.Series(c[list(set(c.columns)-set(a))].sum(axis=1),name='Others')],axis=1)
       if(df1[base_var].dtype==np.object or df1[base_var].nunique()/len(df1)>0.1):
-          if(df1[base_var].nunique()<10):a=c.plot(kind='bar',ax=ax1)
-          else:a=c.loc[list(c.sum(axis=1).sort_values().index)[-10:]].plot(kind='bar',ax=ax1)
-          ax1.set_title(base_var)
+          if(df1[base_var].nunique()<10):
+                a=c.plot(kind='bar')
+                plt.xlabel(base_var)
+                plt.ylabel("Frequency")
+                plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
+                plt.title(targ)
+                plt.show()
+          else:
+            a=c.loc[list(c.sum(axis=1).sort_values().index)[-10:]].plot(kind='bar')
+            plt.xlabel(base_var)
+            plt.ylabel("Frequency")
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
+            plt.title(targ)
+            plt.show()
+           
       else:
-          a=c.plot(kind='line',alpha=0.5,ax=ax1)
-      ax1.set_ylabel('Frequency')
+          a=c.plot(kind='line',alpha=0.5)
+          plt.xlabel(base_var)
+          plt.ylabel("Frequency")
+          plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
+          plt.title(targ)
+          plt.show()
+          
       return a
 
 def userInteractVisualization(df,targ):
@@ -440,27 +465,33 @@ def userInteractVisualization(df,targ):
         # print("NumList is as follows",numlist)
         # print("Objectlist is as follows",objectlist)
         x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
-        if(df1[targ].nunique()>4 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
+        if(df1[targ].nunique()>2 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
         else:j=abs(len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1)
-        nr=int((j/4)+0.99)
+        nr=int((j/1)+0.99)
         start = time.time()
         if numlist:
             print("Generating Histograms for numeric columns")
             try:
                 for c in numlist:
                     df1.hist( column=c, bins=15, color=np.random.rand(3,))
+                    plt.show()
                 
             except:
                 pass
+
         if len(objectlist)>2:
-            fig, axes = plt.subplots(ncols=4,nrows=nr,figsize=(60,60));axes=axes.ravel();i=0
+#             fig, axes = plt.subplots(ncols= 1, nrows= nr);
+#             axes=axes.ravel();
+            i=0
             print('\t Applying bivar_plotting to create Images ...') # For Testing
             if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
                 for c in (df1.dtypes.loc[(df1.dtypes==np.object).values].index):
                     #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
-                    if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):continue
+                    if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):
+                        continue
                     try:
-                        bivar_ploter(df1,c,targ,axes[i]);i=i+1
+                        bivar_ploter(df1,c,targ);
+                        i=i+1
                     except:
                         pass
             else:
@@ -468,9 +499,15 @@ def userInteractVisualization(df,targ):
                     #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
                     if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10 and df1[c].dtype==np.object):continue
                     try:
-                        bivar_ploter(df1,targ,c,axes[i]);i=i+1
+                        bivar_ploter(df1,c, targ);
+                        i=i+1
                     except:
                         pass
-            for c in range(i,(4*nr)):axes[c].set_visible(False)
-            print('\n Target analysis');fig.suptitle(targ);fig.tight_layout();fig.show()
+#             for c in range(i,1*nr):
+#                 axes[c].set_visible(False)
+            print('\n Target analysis');
+        #     fig.suptitle(targ);
+        #     fig.tight_layout();
+        #     fig.show()
             print(f'\t Done with Bivar plotting in time {time.time() - start} seconds ')
+
