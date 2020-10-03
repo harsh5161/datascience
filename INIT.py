@@ -327,7 +327,7 @@ def INIT(df,info):
         cart_decisiontree(cart_df,target,class_or_Reg,passingList)
     except Exception as e:
         print(e)
-    print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
+        print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     try:
         vis_disc_cols = []
         print("DISCRETE COLUMNS ARE:",disc_df)
