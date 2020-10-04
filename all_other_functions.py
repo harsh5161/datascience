@@ -452,8 +452,7 @@ def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var s
       return a
 
 def userInteractVisualization(df,targ):
-        df1 = df.sample(n=1000,random_state=1) if len(df)>1000 else df.copy()
-        # print(df1.shape)
+        df1 =  df.copy() #df.sample(n=1000,random_state=1) if len(df)>1000
         B=list(df1.columns)
         B.remove(targ)
         l=[]
@@ -462,12 +461,6 @@ def userInteractVisualization(df,targ):
             if df1[col].nunique()<100:
                 numlist.remove(col)
         objectlist = list(df1.select_dtypes(include=['object']).columns)
-        # print("NumList is as follows",numlist)
-        # print("Objectlist is as follows",objectlist)
-        x=df1.apply(lambda x:np.sum(x.value_counts(normalize=True).iloc[:min(10,x.nunique())])<0.10)
-        if(df1[targ].nunique()>2 and df1[targ].dtype!=np.object):j=abs(np.sum(df1.dtypes==np.object)-np.sum(x))
-        else:j=abs(len(df1.columns)-np.sum(x & df1.dtypes==np.object)-1)
-        nr=int((j/1)+0.99)
         start = time.time()
         if numlist:
             print("Generating Histograms for numeric columns")
@@ -480,34 +473,17 @@ def userInteractVisualization(df,targ):
                 pass
 
         if len(objectlist)>2:
-#             fig, axes = plt.subplots(ncols= 1, nrows= nr);
-#             axes=axes.ravel();
             i=0
-            print('\t Applying bivar_plotting to create Images ...') # For Testing
-            if(df1[targ].nunique()>5 and df1[targ].dtype!=np.object):
-                for c in (df1.dtypes.loc[(df1.dtypes==np.object).values].index):
+            print("Generating Bivariates for object columns")
+            for c in B:
                     #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
-                    if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):
-                        continue
-                    try:
-                        bivar_ploter(df1,c,targ);
-                        i=i+1
-                    except:
-                        pass
-            else:
-                for c in B:
-                    #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
-                    if(np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10 and df1[c].dtype==np.object):continue
-                    try:
-                        bivar_ploter(df1,c, targ);
-                        i=i+1
-                    except:
-                        pass
-#             for c in range(i,1*nr):
-#                 axes[c].set_visible(False)
-            print('\n Target analysis');
-        #     fig.suptitle(targ);
-        #     fig.tight_layout();
-        #     fig.show()
-            print(f'\t Done with Bivar plotting in time {time.time() - start} seconds ')
+                    if(df1[c].dtype==np.object and np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):continue
+                    if(df1[c].dtype ==np.object):
+                        try:
+                            bivar_ploter(df1,c, targ);
+                            i=i+1
+                        except:
+                            pass
+
+        print(f'\t Done with Histogram and Bivar plotting in time {time.time() - start} seconds ')
 
