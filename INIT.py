@@ -307,14 +307,14 @@ def INIT(df,info):
     print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
     X_old.reset_index(drop=True, inplace=True)
-    X_bold = X_old.select_dtypes(include=['category'])
-    for col in X_bold.columns:
-        try:
-            a =pd.to_numeric(X_bold[col],errors='raise')
-            if a.any():
-                X_old.drop(col,axis=1,inplace=True)
-        except:
-            continue
+#     X_bold = X_old.select_dtypes(include=['category'])
+#     for col in X_bold.columns:
+#         try:
+#             a =pd.to_numeric(X_bold[col],errors='raise')
+#             if a.any():
+#                 X_old.drop(col,axis=1,inplace=True)
+#         except:
+#             continue
     y_cart = y.copy()
     if class_or_Reg=='Classification':
         passingList = y_cart.value_counts(normalize=True).values
@@ -323,6 +323,7 @@ def INIT(df,info):
     y_cart.reset_index(drop=True, inplace=True)
     cart_list =[X_old,y_cart]
     cart_df = pd.concat(cart_list,axis=1)
+
     try:
         cart_decisiontree(cart_df,target,class_or_Reg,passingList)
     except Exception as e:
