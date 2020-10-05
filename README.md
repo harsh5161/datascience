@@ -7,5 +7,6 @@ Option 2: Download and Install Anaconda onto your system. Activate your Anaconda
 If you are using option 2; <br />
 For a MacOS 10.15(Catalina) environment replace env_name.yaml with macos_env.yaml [The file can be found in Dependencies Folder] <br />
 For a Windows10 environment replace env_name.yaml with windows_env.yaml  [The file can be found in Dependencies Folder] <br />
+For a Linux environment replace env_name.yaml with linux_env.yaml  [The file can be found in Dependencies Folder] <br />
 ##Note## <br />
 In the respective files, there's a part called "prefix": please replace it with your respective anaconda PATH where you want the environment to be created <br />
