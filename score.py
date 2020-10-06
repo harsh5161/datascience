@@ -251,9 +251,9 @@ def score(df,init_info,validation=False):
             yp[i] = str(i).replace("Probabilities", "Probability")
         preview.rename(columns = yp, inplace = True)       # to rename columns
     
-    preview = preview[:preview_length]
        
     if validation:
+        preview = preview[:preview_length]
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
     else:
