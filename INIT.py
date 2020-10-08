@@ -7,6 +7,7 @@ from sklearn.preprocessing import LabelEncoder,PowerTransformer,MinMaxScaler
 from category_encoders import TargetEncoder
 import joblib
 from Viz import *
+from imblearn.over_sampling import RandomOverSampler
 
 def INIT(df,info):
     print("Length of the dataframe is", df.shape[0])
@@ -306,24 +307,22 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('\n #### DECISION TREE VISUALIZATION ####')
-    X_old.reset_index(drop=True, inplace=True)
-#     X_bold = X_old.select_dtypes(include=['category'])
-#     for col in X_bold.columns:
-#         try:
-#             a =pd.to_numeric(X_bold[col],errors='raise')
-#             if a.any():
-#                 X_old.drop(col,axis=1,inplace=True)
-#         except:
-#             continue
+    X_cart = X_old.copy() #making a specific copy for CART because X_old is also being used by sample equation
+    X_cart.reset_index(drop=True, inplace=True)
     y_cart = y.copy()
+    y_cart.reset_index(drop=True, inplace=True)
     if class_or_Reg=='Classification':
-        passingList = y_cart.value_counts(normalize=True).values
+        print("Length of X_cart and y_cart",len(X_cart),"---",len(y_cart))
+        ros = RandomOverSampler(sampling_strategy='minority')
+        X_cart_res, y_cart_res = ros.fit_resample(X_cart,y_cart)
+        print("Length of X_cart_res and y_cart_res",len(X_cart_res),"---",len(y_cart_res))
+        passingList = y_cart_res.value_counts(normalize=True).values
+        cart_list =[X_cart_res,y_cart_res]
+        cart_df = pd.concat(cart_list,axis=1)
     else:
         passingList = []
-    y_cart.reset_index(drop=True, inplace=True)
-    cart_list =[X_old,y_cart]
-    cart_df = pd.concat(cart_list,axis=1)
-
+        cart_list =[X_cart,y_cart]
+        cart_df = pd.concat(cart_list,axis=1)
     try:
         cart_decisiontree(cart_df,target,class_or_Reg,passingList)
     except Exception as e:
