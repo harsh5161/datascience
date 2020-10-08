@@ -40,7 +40,8 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
             library(rattle)
             library(rpart.plot)
             library(RColorBrewer)
-            fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,parms = priors,cp=0,maxdepth = 4,minsplit=6)
+            fivepercent <- as.integer(0.05*nrow(data1))
+            fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,parms = priors,cp=0.001,maxdepth = 4,minsplit=fivepercent)
             rpart.plot(fit,roundint=TRUE)
             }
             """
@@ -51,11 +52,12 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
                 library(rattle)
                 library(rpart.plot)
                 library(RColorBrewer)
-                fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,cp=0,maxdepth = 4,minsplit=6)
+                fivepercent <- as.integer(0.05*nrow(data1))
+                fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,cp=0.001,maxdepth = 4,minsplit=fivepercent)
                 rpart.plot(fit,roundint=TRUE)
                 }
                 """
-    grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100)#
+    grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100,res=350)# 
     if class_or_Reg =='Classification':
             rfunc=ro.r(rstring1)#
             p=rfunc(r_from_pd_df) 
