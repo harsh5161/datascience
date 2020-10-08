@@ -324,6 +324,10 @@ def FeatureSelection(X,y,class_or_Reg):
     return list(rejected_cols),new_2.drop(['t/f'],axis=1)
 
 def dataHandler(dx):
+        for col in dx.columns:
+            if 'Unnamed' in col:
+                if len(dx[col].value_counts())<0.5*dx.shape[0]:
+                    dx.drop(col,axis=1,inplace=True)
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
         if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
             colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
