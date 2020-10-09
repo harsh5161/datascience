@@ -141,14 +141,19 @@ def DatasetSelection(X,Y):
     return X2,Y
 
 def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
-    obj_df = pd.DataFrame(X[disc_df_columns])
+    obj_df = pd.DataFrame(X[disc_df_columns])     # collect all 'category' columns
+    for col in obj_df.columns:                 # convert numeric category column type from object to numeric 
+        obj_df[col]=pd.to_numeric(obj_df[col], errors = 'ignore')       
+    num = obj_df._get_numeric_data().columns    
+    obj = list(set(obj_df.columns)-set(num))
+    obj_df=obj_df[obj]                         # only keep those category columns which are of type object(have non numeric values)
     if not obj_df.empty:
-        X.drop(disc_df_columns,axis=1,inplace=True)
+        X.drop(obj_df.columns,axis=1,inplace=True)         # drop non numerical category columns from X
         d = defaultdict(LabelEncoder)
-        dummy=obj_df.copy()     
-        obj_df = obj_df.apply(lambda x: d[x.name].fit_transform(x.astype(str)))
+        dummy=obj_df.copy()          # for table grid purpose
+        obj_df = obj_df.apply(lambda x: d[x.name].fit_transform(x.astype(str)))  # label encode non numeric category columns
         print('LABEL ENCODED FOR SAMPLE EQUATION\n')
-        X = pd.concat([X,obj_df],axis=1)
+        X = pd.concat([X,obj_df],axis=1)       # add non numeric category columns back after encoding them
         
     from sklearn.feature_selection import f_classif, f_regression
     if class_or_Reg == 'Classification':# for classification
@@ -221,7 +226,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
         equation=equation+str(model.intercept_)
         print("\nLINEAR REGRESSION EQUATION:\n\n")
         print('Predicted value = {}'.format(equation))
-        print("\nR squared =", model.score(X,Y))
+        print("\nR squared =", round(model.score(X,Y), 3))
         print("(The closer R squared is to 1, the better the model is)")
     
     dum2=pd.DataFrame()  
@@ -239,7 +244,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
         html_table = "<table style='width:100%; border:0px'>{content}</table>"
         html_row = "<tr style='border:0px'>{content}</tr>"
-        html_cell = "<td style='width:{width}%;vertical-align:top;text-align:center;border:0px;border:solid black'>{{content}}</td>"
+        html_cell = "<td style='width:{width}%;vertical-align:top;text-align:center;border:0px'>{{content}}</td>"
         html_cell = html_cell.format(width=100/cols)
 
         cells = [ html_cell.format(content=df.to_html(index=False)) for df in list_dfs ]
@@ -247,7 +252,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
         rows = [ html_row.format(content="".join(cells[i:i+cols])) for i in range(0,len(cells),cols)]
         display(HTML(html_table.format(content="".join(rows))))
         
-    multi_column_df_display(list_dfs)
+    if list_dfs:    # only display table grid if any columns were encoded
+        multi_column_df_display(list_dfs)
 
 
 def featureSelectionPlot(feat_df):

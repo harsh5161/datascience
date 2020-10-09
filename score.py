@@ -29,6 +29,8 @@ def score(df,init_info,validation=False):
         y_test = pd.Series()
 
     if init_info['KEY']:
+        if df[init_info['KEY']].dtype == np.float64:             # if the key is float convert it to int
+            df[init_info['KEY']]=df[init_info['KEY']].astype(int)        
         k_test = df[init_info['KEY']]
         k_test.index = X_test.index
     else:
@@ -251,7 +253,10 @@ def score(df,init_info,validation=False):
             yp[i] = str(i).replace("Probabilities", "Probability")
         preview.rename(columns = yp, inplace = True)       # to rename columns
     
-       
+    for col in preview.columns:       # to round off decimal places of large float entries in preview
+            if preview[col].dtype == np.float64:
+                preview[col]= pd.Series(preview[col]).round(decimals=3)
+         
     if validation:
         preview = preview[:preview_length]
         preview.to_csv('preview.csv',sep=',',index=False)
