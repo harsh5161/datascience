@@ -255,6 +255,8 @@ def score(df,init_info,validation=False):
         yp={}
         for i in y_probas.columns:
             yp[i] = str(i).replace("Probabilities", "Probability")
+            yp[i] = str(i).replace("0.0", "0")
+            yp[i] = str(i).replace("1.0", "1")
         preview.rename(columns = yp, inplace = True)       # to rename columns
             
     if validation:
