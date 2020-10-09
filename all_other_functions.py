@@ -172,6 +172,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
             X=X[new_features]
            
         model.fit(X,Y)
+        selected_features= X.columns
         Y_pred = model.predict(X)
         print("\nLOGISTIC REGRESSION EQUATION:\n\n")
         if Y.nunique()==2: #if there are only two classes
@@ -185,7 +186,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                 print("ln(odds) = " + s)
                 print("\n=> odds = exp ( "+s+" )")
                 print("\nWhere, odds = P(class={}) / 1 - P(class={}) \n".format(lbls[i+1],lbls[i+1]))
-                print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/5 or 20%.")
+                print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/6 or 16.67%.")
                 print("\nEstimated f1 score = ","{:.2%}".format(Decimal(str(f1_score(Y,Y_pred,average='weighted')))) )
                 print("(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)")
                                
@@ -200,7 +201,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                 print("ln(odds) = " + s)
                 print("\n=> odds = exp ( "+s+" )")
                 print("\nWhere, odds= P(class={}) / 1 - P(class={}) \n".format(lbls[i],lbls[i]))
-            print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/5 or 20%.")
+            print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/6 or 16.67%.")
             print("\nEstimated f1 score = ","{:.2%}".format(Decimal(str(f1_score(Y,Y_pred,average='weighted')))) )
             print("(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)")
             
@@ -218,7 +219,9 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
 
             sfs.fit(X,Y)
             X=X[list(sfs.k_feature_names_)]
+
         model.fit(X,Y)
+        selected_features= X.columns
         coeff=model.coef_
         equation=""
         for i in range(len(coeff)):
@@ -231,14 +234,15 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     
     dum2=pd.DataFrame()  
     list_dfs=[]
-    if len(obj_df.columns)!=0:
+    selected_obj_cols=list(set(selected_features)&set(obj_df.columns)) 
+    if len(selected_obj_cols)!=0:  # to only print those encoded columns which are included in equation
             print("\nWhere the columns are encoded like this:\n")             
-            for i in obj_df.columns:      
-                dum=dummy.drop_duplicates(subset=[i])      
-                dum2=obj_df.drop_duplicates(subset=[i])   
-                dum2.rename(columns = {i:str(i)+" encoded"}, inplace = True)      
-                dum3=(pd.concat([dum[i],dum2[str(i)+" encoded"]],axis=1)).sort_values (str(i)+" encoded")
-                list_dfs.append(dum3)
+            for i in selected_obj_cols: 
+                    dum=dummy.drop_duplicates(subset=[i])      
+                    dum2=obj_df.drop_duplicates(subset=[i])   
+                    dum2.rename(columns = {i:str(i)+" encoded"}, inplace = True)      
+                    dum3=(pd.concat([dum[i],dum2[str(i)+" encoded"]],axis=1)).sort_values (str(i)+" encoded")
+                    list_dfs.append(dum3)
 
     from IPython.display import display,HTML
     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
