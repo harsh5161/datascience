@@ -266,8 +266,10 @@ def score(df,init_info,validation=False):
                 preview[col]= pd.Series(preview[col]).round(decimals=3)
         
         sort_col = preview['Predicted Values']
-        preview, _ = train_test_split(preview,train_size=preview_length,random_state=1,stratify=sort_col)
-        #preview = preview[:preview_length]
+        try:
+        	preview, _ = train_test_split(preview,train_size=preview_length,random_state=1,stratify=sort_col)
+        except:
+        	preview = preview[:preview_length]
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
     else:
