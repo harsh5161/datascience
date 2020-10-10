@@ -8,6 +8,7 @@ import seaborn as sns
 import swifter
 from sklearn.preprocessing import MinMaxScaler
 import joblib
+from sklearn.model_selection import train_test_split
 
 def score(df,init_info,validation=False):
     print('\n\t #### VALIDATION AND SCORING ZONE ####')
@@ -263,7 +264,10 @@ def score(df,init_info,validation=False):
         for col in preview.columns:       # to round off decimal places of large float entries in preview
             if preview[col].dtype == np.float64:
                 preview[col]= pd.Series(preview[col]).round(decimals=3)
-        preview = preview[:preview_length]
+        
+        sort_col = preview['Predicted Values']
+        preview, _ = train_test_split(preview,train_size=preview_length,random_state=1,stratify=sort_col)
+        #preview = preview[:preview_length]
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
     else:
