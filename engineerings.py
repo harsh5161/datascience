@@ -121,7 +121,7 @@ def date_engineering(df):
     for i in date_cols:
         df[str(i)+"_month"] = df[str(i)].dt.month.astype(int)
         df[str(i)+"_year"] = df[str(i)].dt.year.astype(int)
-        df[str(i)+"-most_recent"] = (pd.to_datetime('today')-df[str(i)]).dt.days.astype(int)
+        df[str(i)+"-today"] = (pd.to_datetime('today')-df[str(i)]).dt.days.astype(int)
         visualize_dict[str(i)] =  visualize_dict[str(i)] + [str(i)+"_month"] + [str(i)+"_year"]+[str(i)+"-today"]
 
     # create difference columns
@@ -129,7 +129,7 @@ def date_engineering(df):
     if (len(date_cols)>1) :
         for i in itertools.combinations(date_cols,2):
             diff_days = diff_days + [str(i[0])+"-"+str(i[1])]
-            df[str(i[0])+" - "+str(i[1])]=(df[i[0]]-df[i[1]]).dt.days.astype(int)
+            df[str(i[0])+"-"+str(i[1])]=(df[i[0]]-df[i[1]]).dt.days.astype(int)
 
 
     print('\n\t #### RUNNING WAIT ####')
