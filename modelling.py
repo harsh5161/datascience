@@ -1280,7 +1280,7 @@ class Regression:
         #XGBoost
         #######################################################################
         df.loc[ind,'Machine Learning Model']='XGBoost'
-        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=100,eta=0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="reg:squarederror",eval_metric='rmse')
+        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=1000,eta=0.01,max_depth=16,min_child_weight=2,gamma=5,subsample=0.8,objective="reg:squarederror",eval_metric='rmse')
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1304,7 +1304,7 @@ class Regression:
         ##Catboost
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='CatBoost'
-        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,silent=True)
+        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1327,7 +1327,7 @@ class Regression:
         ########################################################################################################
         eval_set = [(X_test, y_test)]
         df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
-        df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16)
+        df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
         df.loc[ind,'param']= str(best)
         Start=time.time()
         df.loc[ind,'model'].fit(X_train, y_train,verbose=False)
@@ -1349,7 +1349,7 @@ class Regression:
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='Random Forest'
-        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=20)
+        df['model'][ind]=RandomForestRegressor(n_estimators=1000,max_depth=16)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1372,7 +1372,7 @@ class Regression:
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
-        df['model'][ind]=ExtraTreesRegressor(n_estimators=100,max_depth=20)
+        df['model'][ind]=ExtraTreesRegressor(n_estimators=1000,max_depth=16)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1499,14 +1499,14 @@ class Regression:
             Start=time.time()
             Space = {
                   'n_estimators': 100, # scope.int(hp.quniform('n_estimators', 50,1250,75)),
-                  'eta': hp.uniform('eta', 0.01,0.2 ),
+                  'eta': hp.uniform('eta', 0.01,0.1 ),
                   'max_depth': 20, # scope.int(hp.quniform('max_depth',2,16,1 )),
                   'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,15,1 )),
                   'colsample_bytree': hp.uniform('colsample_bytree', 0.2,1.0 ),
                   'gamma': scope.int(hp.quniform('gamma', 0,15,1)),
                   'eval_metric': 'rmse',
-                  'objective': 'reg:linear',
-                  'subsample': hp.uniform('subsample',  0.2,1.0  )
+                  'objective': 'reg:squarederror',
+                  'subsample': hp.uniform('subsample',  0.6,1.0  )
               }
 
 
@@ -1554,7 +1554,7 @@ class Regression:
             ##Catboost
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='CatBoost'
-            df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,silent=True)
+            df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True)
             df.loc[ind,'param']=str(best)
             Start = time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -1588,10 +1588,10 @@ class Regression:
             Start=time.time()
             Space = {
                 'boosting_type': 'gbdt',
-                'learning_rate': hp.uniform('learning_rate',0.01,0.2),
+                'learning_rate': hp.uniform('learning_rate',0.01,0.1),
                 'n_estimators': 100, # scope.int(hp.quniform('n_estimators',50,1250,75)),
                 'random_state':1,
-                'subsample': hp.uniform('subsample',  0.1,1.0  ),
+                'subsample': hp.uniform('subsample',  0.7,1.0  ),
                 'num_leaves': scope.int(hp.quniform('num_leaves',29,43,1)),
                 'max_depth': 16, #scope.int(hp.quniform('max_depth',2,16,1 )),
                 'min_child_weight':  scope.int(hp.quniform('min_child_weight',1,16,1 ))
@@ -1882,5 +1882,19 @@ class Regression:
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
+
+      # Testing area for model performance comparison
+    #   for ind in range(0,len(df)):
+    #       print("!!!!!!!!!!Individual Model  Scores!!!!!!!!",df.at[ind,'Machine Learning Model'])
+    #       print("Length of y_train",len(y_train))
+    #       pred = df.loc[ind,'model'].predict(X_train)
+    #       print("Train accuracy=",r2_score(y_train,pred))
+    #       print("Train RMSE score",sqrt(mean_squared_error(y_train,pred)))
+    #       pred = df.loc[ind,'model'].predict(X_test)
+    #       print("len of test pred",len(pred))
+    #       print("Test accuracy=",r2_score(y_test,pred))
+    #       print("Test RMSE score",sqrt(mean_squared_error(y_test,pred)))
+
+
 
       return best_name,best_mod, best_acc, best_param,df
