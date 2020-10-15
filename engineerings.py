@@ -81,7 +81,7 @@ def getDateColumns(df,withPossibilies=0):
             Possibility[column] = int(len(df)*0.1)
         else:
             Possibility[column] = 0
-        for entry in df[column]:                                                    # ITERATE THROUGH EVERY ENTRY AND TRY SPLITTING THE VALUE AND INCREMENT/DECREMENT POSSIBILITY
+        for entry in df[column]:           # ITERATE THROUGH EVERY ENTRY AND TRY SPLITTING THE VALUE AND INCREMENT/DECREMENT POSSIBILITY
             try:                                                                      # USING EXCEPTION HANDLING
                 if len(entry.split('/')) == 3 or len(entry.split('-')) == 3 or len(entry.split(':')) == 3:
                     Possibility[column] += 1
@@ -95,26 +95,68 @@ def getDateColumns(df,withPossibilies=0):
       # This contains the final DATE Columns
     DATE_COLUMNS = []
     for key,value in Possibility.items():
-        if value > 0.8 * len(df):                                                  # IF THE POSSIBILITY OF THE COLUMN IN GREATER THAN 1, THEN IT IS DEFINITELY A 'DATE COLUMN'
+        if value > 0.8 * len(df):          # IF THE POSSIBILITY OF THE COLUMN IN GREATER THAN 1, THEN IT IS DEFINITELY A 'DATE COLUMN'
             DATE_COLUMNS.append(key)
+            
+    # to find missed date columns    
+    def finddate(entry):    # function to find the presence of a month in an entry     
+        a=0
+        for month in months:
+            if month in str(entry).lower():
+                a=1
+        return a
+    
+    Y=non_numeric_cols
+    Y=Y.drop(DATE_COLUMNS, axis =1) 
+    Possible_date_col=[]
+    for col in Y.columns:
+        a=Y[col].apply(finddate) # returns a series where value is one if the entry has a month in it
+        if sum(a)>0.8*len(Y[col]):   # if there is a name of a month in atleast 80% entries of the column
+            Possible_date_col.append(col)
+            
     if not withPossibilies:
-        return DATE_COLUMNS
+        return DATE_COLUMNS,Possible_date_col
     else:
-        return DATE_COLUMNS,Possibility
+        return DATE_COLUMNS,Possible_date_col,Possibility
 
 def date_engineering(df):
     import itertools
+    
+    def fixdate(entry):    # function to introduce '-' before and after month and and removing timestamp if it is seperated from date by':' 
+        months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+        for month in months:
+            if month in str(entry).lower():
+                index1= entry.find(month)
+                index2= index1+3
+                entry = entry[:index1]+'-'+entry[index1:index2]+'-'+entry[index2:]
+                index3=entry.find(':')  #only specific to messy dataset
+                entry=entry[:index3]
+        return entry  
+    
     start = time.time()
-    date_cols = df.columns
+    
+    if possible_datecols:
+        for col in possible_datecols:
+            df[col]=df[col].apply(fixdate)
+            
     print('\n\t Entering Date Engineering')
     df = df.apply(pd.to_datetime,errors='coerce')
     print('\nPrinting Missing % of date columns')
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
-    print('Dropping Columns with missing greater than 35% of total number of entries')
-    df.dropna(thresh=len(df)*0.35,axis=1,inplace=True)
-    df.fillna(pd.datetime.now(),inplace=True)
+    
+    if validation==False:   # dropping columns with missing greater than 35% only in training not scoring
+        print('Dropping Columns with missing greater than 35% of total number of entries')
+        df.dropna(thresh=len(df)*0.65,axis=1,inplace=True)
+    try:     
+        for c in df.columns:
+            df[c].fillna(df[c].mode()[0],inplace=True)    # replacing null values with mode 
 
+    except:
+        for c in df.columns:
+            df[c].fillna(df[c].mean(),inplace=True)   # if error in mode then replacing null values with mean      
+     
+    date_cols = df.columns
     visualize_dict = dict.fromkeys(date_cols, [])
 
     # creating separate month and year columns, and difference from current date

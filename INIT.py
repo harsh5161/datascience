@@ -118,13 +118,18 @@ def INIT(df,info):
 
     ######## DATE ENGINEERING #######
     print('\n#### DATE ENGINEERING RUNNING WAIT ####')
-    date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)
+#     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
+    date_cols,possible_datecols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)   
+
+    if possible_datecols:
+        date_cols= date_cols + possible_datecols
+
     print('Date Columns found are {}'.format(date_cols))
     if date_cols:
         print('Respective columns will undergo date engineering and will be imputed in the function itself')
         print('\n#### DATE ENGINEERING RUNNING WAIT ####')
         try:
-            DATE_DF = date_engineering(X[date_cols])
+            DATE_DF = date_engineering(X[date_cols],possible_datecols)
             print(DATE_DF.shape)
             DATE_DF.index = X.index
             X.drop(date_cols,axis=1,inplace=True)
@@ -373,7 +378,8 @@ def INIT(df,info):
 
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
-                'DateColumns':date_cols,'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
+                'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
+                'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],

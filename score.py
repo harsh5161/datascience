@@ -39,8 +39,9 @@ def score(df,init_info,validation=False):
         k_test.name = 'S.No'
 
     date_cols = init_info['DateColumns']
+    possible_datecols= init_info['PossibleDateColumns']
     if date_cols:
-        DATE_DF = date_engineering(X_test[date_cols])
+        DATE_DF = date_engineering(X_test[date_cols], possible_datecols, validation=True)
         DATE_DF = DATE_DF[init_info['DateFinalColumns']]
         DATE_DF.fillna(init_info['DateMean'],inplace=True)
     else:
