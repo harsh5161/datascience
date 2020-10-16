@@ -264,7 +264,7 @@ def featureSelectionPlot(feat_df):
     f = 20
     plt.figure(figsize=(8,8))
     plt.title('Feature Importance Plot',fontsize=f)
-    sns.barplot(x='scores2',y='col_name',data=feat_df,palette="Spectral")
+    sns.barplot(x='scores2',y='col_name',data=feat_df,palette="YlGn_r")
     plt.xlabel('Importance',fontsize=f)
     plt.ylabel('Feature',fontsize=f)
     plt.xticks(fontsize=12,rotation=90)

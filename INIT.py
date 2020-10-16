@@ -282,6 +282,8 @@ def INIT(df,info):
     concat_list = [num_df,disc_df,DATE_DF,TEXT_DF]
     X = pd.concat(concat_list,axis=1)
     X_old = X.copy()# X_old is before Target Encoding
+
+    ############# TRANSFORMATIONS ############
     print('\n #### TRANSFORMATIONS ####')
     TE = TargetEncoder(cols=disc_df.columns)
     print('\n #### TARGET ENCODING ####')
@@ -291,6 +293,9 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
+    ############# TRANSFORMATIONS ############
+
+    ############# FEATURE SELECTION AND PLOTS ############
     print('\n #### FEATURE SELECTION ####')
     fe_s = time.time()
     rem,feat_df = FeatureSelection(X,y,class_or_Reg)
@@ -311,6 +316,9 @@ def INIT(df,info):
     print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
     print(X.shape)
     print(y.shape)
+    ############# FEATURE SELECTION AND PLOTS #####################
+
+    ############# CART DECISION TREE VISUALIZATION #####################
     print('\n #### DECISION TREE VISUALIZATION ####')
     X_cart = X_old.copy() #making a specific copy for CART because X_old is also being used by sample equation
     X_cart.reset_index(drop=True, inplace=True)
@@ -333,6 +341,10 @@ def INIT(df,info):
     except Exception as e:
         print(e)
         print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
+    ############# CART DECISION TREE VISUALIZATION #####################   
+
+    
+    ############# SKLEARN TREE VISUALIZATION ##################### 
     try:
         vis_disc_cols = []
         print("DISCRETE COLUMNS ARE:",disc_df)
@@ -346,6 +358,9 @@ def INIT(df,info):
         print('#### SKLEARN VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     print(X.shape)
     print(y.shape)
+    ############# SKLEARN TREE VISUALIZATION ##################### 
+
+    ############# NORMALISATION AND TRANSFORMATIONS ##################### 
     print('\n #### NORMALIZATION ####')
     MM = MinMaxScaler(feature_range=(1, 2))
     X = pd.DataFrame(MM.fit_transform(X),columns=TrainingColumns)
@@ -360,6 +375,9 @@ def INIT(df,info):
     print(' #### DONE ####')
     print(X.shape)
     print(y.shape)
+    ############# NORMALISATION AND TRANSFORMATIONS ##################### 
+
+    ############# SAMPLE EQUATION ##################### 
     print('\n #### Printing Sample Equation of the DATA ####')
     try:
         vis_disc_cols = []
@@ -375,6 +393,8 @@ def INIT(df,info):
 
     print('\nThis is final shape of X_train : {}'.format(X.shape))
     print('This is final shape of Y_train : {}\n'.format(y.shape))
+    ############# SAMPLE EQUATION ##################### 
+
 
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
