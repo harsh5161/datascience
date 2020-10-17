@@ -233,7 +233,7 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
         print("(The closer R squared is to 1, the better the model is)")
     
     dum2=pd.DataFrame()  
-    list_dfs=[]
+#     list_dfs=[]
     selected_obj_cols=list(set(selected_features)&set(obj_df.columns)) 
     if len(selected_obj_cols)!=0:  # to only print those encoded columns which are included in equation
             print("\nWhere the columns are encoded like this:\n")             
@@ -242,22 +242,25 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                     dum2=obj_df.drop_duplicates(subset=[i])   
                     dum2.rename(columns = {i:str(i)+" encoded"}, inplace = True)      
                     dum3=(pd.concat([dum[i],dum2[str(i)+" encoded"]],axis=1)).sort_values (str(i)+" encoded")
-                    list_dfs.append(dum3)
+#                     list_dfs.append(dum3)
+                    from tabulate import tabulate
+                    pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql', showindex = False)
+                    print(pdtabulate(dum3))
 
-    from IPython.display import display,HTML
-    def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
-        html_table = "<table style='width:100%; border:0px'>{content}</table>"
-        html_row = "<tr style='border:0px'>{content}</tr>"
-        html_cell = "<td style='width:{width}%;vertical-align:top;text-align:center;border:0px'>{{content}}</td>"
-        html_cell = html_cell.format(width=100/cols)
+#     from IPython.display import display,HTML
+#     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
+#         html_table = "<table style='width:100%; border:0px'>{content}</table>"
+#         html_row = "<tr style='border:0px'>{content}</tr>"
+#         html_cell = "<td style='width:{width}%;vertical-align:top;text-align:center;border:0px'>{{content}}</td>"
+#         html_cell = html_cell.format(width=100/cols)
 
-        cells = [ html_cell.format(content=df.to_html(index=False)) for df in list_dfs ]
-        cells += (cols - (len(list_dfs)%cols)) * [html_cell.format(content="")] # pad
-        rows = [ html_row.format(content="".join(cells[i:i+cols])) for i in range(0,len(cells),cols)]
-        display(HTML(html_table.format(content="".join(rows))))
+#         cells = [ html_cell.format(content=df.to_html(index=False)) for df in list_dfs ]
+#         cells += (cols - (len(list_dfs)%cols)) * [html_cell.format(content="")] # pad
+#         rows = [ html_row.format(content="".join(cells[i:i+cols])) for i in range(0,len(cells),cols)]
+#         display(HTML(html_table.format(content="".join(rows))))
         
-    if list_dfs:    # only display table grid if any columns were encoded
-        multi_column_df_display(list_dfs)
+#     if list_dfs:    # only display table grid if any columns were encoded
+#         multi_column_df_display(list_dfs)
 
 
 def featureSelectionPlot(feat_df):
