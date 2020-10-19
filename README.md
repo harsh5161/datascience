@@ -70,7 +70,7 @@ Grouping of categorical data - if the top 5 levels (by number of observations) i
 <br />
 Outlier winsorizing = bring back the extreme values to within +-4sd <br />
 <br />
-#Text Engineering-<br />
+# Text Engineering-<br />
 Only Useless columns are considered in Text Engineering.<br />
 If there are fewer than 5 words in more than 75% of the rows then that particular row is dropped because it is probably not a review column.<br />
 <br />
