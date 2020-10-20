@@ -28,7 +28,20 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
         cat_df = cat_df.apply(lambda x: d[x.name].fit_transform(x.astype(str))) 
         cat_df = cat_df.apply(lambda x: d[x.name].inverse_transform(x))  
         df = pd.concat([df,cat_df],axis=1)
-        
+
+
+    for col in df.columns:
+        if df[col].dtype=='object':
+            #print(f"The object columns are {col}")
+            s = pd.Series(df[col])
+            try:
+                pd.to_numeric(s)
+            except Exception as e:
+                print(f"{col} column will now be truncated")
+                df[col]= df[col].apply(lambda x: x.split()[0]+"..." if (len(x.split())>1) else x)
+                print("The values after truncating the text are as follows")
+                print(df[col].value_counts())
+
     with localconverter(ro.default_converter + pandas2ri.converter): 
         r_from_pd_df = ro.conversion.py2rpy(df)
         # class_or_Reg = ro.conversion.py2rpy(typer)
