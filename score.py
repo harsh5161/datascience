@@ -213,6 +213,8 @@ def score(df,init_info,validation=False):
                 sorted_df = sorted_df[sorted_df.decile != 0]
                 df_mean=pd.DataFrame()
                 df_mean[['Decile','Actualvalue_mean','Predictedvalue_mean']]=sorted_df.groupby('decile', as_index=False)[['y_test','y_pred']].mean()
+                df_mean['Actualvalue_mean']= pd.Series(df_mean['Actualvalue_mean']).round(decimals=2) #rounding off values
+                df_mean['Predictedvalue_mean']= pd.Series(df_mean['Predictedvalue_mean']).round(decimals=2) #rounding off values
                 fig, ax1 = plt.subplots(figsize=(10, 7))
                 plt.xticks(df_mean['Decile'])
                 tidy = pd.melt(df_mean, id_vars='Decile', value_vars= ['Actualvalue_mean','Predictedvalue_mean'],value_name='Mean values per decile')
