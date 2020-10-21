@@ -52,6 +52,7 @@ def Segregation(df):
 
     unique = []
 
+    # Function to group minor categories, if present
     def func(column):
         l=column.value_counts(normalize=True)
         minor=l[l<=0.005].index
@@ -70,22 +71,31 @@ def Segregation(df):
     print('Printing Cardinality info of All Object Type Columns!\n')
     print(obj_df.nunique())
     print('\n')
+
+    # For each object type column, below are a sequence of conditions to determine if it's a unique column/not
     for col in obj_df:
+        # If top 5 levels contribute to less than 10 percent of data
         if obj_df[col].value_counts(normalize=True)[:5].sum()<=0.1:
             print('{} has top 5 levels that contribute to less than 10% of data!'.format(col))
             print('{} is unique\n'.format(col))
             unique.append(col)
+
+        # If number of unique entries is greater than or equal to 50000
         elif obj_df[col].nunique() >= 50000:
             print('{} has more than 50000 unique levels!'.format(col))
             print('{} is unique\n'.format(col))
             unique.append(col)
+
+        # If Number of unique entries is greater than 75% of the total number of rows
         elif obj_df[col].nunique() > 0.75 * len(df):
             print('{} has more than 75% unique levels!'.format(col))
             print('{} is unique\n'.format(col))
             unique.append(col)
+        # If none of the above is true, we try to group minor categories
         else:
             print('{} has top 5 levels that contribute to more than 10% of data!'.format(col))
             print('{} has {} levels before grouping'.format(col,obj_df[col].nunique()))
+            # If number of levels is greater than 60, attempt grouping 
             if obj_df[col].nunique() > 60:
                 print('Attempting grouping of minor levels of {} as the column has more than 60 levels'.format(col))
                 obj_df[col] = func(obj_df[col])
