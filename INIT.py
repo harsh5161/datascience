@@ -242,7 +242,8 @@ def INIT(df,info):
     ############# PEARSON CORRELATION ############
     print('\n #### PEARSON CORRELATION ####')
     corr = num_df.corr(method='pearson')
-    corr = corr[(corr >= 0.85)]
+    # If correlation is found to be greater than 85 or equal to 85%, both positive and negative
+    corr = corr[(corr >= 0.85)|(corr <= -0.85)]
     for column in corr.columns:
         corr.loc[column][column] = np.nan
     corr.dropna(axis=1,how='all',inplace=True)
@@ -345,6 +346,7 @@ def INIT(df,info):
 
     
     ############# SKLEARN TREE VISUALIZATION ##################### 
+    # The few lines below consider only columns of object/category type that remained after feature selection
     try:
         vis_disc_cols = []
         print("DISCRETE COLUMNS ARE:",disc_df)
@@ -379,6 +381,7 @@ def INIT(df,info):
 
     ############# SAMPLE EQUATION ##################### 
     print('\n #### Printing Sample Equation of the DATA ####')
+    # The few lines below consider only columns of object/category type that remained after feature selection
     try:
         vis_disc_cols = []
         for col in disc_df.columns:
