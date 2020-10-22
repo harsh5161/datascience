@@ -252,9 +252,14 @@ def score(df,init_info,validation=False):
 
     if init_info['ML'] == 'Classification':
         preview = pd.concat([preview,y_probas],axis=1)
-        for col in ['Actual Values','Predicted Values']:                # to convert '1.0' and '0.0' to '1' and '0'
-            if preview[col].dtype== np.float64:
-                preview[col]=preview[col].astype(int) 
+        if validation:
+            for col in ['Actual Values','Predicted Values']:                # to convert '1.0' and '0.0' to '1' and '0'
+                if preview[col].dtype== np.float64:
+                    preview[col]=preview[col].astype(int) 
+        else:
+            for col in ['Predicted Values']:                # to convert '1.0' and '0.0' to '1' and '0'
+                if preview[col].dtype== np.float64:
+                    preview[col]=preview[col].astype(int) 
                         
         yp={}
         for i in y_probas.columns:
