@@ -371,7 +371,7 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
     #print("BOW Corpus", bow_corpus[:10])
     tfidf = models.TfidfModel(bow_corpus)
     corpus_tfidf = tfidf[bow_corpus] #generating the TF-IDF of the corpus
-
+    print("!!!!!!",len(corpus_tfidf))
     start = time.time()
     lda_model_tfidf = gensim.models.LdaMulticore(corpus_tfidf, num_topics=10, id2word=dictionary, passes=1, workers=6) #multiprocessing Latent Dirilichtion Allocation Model
     end = time.time()
@@ -384,10 +384,16 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
   append = ser.append
   print("Bag of Words Corpus length",len(bow_corpus))
   start = time.time()
+  count = 0
   for i in range(len(bow_corpus)):
+    val = bow_corpus[i]
+    for i in range(len(val)):
+        print("Word {} (\"{}\") appears {} time.".format(val[i][0], dictionary[val[i][0]], val[i][1]))
+    count = count+1
     for idx, topic in sorted(lda_model_tfidf[bow_corpus[i]], key= lambda tup: -1*tup[1]):
       append(idx)
       break
+    print("Loop ran for ",count)
   end = time.time()
   asf = pd.DataFrame(ser)
   print("Time for append", end-start)
