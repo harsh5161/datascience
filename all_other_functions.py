@@ -46,9 +46,9 @@ def ForestImputer(num_df,disc_df,target):
 
     class_or_reg = targetAnalysis(target)
     if class_or_reg == 'Classification':
-        imputer = MissForest(max_iter=10,copy=True,max_depth=20,class_weight="balanced")
+        imputer = MissForest(max_iter=1,copy=True,max_depth=10,class_weight="balanced",n_estimators=25)
     elif class_or_reg == 'Regression':
-        imputer = MissForest(max_iter=10,copy=True,max_depth=20)
+        imputer = MissForest(max_iter=1,copy=True,max_depth=10,n_estimators=25)
     X = imputer.fit_transform(df1)
 
     df2 = pd.DataFrame(X,index=df1.index,columns=df1.columns) #converting numpy array back to dataframe after transformation call
