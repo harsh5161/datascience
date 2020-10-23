@@ -148,7 +148,7 @@ def INIT(df,info):
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
 
-    num_df, disc_df, useless_cols = Segregation(X)
+    num_df, disc_df, useless_cols = Segregation(X,y)
     if not disc_df.empty:
         disc_df = disc_df.astype('category')
         disc_cat = {}
@@ -219,8 +219,8 @@ def INIT(df,info):
             X.drop(some_list,axis=1,inplace=True)
             X.drop(remove_list,axis=1, inplace=True)
             lda_models.dropna(axis=0,inplace=True)
-        except:
-            print('#### TEXT ENGINEERING HAD ERRORS ####')
+        except Exception as e:
+            print('#### TEXT ENGINEERING HAD ERRORS ####', e)
             X.drop(some_list,axis=1,inplace=True)
             if(remove_list):
                 X.drop(remove_list,axis=1,inplace=True)
