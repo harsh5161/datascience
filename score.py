@@ -30,6 +30,10 @@ def score(df,init_info,validation=False):
         y_test = pd.Series()
 
     if init_info['KEY']:
+        print("Value of Key from Training is: ",init_info['KEY'])
+        print("Total no. of null values present in the Key: ",df[init_info['KEY']].isna().sum())
+        df.dropna(axis=0,subset=[init_info['KEY']],inplace=True)
+        print("NUll values after removal are: ",df[init_info['KEY']].isna().sum())
         if df[init_info['KEY']].dtype == np.float64:             # if the key is float convert it to int
             df[init_info['KEY']]=df[init_info['KEY']].astype(int)        
         k_test = df[init_info['KEY']]
