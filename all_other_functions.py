@@ -10,8 +10,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.utils import class_weight
 import pydotplus
-
-
+from category_encoders import TargetEncoder
+from missingpy import MissForest
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -30,8 +30,40 @@ def targetAnalysis(df):
             return 'Classification'
         else:
             return None
+def ForestImputer(num_df,disc_df,target):
+    num_df.reset_index(drop=True,inplace=True)
+    disc_df.reset_index(drop=True, inplace=True)
+    concat_list = [num_df,disc_df]
+    df = pd.concat(concat_list,axis=1)
+    #testing purposes
+    print("checking Initial Presence of Missing Per Column",df.isna().any())
+    #testing purposes
+    cat_list = disc_df.columns.to_list()
+    num_list = num_df.columns.to_list()
 
-def Segregation(df):
+    TE = TargetEncoder(cols=cat_list) #target encoding t=categorical variables
+    df1 = TE.fit_transform(df,target)
+
+    class_or_reg = targetAnalysis(target)
+    if class_or_reg == 'Classification':
+        imputer = MissForest(max_iter=10,copy=True,max_depth=20,class_weight="balanced")
+    elif class_or_reg == 'Regression':
+        imputer = MissForest(max_iter=10,copy=True,max_depth=20)
+    X = imputer.fit_transform(df1)
+
+    df2 = pd.DataFrame(X,index=df1.index,columns=df1.columns) #converting numpy array back to dataframe after transformation call
+
+    print("Checking Final Presence of Missing Per Column",df2.isna().any())
+
+    for col in df.columns:
+        if col in df2.columns:
+            if col not in cat_list:
+                df[col] = df2[col]
+    
+    numeric = df[num_list]
+    return numeric
+
+def Segregation(df,y):
     print('\n#### Entering Segregation ####\n')
     start = time.time()
     num = df._get_numeric_data().columns
@@ -40,8 +72,7 @@ def Segregation(df):
     nu = df[num].nunique()>8
     numeric = df[nu[nu == True].index]
     cat_num = df[list(set(num) - set(numeric.columns))]
-    numeric.fillna(numeric.mean(),inplace=True)
-    cat_num.fillna('missing',inplace=True)
+    cat_num.fillna(cat_num.median(skipna=True),inplace=True)
 
     print('There are {} pure numeric columns'.format((len(numeric.columns))))
     print('There are {} categorical numeric columns\n'.format((len(cat_num.columns))))
@@ -111,6 +142,7 @@ def Segregation(df):
     print('\nPrinting Cardinality info of obj Discrete Columns!\n')
     print(obj_df.nunique())
     disc = pd.concat([cat_num,obj_df],axis=1)
+    numeric = ForestImputer(numeric,disc,y)
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')
     print(disc.nunique())
     end = time.time()
