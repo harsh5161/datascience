@@ -149,10 +149,6 @@ def INIT(df,info):
     print('\n ### Entering Segregation Zone ### \n')
 
     num_df, disc_df, useless_cols = Segregation(X,y)
-    print("!!!!!#####!!!!!")
-    print(num_df.isna().any())
-    print(disc_df.isna().any())
-    print("!!!!!#####!!!!!")
     if not disc_df.empty:
         disc_df = disc_df.astype('category')
         disc_cat = {}
