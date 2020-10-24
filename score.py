@@ -271,12 +271,13 @@ def score(df,init_info,validation=False):
             yp[i] = str(i).replace("0.0", "0")
             yp[i] = str(i).replace("1.0", "1")
         preview.rename(columns = yp, inplace = True)       # to rename columns
-            
-    if validation:
-        for col in preview.columns:       # to round off decimal places of large float entries in preview
+
+
+    for col in preview.columns:       # to round off decimal places of large float entries in preview
             if preview[col].dtype == np.float64:
                 preview[col]= pd.Series(preview[col]).round(decimals=3)
-        
+            
+    if validation:
         sort_col = preview['Predicted Values']
         try:
         	preview, _ = train_test_split(preview,train_size=preview_length,random_state=1,stratify=sort_col)
