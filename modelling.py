@@ -67,6 +67,7 @@ from imblearn.ensemble import EasyEnsembleClassifier
 import xgboost as xgb
 from scipy.stats import ks_2samp
 
+#TerminalPush Test
 class classification:
 
   #This funciton takes input of training and testing datasets and give out the best model's Name, model with best parameter(can be used directly to score data using 'predcit' function), accuracy on the test dataset and parameters (not usefful)
