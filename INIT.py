@@ -52,14 +52,14 @@ def INIT(df,info):
 
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
-    ues = time.time()
-    if key:
-        x = df.drop(key,axis=1)
-        userInteractVisualization(x,target)
-    else:
-        userInteractVisualization(df,target)
-    uee = time.time()
-    print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
+    # ues = time.time()
+    # if key:
+    #     x = df.drop(key,axis=1)
+    #     userInteractVisualization(x,target)
+    # else:
+    #     userInteractVisualization(df,target)
+    # uee = time.time()
+    # print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
@@ -148,7 +148,7 @@ def INIT(df,info):
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
 
-    num_df, disc_df, useless_cols = Segregation(X)
+    num_df, disc_df, useless_cols = Segregation(X,y)
     if not disc_df.empty:
         disc_df = disc_df.astype('category')
         disc_cat = {}
