@@ -67,6 +67,8 @@ Columns created are - difference of all date columns, date_month, date_year, dat
 Numeric columns are separated into numeric or categorical numeric. Numeric variables with less than 8 levels are considered categorical numeric.<br />
 <br />
 Grouping of categorical data - if the top 5 levels (by number of observations) in a variable have more than a total of 10% of observations, we send it for<br /> grouping, else it's called a useless column. After checking this, we group levels having less than 0.5% value as ‘others’. After all this if a variable is more<br /> than 60 levels, we reject it.<br /> 
+<br /> 
+Numeric Column imputation done on te basis of missforest imputation, updation to logic when missing columns are are very high required.<br /> 
 <br />
 Outlier winsorizing = bring back the extreme values to within +-4sd <br />
 <br />
