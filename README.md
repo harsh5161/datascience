@@ -1,4 +1,4 @@
-# Logical Proceeding of ProtonAutoML (v. 1.0)
+# Logical Proceeding of ProtonAutoML (v. 1.0+)
 
 Flow of informations starts from Training <br />
 As the data enters the system, we check the column names for special characters and we remove them. This is done because the Light GBM ML model does not support<br /> special characters in the column names.<br />
