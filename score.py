@@ -277,15 +277,27 @@ def score(df,init_info,validation=False):
             if preview[col].dtype == np.float64:
                 preview[col]= pd.Series(preview[col]).round(decimals=3)
             
+    
     if validation:
         sort_col = preview['Predicted Values']
         try:
         	preview, _ = train_test_split(preview,train_size=preview_length,random_state=1,stratify=sort_col)
         except:
         	preview = preview[:preview_length]
+        
+        preview_vals = preview['Predicted Values'].value_counts()
+        printer = ""
+        for k,v in preview_vals.iteritems():
+            printer = printer + f"{k} is present in {v}% of the Testing Preview\n"
+        print(printer)
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
     else:
+        preview_vals = preview['Predicted Values'].value_counts()
+        printer = ""
+        for k,v in preview_vals.iteritems():
+            printer = printer + f"{k} is present in {round((v/len(preview))*100,3)}% of the Scoring File\n"
+        print(printer)
         preview.to_csv('score.csv',sep=',',index=False)
         print('\nFile Saved as score.csv')
     print('\nCode executed Successfully')
