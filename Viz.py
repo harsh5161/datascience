@@ -38,7 +38,7 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
                 pd.to_numeric(s)
             except Exception as e:
                 print(f"{col} column will now be truncated")
-                df[col]= df[col].apply(lambda x: x.split()[0]+"..." if (len(x.split())>1) else x)
+                df[col]= df[col].apply(lambda x: x[0:6]+"..." if (len(x)>6) else x)
                 print("The values after truncating the text are as follows")
                 print(df[col].value_counts())
 
@@ -70,7 +70,13 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
                 rpart.plot(fit,roundint=TRUE)
                 }
                 """
-    grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100,res=350)# 
+    if len(df.columns) <=15:
+        grdevices.jpeg(file="dec_tree.jpeg", width=800, height=800,quality=100,res=200)#
+    elif len(df.columns) >15 and len(df.columns) <=40:
+        grdevices.jpeg(file="dec_tree.jpeg", width=1300, height=1300,quality=100,res=300)# 
+    elif len(df.columns) >40:
+        grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100,res=350)#
+
     if class_or_Reg =='Classification':
             rfunc=ro.r(rstring1)#
             p=rfunc(r_from_pd_df) 
