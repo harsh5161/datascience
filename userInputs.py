@@ -130,7 +130,7 @@ def importFile(path,nrows=None):
             return None
 
     try:
-        ext = path.split('.')[1].lower().strip()
+        ext = path.split('.')[-1].lower().strip()
         print('extension is {}'.format(ext))
         if ext == 'csv' or ext == 'tsv':
             df = importCsv(path)
@@ -155,37 +155,51 @@ def importFile(path,nrows=None):
 ######## getUserInput Function #######
 ######################################
 
-def getUserInput(df):
+def getUserInput(df,test=False):
     if isinstance(df,pd.DataFrame):
         print('\nDataFrame Succesfully imported\n')
 
         print(df.columns)
 
-        # Get Target from user
-        target = getTarget(df.columns)
+        if not test:
+            # Get Target from user
+            target = getTarget(df.columns)
 
-        if not target:
-            # Quit the whole process
-            print('\nQuitting Process\n')
-            return None
+            if not target:
+                # Quit the whole process
+                print('\nQuitting Process\n')
+                return None
+            else:
+                # Get Key Column
+                key = getKey(df.columns)
+                if not key:
+                    key = findKey(df.columns[0])
+                if key:
+                    df.drop(key,axis=1,inplace=True)
+
+                # Remove User Specified ID Columns
+                df = removeUserSpecifiedIDs(df,True)
+
+                # Remove Successive Targets
+                df = removeUserSpecifiedIDs(df)
+
+                # Quick/Slow results for max evals
+                quick = quick_slow()
+                if quick:print('QUICK MODELLING WITH DEFAULT PARAMETERS')
+                else:print('HyperOP with MAX EVALS = 15')
+
         else:
-            # Get Key Column
-            key = getKey(df.columns)
-            if not key:
-                key = findKey(df.columns[0])
-            if key:
-                df.drop(key,axis=1,inplace=True)
-
-            # Remove User Specified ID Columns
-            df = removeUserSpecifiedIDs(df,True)
-
-            # Remove Successive Targets
-            df = removeUserSpecifiedIDs(df)
-
-            # Quick/Slow results for max evals
-            quick = quick_slow()
-            if quick:print('QUICK MODELLING WITH DEFAULT PARAMETERS')
-            else:print('HyperOP with MAX EVALS = 15')
+            target = None
+            key = None
+            for col in df.columns:
+                if '_target_' in col:
+                    target = col
+                    break
+            
+            for col in df.columns:
+                if '_id_' in col:
+                    key = col
+            quick = 'y'
 
         info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
 

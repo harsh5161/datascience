@@ -1,0 +1,743 @@
+Testing vehicle.csv
+
+#### RUNNING WAIT ####
+extension is csv
+We have a csv file
+This file has 24 columns and 30 rows
+
+DataFrame Succesfully imported
+
+Index(['_id_Customer', 'State', 'CustomerLifetimeValue', '_target_Response',
+       'Coverage', 'Education', 'EffectiveToDate', 'EmploymentStatus',
+       'Gender', 'Income', 'LocationCode', 'MaritalStatus',
+       'MonthlyPremiumAuto', 'MonthsSinceLastClaim',
+       'MonthsSincePolicyInception', 'NumberofOpenComplaints',
+       'NumberofPolicies', 'PolicyType', 'Policy', 'RenewOfferType',
+       'SalesChannel', 'TotalClaimAmount', 'VehicleClass', 'VehicleSize'],
+      dtype='object')
+#### RUNNING WAIT ####
+extension is csv
+We have a csv file
+This file has 24 columns and 9134 rows
+###Performing Initial Numeric Engineering for Capping Purposes###
+		 stripping spaces, symbols, and lower casing all entries
+done ...
+		 Replacing empty and invalid strings
+done ...
+		 Replacing commas if present in Currencies
+done ...
+		 Finding Numeric Columns
+done ...
+		   _id_Customer is of type object
+		   State is of type object
+		   CustomerLifetimeValue is of type float64
+		   _target_Response is of type object
+		   Coverage is of type object
+		   Education is of type object
+		   EffectiveToDate is of type object
+		   EmploymentStatus is of type object
+		   Gender is of type object
+		   Income is of type int64
+		   LocationCode is of type object
+		   MaritalStatus is of type object
+		   MonthlyPremiumAuto is of type int64
+		   MonthsSinceLastClaim is of type int64
+		   MonthsSincePolicyInception is of type int64
+		   NumberofOpenComplaints is of type int64
+		   NumberofPolicies is of type int64
+		   PolicyType is of type object
+		   Policy is of type object
+		   RenewOfferType is of type object
+		   SalesChannel is of type object
+		   TotalClaimAmount is of type float64
+		   VehicleClass is of type object
+		   VehicleSize is of type object
+Numeric Engineering time taken: 0.08151102066040039
+
+
+
+### TARGET ANALYSIS ENTERED ###
+Target has 2 unique values
+Printing % occurence of each class in target Column
+no     0.866
+yes    0.134
+Name: _target_Response, dtype: float64
+Dataset has not been capped
+Length of the dataset is same as original 9134
+Length of the dataframe is 9134
+                       Missing in %
+_id_Customer                    0.0
+MonthlyPremiumAuto              0.0
+State                           0.0
+CustomerLifetimeValue           0.0
+Coverage                        0.0
+Education                       0.0
+EffectiveToDate                 0.0
+EmploymentStatus                0.0
+Gender                          0.0
+Income                          0.0
+
+ ### Entering Numeric Engineering of Target### 
+
+		 stripping spaces, symbols, and lower casing all entries
+done ...
+		 Replacing empty and invalid strings
+done ...
+		 Replacing commas if present in Currencies
+done ...
+		 Finding Numeric Columns
+done ...
+		   State is of type object
+		   CustomerLifetimeValue is of type float64
+		   Coverage is of type object
+		   Education is of type object
+		   EffectiveToDate is of type object
+		   EmploymentStatus is of type object
+		   Gender is of type object
+		   Income is of type int64
+		   LocationCode is of type object
+		   MaritalStatus is of type object
+		   MonthlyPremiumAuto is of type int64
+		   MonthsSinceLastClaim is of type int64
+		   MonthsSincePolicyInception is of type int64
+		   NumberofOpenComplaints is of type int64
+		   NumberofPolicies is of type int64
+		   PolicyType is of type object
+		   Policy is of type object
+		   RenewOfferType is of type object
+		   SalesChannel is of type object
+		   TotalClaimAmount is of type float64
+		   VehicleClass is of type object
+		   VehicleSize is of type object
+		   _target_Response is of type object
+Numeric Engineering time taken: 0.5008471012115479
+
+
+
+### TARGET ANALYSIS ENTERED ###
+Target has 2 unique values
+Printing % occurence of each class in target Column
+no     0.856799
+yes    0.143201
+Name: _target_Response, dtype: float64
+
+Target has 2 Levels! No classes will be removed
+_target_Response column needs Classification
+
+ 0 rows were removed since target had these missing
+
+Removing Rows and Columns with more than 50% missing
+
+Rows are getting dropped first then rows
+The columns getting dropped are []
+Shape of the dataframe: (7307, 22)
+Shape of the target column (7307,)
+After removal of highly missing rows and columns
+                       Missing in %
+VehicleSize                     0.0
+VehicleClass                    0.0
+CustomerLifetimeValue           0.0
+Coverage                        0.0
+Education                       0.0
+EffectiveToDate                 0.0
+EmploymentStatus                0.0
+Gender                          0.0
+Income                          0.0
+LocationCode                    0.0
+Shape of X_train is (7307, 22)
+Shape of y_train is (7307,)
+printing target variable distribution for classification:
+
+0    0.85685
+1    0.14315
+Name: _target_Response, dtype: float64
+
+#### DATE ENGINEERING RUNNING WAIT ####
+Date Columns found are ['EffectiveToDate']
+Respective columns will undergo date engineering and will be imputed in the function itself
+
+#### DATE ENGINEERING RUNNING WAIT ####
+
+	 Entering Date Engineering
+
+Printing Missing % of date columns
+                 Missing in %
+EffectiveToDate           0.0
+Dropping Columns with missing greater than 35% of total number of entries
+
+	 #### RUNNING WAIT ####
+
+Visualizing Coloumns Generated
+ {'EffectiveToDate': ['EffectiveToDate_month', 'EffectiveToDate_year', 'EffectiveToDate-today', 'EffectiveToDate_nearestHoliday']}
+
+The Following columns were generated to get days between dates of two seperate date columns
+ []
+
+Date Engineering Time Taken : 0.43993401527404785
+
+	 #### DONE ####
+(7307, 4)
+ #### DONE ####
+
+ ### Entering Segregation Zone ### 
+
+
+#### Entering Segregation ####
+
+There are 7 pure numeric columns
+There are 1 categorical numeric columns
+
+The pure numeric columns are Index(['CustomerLifetimeValue', 'Income', 'MonthlyPremiumAuto',
+       'MonthsSinceLastClaim', 'MonthsSincePolicyInception',
+       'NumberofPolicies', 'TotalClaimAmount'],
+      dtype='object')
+The categorical numeric columns are Index(['NumberofOpenComplaints'], dtype='object')
+
+We found 13 obj type columns!
+Printing Cardinality info of All Object Type Columns!
+
+Gender              2
+VehicleSize         3
+Coverage            3
+VehicleClass        6
+RenewOfferType      4
+Education           5
+LocationCode        3
+PolicyType          3
+State               5
+EmploymentStatus    5
+SalesChannel        4
+MaritalStatus       3
+Policy              9
+dtype: int64
+
+
+Gender has top 5 levels that contribute to more than 10% of data!
+Gender has 2 levels before grouping
+Gender is a discrete column!
+
+VehicleSize has top 5 levels that contribute to more than 10% of data!
+VehicleSize has 3 levels before grouping
+VehicleSize is a discrete column!
+
+Coverage has top 5 levels that contribute to more than 10% of data!
+Coverage has 3 levels before grouping
+Coverage is a discrete column!
+
+VehicleClass has top 5 levels that contribute to more than 10% of data!
+VehicleClass has 6 levels before grouping
+VehicleClass is a discrete column!
+
+RenewOfferType has top 5 levels that contribute to more than 10% of data!
+RenewOfferType has 4 levels before grouping
+RenewOfferType is a discrete column!
+
+Education has top 5 levels that contribute to more than 10% of data!
+Education has 5 levels before grouping
+Education is a discrete column!
+
+LocationCode has top 5 levels that contribute to more than 10% of data!
+LocationCode has 3 levels before grouping
+LocationCode is a discrete column!
+
+PolicyType has top 5 levels that contribute to more than 10% of data!
+PolicyType has 3 levels before grouping
+PolicyType is a discrete column!
+
+State has top 5 levels that contribute to more than 10% of data!
+State has 5 levels before grouping
+State is a discrete column!
+
+EmploymentStatus has top 5 levels that contribute to more than 10% of data!
+EmploymentStatus has 5 levels before grouping
+EmploymentStatus is a discrete column!
+
+SalesChannel has top 5 levels that contribute to more than 10% of data!
+SalesChannel has 4 levels before grouping
+SalesChannel is a discrete column!
+
+MaritalStatus has top 5 levels that contribute to more than 10% of data!
+MaritalStatus has 3 levels before grouping
+MaritalStatus is a discrete column!
+
+Policy has top 5 levels that contribute to more than 10% of data!
+Policy has 9 levels before grouping
+Policy is a discrete column!
+
+
+We found 0 unique columns!
+
+
+The unique columns are []
+
+We now have 13 obj type discrete columns!
+
+Printing Cardinality info of obj Discrete Columns!
+
+Gender              2
+VehicleSize         3
+Coverage            3
+VehicleClass        6
+RenewOfferType      4
+Education           5
+LocationCode        3
+PolicyType          3
+State               5
+EmploymentStatus    5
+SalesChannel        4
+MaritalStatus       3
+Policy              9
+dtype: int64
+checking Initial Presence of Missing Per Column CustomerLifetimeValue         False
+Income                        False
+MonthlyPremiumAuto            False
+MonthsSinceLastClaim          False
+MonthsSincePolicyInception    False
+NumberofPolicies              False
+TotalClaimAmount              False
+NumberofOpenComplaints        False
+Gender                        False
+VehicleSize                   False
+Coverage                      False
+VehicleClass                  False
+RenewOfferType                False
+Education                     False
+LocationCode                  False
+PolicyType                    False
+State                         False
+EmploymentStatus              False
+SalesChannel                  False
+MaritalStatus                 False
+Policy                        False
+dtype: bool
+
+### TARGET ANALYSIS ENTERED ###
+Target has 2 unique values
+Printing % occurence of each class in target Column
+0    0.85685
+1    0.14315
+Name: _target_Response, dtype: float64
+Checking Final Presence of Missing Per Column CustomerLifetimeValue         False
+Income                        False
+MonthlyPremiumAuto            False
+MonthsSinceLastClaim          False
+MonthsSincePolicyInception    False
+NumberofPolicies              False
+TotalClaimAmount              False
+NumberofOpenComplaints        False
+Gender                        False
+VehicleSize                   False
+Coverage                      False
+VehicleClass                  False
+RenewOfferType                False
+Education                     False
+LocationCode                  False
+PolicyType                    False
+State                         False
+EmploymentStatus              False
+SalesChannel                  False
+MaritalStatus                 False
+Policy                        False
+dtype: bool
+!!!---!!!
+
+Printing Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!
+
+NumberofOpenComplaints    6
+Gender                    2
+VehicleSize               3
+Coverage                  3
+VehicleClass              6
+RenewOfferType            4
+Education                 5
+LocationCode              3
+PolicyType                3
+State                     5
+EmploymentStatus          5
+SalesChannel              4
+MaritalStatus             3
+Policy                    9
+dtype: int64
+
+Segregation time taken : 0.7226204872131348
+Segregation Done!
+
+#### OUTLIER WINSORIZING ####
+ #### DONE ####
+(150, 0)
+Time taken to tokenize the DataFrame 0.9718389511108398
+Columns that are going to be removed are  []
+Time taken for completion of excess column removal: 0.0
+No Remarks or Comments Found 
+Extracting Review Columns time 0.9718389511108398
+No review/comment columns found
+total text analytics time taken = 0.9718389511108398
+Text Engineering Result Empty DataFrame
+Columns: []
+Index: []
+
+ #### PEARSON CORRELATION ####
+
+0 columns removed which were highly correlated
+The columns removed are []
+ #### DONE ####
+num_df - (7307, 7)
+disc_df - (7307, 14)
+DATE_DF - (7307, 4)
+TEXT_DF - (0, 0)
+
+ #### TRANSFORMATIONS ####
+
+ #### TARGET ENCODING ####
+(7307, 25)
+(7307,)
+Target Encoding Time taken : 0.3437461853027344
+
+ #### FEATURE SELECTION ####
+(7307, 25)
+runnning classifier selector
+
+Binary Classification
+HBox(children=(FloatProgress(value=0.0, max=10.0), HTML(value='')))
+
+
+thresh2: 51.27777777777778
+
+The final score sheet of 16 selected columns with importances:
+
+                      col_name  scores2   t/f
+23       EffectiveToDate-today      362  True
+1                       Income      322  True
+0        CustomerLifetimeValue      314  True
+6             TotalClaimAmount      302  True
+4   MonthsSincePolicyInception      285  True
+2           MonthlyPremiumAuto      252  True
+3         MonthsSinceLastClaim      240  True
+12              RenewOfferType      115  True
+17            EmploymentStatus      113  True
+18                SalesChannel      112  True
+13                   Education       96  True
+5             NumberofPolicies       80  True
+9                  VehicleSize       71  True
+19               MaritalStatus       66  True
+7       NumberofOpenComplaints       62  True
+10                    Coverage       56  True
+
+9 columns are eliminated during Feature Selection which are:
+{'EffectiveToDate_Holiday', 'EffectiveToDate_year', 'Gender', 'VehicleClass', 'LocationCode', 'PolicyType', 'State', 'EffectiveToDate_month', 'Policy'}
+(7307, 25)
+(7307,)
+Feature Selection Time taken : 2.03926157951355
+Feature Selection Plot Time taken : 3.6561455726623535
+(7307, 16)
+(7307,)
+
+ #### DECISION TREE VISUALIZATION ####
+Length of X_cart and y_cart 7307 --- 7307
+Length of X_cart_res and y_cart_res 12522 --- 12522
+VehicleSize column will now be truncated
+The values after truncating the text are as follows
+medsiz...    8900
+small        2233
+large        1389
+Name: VehicleSize, dtype: int64
+Coverage column will now be truncated
+The values after truncating the text are as follows
+basic        7557
+extend...    3812
+premiu...    1153
+Name: Coverage, dtype: int64
+RenewOfferType column will now be truncated
+The values after truncating the text are as follows
+offer1    5384
+offer2    5069
+offer3    1261
+offer4     808
+Name: RenewOfferType, dtype: int64
+Education column will now be truncated
+The values after truncating the text are as follows
+colleg...    3784
+bachel...    3726
+high s...    3443
+master       1067
+doctor        502
+Name: Education, dtype: int64
+EmploymentStatus column will now be truncated
+The values after truncating the text are as follows
+employ...    7492
+unempl...    2696
+retire...    1004
+medica...     679
+disabl...     651
+Name: EmploymentStatus, dtype: int64
+SalesChannel column will now be truncated
+The values after truncating the text are as follows
+agent        5391
+branch       3327
+call c...    2166
+web          1638
+Name: SalesChannel, dtype: int64
+MaritalStatus column will now be truncated
+The values after truncating the text are as follows
+marrie...    6912
+single       3111
+divorc...    2499
+Name: MaritalStatus, dtype: int64
+name 'localconverter' is not defined
+#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####
+DISCRETE COLUMNS ARE:      NumberofOpenComplaints Gender VehicleSize  ... SalesChannel MaritalStatus        Policy
+0                         5      f     medsize  ...  call center      divorced   personal l3
+1                         0      m     medsize  ...          web      divorced   personal l3
+2                         0      m     medsize  ...          web       married  corporate l1
+3                         1      m       small  ...       branch       married  corporate l1
+4                         0      f     medsize  ...       branch       married   personal l2
+...                     ...    ...         ...  ...          ...           ...           ...
+7302                      0      f     medsize  ...        agent       married   personal l1
+7303                      1      f     medsize  ...        agent      divorced  corporate l2
+7304                      0      f     medsize  ...        agent       married   personal l1
+7305                      1      m       large  ...        agent       married   personal l1
+7306                      2      m     medsize  ...          web      divorced   personal l3
+
+[7307 rows x 14 columns]
+DISCRETE COLUMNS ARE!!!!!!!: ['NumberofOpenComplaints', 'VehicleSize', 'Coverage', 'RenewOfferType', 'Education', 'EmploymentStatus', 'SalesChannel', 'MaritalStatus']
+Categorical Columns considered:
+
+Index(['NumberofOpenComplaints', 'VehicleSize', 'Coverage', 'RenewOfferType',
+       'Education', 'EmploymentStatus', 'SalesChannel', 'MaritalStatus'],
+      dtype='object')
+Non-Categorical Columns considered:
+
+Index(['CustomerLifetimeValue', 'Income', 'MonthlyPremiumAuto',
+       'MonthsSinceLastClaim', 'MonthsSincePolicyInception',
+       'NumberofPolicies', 'TotalClaimAmount', 'EffectiveToDate-today'],
+      dtype='object')
+value=[n1,n2,n3...] where n1,n2,n3 are the number of samples of the classes in the order     
+value=['no' 'yes']
+['no', 'yes']
+(7307, 16)
+(7307,)
+
+ #### NORMALIZATION ####
+ #### DONE ####
+(7307, 16)
+(7307,)
+
+ #### POWER TRANSFORMATIONS ####
+ #### DONE ####
+(7307, 16)
+(7307,)
+
+ #### Printing Sample Equation of the DATA ####
+LABEL ENCODED FOR SAMPLE EQUATION
+
+
+LOGISTIC REGRESSION EQUATION:
+
+
+ln(odds) = -0.004200251247409031*MonthlyPremiumAuto + -0.046816352423213387*NumberofPolicies + 0.0009222444494578154*TotalClaimAmount + -0.11838158533834053*NumberofOpenComplaints + -0.485011341201703*MaritalStatus + -0.6480526608680593*RenewOfferType + -0.1869431904993781*SalesChannel + -0.23256861944474058*VehicleSize + 1.6140137703708484
+
+=> odds = exp ( -0.004200251247409031*MonthlyPremiumAuto + -0.046816352423213387*NumberofPolicies + 0.0009222444494578154*TotalClaimAmount + -0.11838158533834053*NumberofOpenComplaints + -0.485011341201703*MaritalStatus + -0.6480526608680593*RenewOfferType + -0.1869431904993781*SalesChannel + -0.23256861944474058*VehicleSize + 1.6140137703708484 )
+
+Where, odds = P(class=yes) / 1 - P(class=yes) 
+
+In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/6 or 16.67%.
+
+Estimated f1 score =  65.34%
+(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)
+
+Where the columns are encoded like this:
+
++----------------+------------------------+
+| SalesChannel   |   SalesChannel encoded |
+|----------------+------------------------|
+| agent          |                      0 |
+| branch         |                      1 |
+| call center    |                      2 |
+| web            |                      3 |
++----------------+------------------------+
++------------------+--------------------------+
+| RenewOfferType   |   RenewOfferType encoded |
+|------------------+--------------------------|
+| offer1           |                        0 |
+| offer2           |                        1 |
+| offer3           |                        2 |
+| offer4           |                        3 |
++------------------+--------------------------+
++---------------+-----------------------+
+| VehicleSize   |   VehicleSize encoded |
+|---------------+-----------------------|
+| large         |                     0 |
+| medsize       |                     1 |
+| small         |                     2 |
++---------------+-----------------------+
++-----------------+-------------------------+
+| MaritalStatus   |   MaritalStatus encoded |
+|-----------------+-------------------------|
+| divorced        |                       0 |
+| married         |                       1 |
+| single          |                       2 |
++-----------------+-------------------------+
+ #### DONE ####
+
+This is final shape of X_train : (7307, 16)
+This is final shape of Y_train : (7307,)
+
+
+ #### SAVING INIT INFORMATION ####
+ #### DONE ####
+
+ TOTAL TRAINING DATA CLEANING AND PLOTS : 11.184844732284546
+
+	 #### VALIDATION AND SCORING ZONE ####
+Value of Key from Training is:  _id_Customer
+Total no. of null values present in the Key:  _id_Customer    0
+_id_Customer    0
+dtype: int64
+NUll values after removal are:  _id_Customer    0
+_id_Customer    0
+dtype: int64
+
+	 Entering Date Engineering
+
+Printing Missing % of date columns
+                 Missing in %
+EffectiveToDate           0.0
+
+	 #### RUNNING WAIT ####
+
+Visualizing Coloumns Generated
+ {'EffectiveToDate': ['EffectiveToDate_month', 'EffectiveToDate_year', 'EffectiveToDate-today', 'EffectiveToDate_nearestHoliday']}
+
+The Following columns were generated to get days between dates of two seperate date columns
+ []
+
+Date Engineering Time Taken : 0.14062237739562988
+
+	 #### DONE ####
+
+ #### TRANSFORMATION AND PREDICTION ####
+num_df - (1827, 7)
+disc_df - (1827, 14)
+DATE_DF - (1827, 4)
+TEXT_DF - (0, 0)
+
+This is final shape of X_test : (1827, 16)
+
+ #### PRINTING THE LIST OF COLUMNS AND ITS TYPES THAT ENTER THE MODEL TRAINING ####
+#### PRINTING X_test ####
+Index(['CustomerLifetimeValue', 'Income', 'MonthlyPremiumAuto',
+       'MonthsSinceLastClaim', 'MonthsSincePolicyInception',
+       'NumberofPolicies', 'TotalClaimAmount', 'NumberofOpenComplaints',
+       'VehicleSize', 'Coverage', 'RenewOfferType', 'Education',
+       'EmploymentStatus', 'SalesChannel', 'MaritalStatus',
+       'EffectiveToDate-today'],
+      dtype='object')
+CustomerLifetimeValue         float64
+Income                        float64
+MonthlyPremiumAuto            float64
+MonthsSinceLastClaim          float64
+MonthsSincePolicyInception    float64
+NumberofPolicies              float64
+TotalClaimAmount              float64
+NumberofOpenComplaints        float64
+VehicleSize                   float64
+Coverage                      float64
+RenewOfferType                float64
+Education                     float64
+EmploymentStatus              float64
+SalesChannel                  float64
+MaritalStatus                 float64
+EffectiveToDate-today         float64
+dtype: object
+
+
+    CustomerLifetimeValue    Income  ...  MaritalStatus  EffectiveToDate-today
+0                0.039961  0.834540  ...       0.440725               0.967492
+1                0.051354  0.803475  ...       0.440725               0.885727
+2                0.344108  1.000000  ...       0.440725               0.836318
+3                0.000000  0.000000  ...       1.000000               0.110387
+4                0.420308  0.000000  ...       0.000000               0.951196
+5                1.000000  0.491187  ...       0.440725               0.703196
+6                1.000000  0.606300  ...       0.000000               0.983760
+7                0.466851  0.583796  ...       0.440725               0.182850
+8                0.037948  0.462369  ...       0.440725               0.516610
+9                0.635125  0.396784  ...       0.440725               0.342949
+10               0.575615  0.000000  ...       0.000000               0.885727
+11               0.334862  0.646578  ...       0.440725               0.736669
+12               0.000000  0.000000  ...       0.000000               0.000000
+13               0.000000  0.000000  ...       0.440725               0.447640
+14               0.390089  0.000000  ...       1.000000               0.000000
+15               0.279845  0.706440  ...       0.440725               0.584964
+16               0.256118  0.249404  ...       0.440725               0.736669
+17               0.426699  0.979064  ...       0.000000               0.055458
+18               0.357010  0.422264  ...       0.440725               0.516610
+19               0.212557  1.000000  ...       0.440725               0.885727
+
+[20 rows x 16 columns]
+
+
+
+#### PRINTING X_train ####
+Index(['CustomerLifetimeValue', 'Income', 'MonthlyPremiumAuto',
+       'MonthsSinceLastClaim', 'MonthsSincePolicyInception',
+       'NumberofPolicies', 'TotalClaimAmount', 'NumberofOpenComplaints',
+       'VehicleSize', 'Coverage', 'RenewOfferType', 'Education',
+       'EmploymentStatus', 'SalesChannel', 'MaritalStatus',
+       'EffectiveToDate-today'],
+      dtype='object')
+CustomerLifetimeValue         float64
+Income                        float64
+MonthlyPremiumAuto            float64
+MonthsSinceLastClaim          float64
+MonthsSincePolicyInception    float64
+NumberofPolicies              float64
+TotalClaimAmount              float64
+NumberofOpenComplaints        float64
+VehicleSize                   float64
+Coverage                      float64
+RenewOfferType                float64
+Education                     float64
+EmploymentStatus              float64
+SalesChannel                  float64
+MaritalStatus                 float64
+EffectiveToDate-today         float64
+dtype: object
+
+
+    CustomerLifetimeValue    Income  ...  MaritalStatus  EffectiveToDate-today
+0                0.446094  0.711754  ...       1.000000               0.200834
+1                0.859932  0.365357  ...       1.000000               0.967492
+2                0.044631  1.000000  ...       0.440725               0.885727
+3                0.954124  0.000000  ...       0.440725               0.852818
+4                0.743769  0.894884  ...       0.440725               0.918519
+5                0.011087  0.644656  ...       0.440725               0.164814
+6                0.312091  0.315966  ...       0.440725               0.055458
+7                0.311430  0.235076  ...       1.000000               0.018547
+8                0.000000  0.515097  ...       0.440725               0.272272
+9                0.833919  1.000000  ...       0.440725               0.447640
+10               0.252472  0.594170  ...       0.440725               0.037033
+11               0.274019  0.761879  ...       0.440725               0.533755
+12               0.511145  0.000000  ...       0.000000               0.018547
+13               0.133064  0.862261  ...       0.000000               0.464942
+14               0.817106  0.419449  ...       0.440725               0.869287
+15               0.996604  0.528606  ...       0.440725               0.934872
+16               0.521604  0.673049  ...       0.440725               0.753356
+17               0.257710  0.440500  ...       0.000000               0.918519
+18               0.017439  0.000000  ...       0.000000               0.037033
+19               0.418490  0.000000  ...       1.000000               0.037033
+
+[20 rows x 16 columns]
+
+
+
+HYPER OP
+0.8568495962775421
+0.1431504037224579
+6
+PRIOR LIST IS [0.8568496 0.1431504]
+Shape of ModelDF (0, 14)
+##Dropping models that behave poorly##
+local variable 'ind' referenced before assignment
+
+
+<class 'UnboundLocalError'> testtk.py 36

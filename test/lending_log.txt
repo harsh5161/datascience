@@ -1,0 +1,720 @@
+Testing lending.csv
+
+#### RUNNING WAIT ####
+extension is csv
+We have a csv file
+This file has 26 columns and 30 rows
+
+DataFrame Succesfully imported
+
+Index(['_target_is_bad', '_id_member_id', 'loan_status', 'emp_title',
+       'emp_length', 'home_ownership', 'annual_inc', 'pymnt_plan', 'desc',
+       'zip_code', 'addr_state', 'dti', 'delinq_2yrs', 'earliest_cr_line',
+       'inq_last_6mths', 'mths_since_last_delinq', 'mths_since_last_record',
+       'open_acc', 'pub_rec', 'revol_util', 'total_acc', 'initial_list_status',
+       'collections_12_mths_ex_med', 'mths_since_last_major_derog',
+       'revol_util_percent', 'policy_code'],
+      dtype='object')
+#### RUNNING WAIT ####
+extension is csv
+We have a csv file
+This file has 26 columns and 10000 rows
+###Performing Initial Numeric Engineering for Capping Purposes###
+		 stripping spaces, symbols, and lower casing all entries
+done ...
+		 Replacing empty and invalid strings
+done ...
+		 Replacing commas if present in Currencies
+done ...
+		 Finding Numeric Columns
+done ...
+		   _target_is_bad is of type object
+		   _id_member_id is of type object
+		   loan_status is of type object
+		   emp_title is of type object
+		   emp_length is of type object
+		   home_ownership is of type object
+		   annual_inc is of type float64
+		   pymnt_plan is of type object
+		   desc is of type object
+		   zip_code is of type object
+		   addr_state is of type object
+		   dti is of type float64
+		   delinq_2yrs is of type float64
+		   earliest_cr_line is of type object
+		   inq_last_6mths is of type float64
+		   mths_since_last_delinq is of type float64
+		   mths_since_last_record is of type float64
+		   open_acc is of type float64
+		   pub_rec is of type float64
+		   revol_util is of type float64
+		   total_acc is of type float64
+		   initial_list_status is of type bool
+		   collections_12_mths_ex_med is of type float64
+		   mths_since_last_major_derog is of type float64
+		   revol_util_percent is of type float64
+		   policy_code is of type int64
+Numeric Engineering time taken: 0.07811927795410156
+
+
+
+### TARGET ANALYSIS ENTERED ###
+Target has 2 unique values
+Printing % occurence of each class in target Column
+no     0.868
+yes    0.132
+Name: _target_is_bad, dtype: float64
+Dataset has not been capped
+Length of the dataset is same as original 10000
+Length of the dataframe is 10000
+                             Missing in %
+mths_since_last_major_derog        100.00
+mths_since_last_record              91.60
+mths_since_last_delinq              63.16
+desc                                32.30
+emp_title                            5.92
+emp_length                           2.59
+collections_12_mths_ex_med           0.32
+revol_util_percent                   0.26
+revol_util                           0.26
+inq_last_6mths                       0.05
+
+ ### Entering Numeric Engineering of Target### 
+
+		 stripping spaces, symbols, and lower casing all entries
+done ...
+		 Replacing empty and invalid strings
+done ...
+		 Replacing commas if present in Currencies
+done ...
+		 Finding Numeric Columns
+done ...
+		   loan_status is of type object
+		   emp_title is of type object
+		   emp_length is of type object
+		   home_ownership is of type object
+		   annual_inc is of type float64
+		   pymnt_plan is of type object
+		   desc is of type object
+		   zip_code is of type object
+		   addr_state is of type object
+		   dti is of type float64
+		   delinq_2yrs is of type float64
+		   earliest_cr_line is of type object
+		   inq_last_6mths is of type float64
+		   mths_since_last_delinq is of type float64
+		   mths_since_last_record is of type float64
+		   open_acc is of type float64
+		   pub_rec is of type float64
+		   revol_util is of type float64
+		   total_acc is of type float64
+		   initial_list_status is of type bool
+		   collections_12_mths_ex_med is of type float64
+		   mths_since_last_major_derog is of type float64
+		   revol_util_percent is of type float64
+		   policy_code is of type int64
+		   _target_is_bad is of type object
+Numeric Engineering time taken: 0.45505285263061523
+
+
+
+### TARGET ANALYSIS ENTERED ###
+Target has 2 unique values
+Printing % occurence of each class in target Column
+no     0.8705
+yes    0.1295
+Name: _target_is_bad, dtype: float64
+
+Target has 2 Levels! No classes will be removed
+_target_is_bad column needs Classification
+
+ 0 rows were removed since target had these missing
+
+Removing Rows and Columns with more than 50% missing
+
+Rows are getting dropped first then rows
+The columns getting dropped are ['mths_since_last_delinq', 'mths_since_last_record', 'mths_since_last_major_derog']
+Shape of the dataframe: (7999, 21)
+Shape of the target column (7999,)
+After removal of highly missing rows and columns
+                            Missing in %
+desc                               32.34
+emp_title                           5.70
+emp_length                          2.50
+collections_12_mths_ex_med          0.34
+revol_util                          0.26
+revol_util_percent                  0.26
+delinq_2yrs                         0.05
+total_acc                           0.05
+pub_rec                             0.05
+open_acc                            0.05
+Shape of X_train is (7999, 21)
+Shape of y_train is (7999,)
+printing target variable distribution for classification:
+
+0    0.870484
+1    0.129516
+Name: _target_is_bad, dtype: float64
+
+#### DATE ENGINEERING RUNNING WAIT ####
+Date Columns found are ['earliest_cr_line']
+Respective columns will undergo date engineering and will be imputed in the function itself
+
+#### DATE ENGINEERING RUNNING WAIT ####
+
+	 Entering Date Engineering
+
+Printing Missing % of date columns
+                  Missing in %
+earliest_cr_line          0.05
+Dropping Columns with missing greater than 35% of total number of entries
+
+	 #### RUNNING WAIT ####
+
+Visualizing Coloumns Generated
+ {'earliest_cr_line': ['earliest_cr_line_month', 'earliest_cr_line_year', 'earliest_cr_line-today', 'earliest_cr_line_nearestHoliday']}
+
+The Following columns were generated to get days between dates of two seperate date columns
+ []
+
+Date Engineering Time Taken : 1.15936279296875
+
+	 #### DONE ####
+(7999, 4)
+ #### DONE ####
+
+ ### Entering Segregation Zone ### 
+
+
+#### Entering Segregation ####
+
+There are 8 pure numeric columns
+There are 4 categorical numeric columns
+
+The pure numeric columns are Index(['annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'open_acc',
+       'revol_util', 'total_acc', 'revol_util_percent'],
+      dtype='object')
+The categorical numeric columns are Index(['pub_rec', 'initial_list_status', 'policy_code',
+       'collections_12_mths_ex_med'],
+      dtype='object')
+
+We found 8 obj type columns!
+Printing Cardinality info of All Object Type Columns!
+
+loan_status          6
+pymnt_plan           2
+addr_state          50
+zip_code           700
+desc              5372
+emp_length          12
+home_ownership       4
+emp_title         6449
+dtype: int64
+
+
+loan_status has top 5 levels that contribute to more than 10% of data!
+loan_status has 6 levels before grouping
+loan_status is a discrete column!
+
+pymnt_plan has top 5 levels that contribute to more than 10% of data!
+pymnt_plan has 2 levels before grouping
+pymnt_plan is a discrete column!
+
+addr_state has top 5 levels that contribute to more than 10% of data!
+addr_state has 50 levels before grouping
+addr_state is a discrete column!
+
+zip_code has top 5 levels that contribute to less than 10% of data!
+zip_code is unique
+
+desc has top 5 levels that contribute to more than 10% of data!
+desc has 5372 levels before grouping
+Attempting grouping of minor levels of desc as the column has more than 60 levels
+desc contains 5371 categories that is/are less than 0.5 percent
+desc has 2 levels after grouping
+
+emp_length has top 5 levels that contribute to more than 10% of data!
+emp_length has 12 levels before grouping
+emp_length is a discrete column!
+
+home_ownership has top 5 levels that contribute to more than 10% of data!
+home_ownership has 4 levels before grouping
+home_ownership is a discrete column!
+
+emp_title has top 5 levels that contribute to less than 10% of data!
+emp_title is unique
+
+
+We found 2 unique columns!
+
+
+The unique columns are ['zip_code', 'emp_title']
+
+We now have 6 obj type discrete columns!
+
+Printing Cardinality info of obj Discrete Columns!
+
+loan_status        6
+pymnt_plan         2
+addr_state        50
+desc               2
+emp_length        12
+home_ownership     4
+dtype: int64
+checking Initial Presence of Missing Per Column annual_inc                    False
+dti                           False
+delinq_2yrs                    True
+inq_last_6mths                 True
+open_acc                       True
+revol_util                     True
+total_acc                      True
+revol_util_percent             True
+pub_rec                       False
+initial_list_status           False
+policy_code                   False
+collections_12_mths_ex_med    False
+loan_status                   False
+pymnt_plan                    False
+addr_state                    False
+desc                          False
+emp_length                    False
+home_ownership                False
+dtype: bool
+
+### TARGET ANALYSIS ENTERED ###
+Target has 2 unique values
+Printing % occurence of each class in target Column
+0    0.870484
+1    0.129516
+Name: _target_is_bad, dtype: float64
+Iteration: 0
+Checking Final Presence of Missing Per Column annual_inc                    False
+dti                           False
+delinq_2yrs                   False
+inq_last_6mths                False
+open_acc                      False
+revol_util                    False
+total_acc                     False
+revol_util_percent            False
+pub_rec                       False
+initial_list_status           False
+policy_code                   False
+collections_12_mths_ex_med    False
+loan_status                   False
+pymnt_plan                    False
+addr_state                    False
+desc                          False
+emp_length                    False
+home_ownership                False
+dtype: bool
+!!!---!!!
+
+Printing Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!
+
+pub_rec                        4
+initial_list_status            1
+policy_code                    1
+collections_12_mths_ex_med     1
+loan_status                    6
+pymnt_plan                     2
+addr_state                    50
+desc                           2
+emp_length                    12
+home_ownership                 4
+dtype: int64
+
+Segregation time taken : 3.6070706844329834
+Segregation Done!
+
+#### OUTLIER WINSORIZING ####
+ #### DONE ####
+zip_code count of words is 141 - 0 - 0 - 0 -
+dropping column zip_code
+emp_title count of words is 21 - 40 - 50 - 20 -
+dropping column emp_title
+(141, 0)
+Time taken to tokenize the DataFrame 0.7530069351196289
+Columns that are going to be removed are  ['zip_code', 'emp_title']
+Time taken for completion of excess column removal: 0.0
+No Remarks or Comments Found 
+Extracting Review Columns time 0.7842576503753662
+No review/comment columns found
+total text analytics time taken = 0.7842576503753662
+Text Engineering Result Empty DataFrame
+Columns: []
+Index: []
+
+ #### PEARSON CORRELATION ####
+
+1 columns removed which were highly correlated
+The columns removed are ['revol_util_percent']
+ #### DONE ####
+num_df - (7999, 7)
+disc_df - (7999, 10)
+DATE_DF - (7999, 4)
+TEXT_DF - (0, 0)
+
+ #### TRANSFORMATIONS ####
+
+ #### TARGET ENCODING ####
+(7999, 21)
+(7999,)
+Target Encoding Time taken : 0.24999785423278809
+
+ #### FEATURE SELECTION ####
+(7999, 21)
+runnning classifier selector
+
+Binary Classification
+HBox(children=(FloatProgress(value=0.0, max=10.0), HTML(value='')))
+
+
+thresh2: 2.588235294117647
+
+The final score sheet of 7 selected columns with importances:
+
+                  col_name  scores2   t/f
+0               annual_inc      223  True
+1                      dti      121  True
+11             loan_status      100  True
+5               revol_util       35  True
+19  earliest_cr_line-today       22  True
+18   earliest_cr_line_year       10  True
+13              addr_state        7  True
+
+14 columns are eliminated during Feature Selection which are:
+{'open_acc', 'pub_rec', 'earliest_cr_line_Holiday', 'inq_last_6mths', 'delinq_2yrs', 'total_acc', 'pymnt_plan', 'initial_list_status', 'desc', 'policy_code', 'emp_length', 'earliest_cr_line_month', 'home_ownership', 'collections_12_mths_ex_med'}
+(7999, 21)
+(7999,)
+Feature Selection Time taken : 0.8635013103485107
+Feature Selection Plot Time taken : 2.6978554725646973
+(7999, 7)
+(7999,)
+
+ #### DECISION TREE VISUALIZATION ####
+Length of X_cart and y_cart 7999 --- 7999
+Length of X_cart_res and y_cart_res 13926 --- 13926
+loan_status column will now be truncated
+The values after truncating the text are as follows
+charge...    6941
+fully ...    6526
+curren...     430
+late (...      22
+in gra...       7
+Name: loan_status, dtype: int64
+addr_state column will now be truncated
+The values after truncating the text are as follows
+ca    2697
+ny    1237
+fl    1106
+tx     874
+nj     724
+ga     563
+va     547
+il     525
+pa     474
+ma     459
+md     385
+oh     372
+wa     323
+az     269
+nc     265
+ct     264
+mi     238
+co     232
+nv     214
+mo     213
+al     186
+sc     165
+ky     146
+or     140
+ok     136
+mn     136
+wi     125
+ut     112
+la     111
+ks      79
+nm      74
+ri      69
+ar      63
+wv      60
+ak      50
+nh      49
+de      45
+dc      43
+hi      37
+mt      25
+vt      25
+wy      16
+ms      14
+sd      14
+tn      11
+ne       8
+ia       2
+in       2
+id       1
+me       1
+Name: addr_state, dtype: int64
+name 'localconverter' is not defined
+#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####
+DISCRETE COLUMNS ARE:      pub_rec initial_list_status policy_code  ...     desc emp_length home_ownership
+0        0.0               False           1  ...  missing    4 years           rent
+1        0.0               False           1  ...   others    missing       mortgage
+2        0.0               False           1  ...   others     1 year       mortgage
+3        0.0               False           1  ...   others   < 1 year           rent
+4        0.0               False           1  ...  missing    9 years       mortgage
+...      ...                 ...         ...  ...      ...        ...            ...
+7994     0.0               False           1  ...   others    3 years           rent
+7995     0.0               False           1  ...  missing    5 years           rent
+7996     1.0               False           1  ...  missing     1 year           rent
+7997     0.0               False           1  ...   others    7 years       mortgage
+7998     0.0               False           1  ...   others    6 years       mortgage
+
+[7999 rows x 10 columns]
+DISCRETE COLUMNS ARE!!!!!!!: ['loan_status', 'addr_state']
+Categorical Columns considered:
+
+Index(['loan_status', 'addr_state'], dtype='object')
+Non-Categorical Columns considered:
+
+Index(['annual_inc', 'dti', 'revol_util', 'earliest_cr_line_year',
+       'earliest_cr_line-today'],
+      dtype='object')
+value=[n1,n2,n3...] where n1,n2,n3 are the number of samples of the classes in the order     
+value=['no' 'yes']
+['no', 'yes']
+(7999, 7)
+(7999,)
+
+ #### NORMALIZATION ####
+ #### DONE ####
+(7999, 7)
+(7999,)
+
+ #### POWER TRANSFORMATIONS ####
+ #### DONE ####
+(7999, 7)
+(7999,)
+
+ #### Printing Sample Equation of the DATA ####
+LABEL ENCODED FOR SAMPLE EQUATION
+
+
+LOGISTIC REGRESSION EQUATION:
+
+
+ln(odds) = 2.2779678240814018e-06*annual_inc + 0.024898081531920437*dti + 0.006976583159368281*revol_util + 0.0018470851204493047*earliest_cr_line_year + -2.2728007844174498e-05*earliest_cr_line-today + -5.298426691504245*loan_status + -0.0036072328476679668*addr_state + -4.572880852921143e-05
+
+=> odds = exp ( 2.2779678240814018e-06*annual_inc + 0.024898081531920437*dti + 0.006976583159368281*revol_util + 0.0018470851204493047*earliest_cr_line_year + -2.2728007844174498e-05*earliest_cr_line-today + -5.298426691504245*loan_status + -0.0036072328476679668*addr_state + -4.572880852921143e-05 )
+
+Where, odds = P(class=yes) / 1 - P(class=yes) 
+
+In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/6 or 16.67%.
+
+Estimated f1 score =  99.95%
+(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)
+
+Where the columns are encoded like this:
+
++--------------------+-----------------------+
+| loan_status        |   loan_status encoded |
+|--------------------+-----------------------|
+| charged off        |                     0 |
+| current            |                     1 |
+| fully paid         |                     2 |
+| in grace period    |                     3 |
+| late (16-30 days)  |                     4 |
+| late (31-120 days) |                     5 |
++--------------------+-----------------------+
++--------------+----------------------+
+| addr_state   |   addr_state encoded |
+|--------------+----------------------|
+| ak           |                    0 |
+| al           |                    1 |
+| ar           |                    2 |
+| az           |                    3 |
+| ca           |                    4 |
+| co           |                    5 |
+| ct           |                    6 |
+| dc           |                    7 |
+| de           |                    8 |
+| fl           |                    9 |
+| ga           |                   10 |
+| hi           |                   11 |
+| ia           |                   12 |
+| id           |                   13 |
+| il           |                   14 |
+| in           |                   15 |
+| ks           |                   16 |
+| ky           |                   17 |
+| la           |                   18 |
+| ma           |                   19 |
+| md           |                   20 |
+| me           |                   21 |
+| mi           |                   22 |
+| mn           |                   23 |
+| mo           |                   24 |
+| ms           |                   25 |
+| mt           |                   26 |
+| nc           |                   27 |
+| ne           |                   28 |
+| nh           |                   29 |
+| nj           |                   30 |
+| nm           |                   31 |
+| nv           |                   32 |
+| ny           |                   33 |
+| oh           |                   34 |
+| ok           |                   35 |
+| or           |                   36 |
+| pa           |                   37 |
+| ri           |                   38 |
+| sc           |                   39 |
+| sd           |                   40 |
+| tn           |                   41 |
+| tx           |                   42 |
+| ut           |                   43 |
+| va           |                   44 |
+| vt           |                   45 |
+| wa           |                   46 |
+| wi           |                   47 |
+| wv           |                   48 |
+| wy           |                   49 |
++--------------+----------------------+
+ #### DONE ####
+
+This is final shape of X_train : (7999, 7)
+This is final shape of Y_train : (7999,)
+
+
+ #### SAVING INIT INFORMATION ####
+ #### DONE ####
+
+ TOTAL TRAINING DATA CLEANING AND PLOTS : 11.322320699691772
+
+	 #### VALIDATION AND SCORING ZONE ####
+Value of Key from Training is:  _id_member_id
+Total no. of null values present in the Key:  _id_member_id    0
+_id_member_id    0
+dtype: int64
+NUll values after removal are:  _id_member_id    0
+_id_member_id    0
+dtype: int64
+
+	 Entering Date Engineering
+
+Printing Missing % of date columns
+                  Missing in %
+earliest_cr_line           0.0
+
+	 #### RUNNING WAIT ####
+
+Visualizing Coloumns Generated
+ {'earliest_cr_line': ['earliest_cr_line_month', 'earliest_cr_line_year', 'earliest_cr_line-today', 'earliest_cr_line_nearestHoliday']}
+
+The Following columns were generated to get days between dates of two seperate date columns
+ []
+
+Date Engineering Time Taken : 0.32999658584594727
+
+	 #### DONE ####
+
+ #### TRANSFORMATION AND PREDICTION ####
+num_df - (2000, 7)
+disc_df - (2000, 10)
+DATE_DF - (2000, 4)
+TEXT_DF - (0, 0)
+
+This is final shape of X_test : (2000, 7)
+
+ #### PRINTING THE LIST OF COLUMNS AND ITS TYPES THAT ENTER THE MODEL TRAINING ####
+#### PRINTING X_test ####
+Index(['annual_inc', 'dti', 'revol_util', 'loan_status', 'addr_state',
+       'earliest_cr_line_year', 'earliest_cr_line-today'],
+      dtype='object')
+annual_inc                float64
+dti                       float64
+revol_util                float64
+loan_status               float64
+addr_state                float64
+earliest_cr_line_year     float64
+earliest_cr_line-today    float64
+dtype: object
+
+
+    annual_inc       dti  revol_util  ...  addr_state  earliest_cr_line_year  earliest_cr_line-today
+0     0.268214  0.161539    1.000000  ...    0.503365               1.000000                0.021528
+1     0.896686  0.787354    0.755033  ...    0.451285               0.564208                0.444310
+2     0.661771  0.070020    0.593633  ...    0.492898               0.564208                0.444310
+3     0.648158  0.529045    0.761179  ...    0.412601               0.688321                0.301522
+4     0.626734  0.565289    0.138224  ...    0.388979               0.564208                0.447401
+5     0.582046  0.658129    0.777137  ...    0.492898               0.426153                0.581439
+6     0.344248  0.976744    0.784493  ...    0.472733               0.457973                0.539370
+7     0.021407  0.302819    0.019172  ...    0.530685               0.644821                0.383411
+8     0.484485  1.000000    0.908607  ...    0.461272               0.688321                0.312755
+9     0.196203  0.297225    0.972435  ...    0.358611               0.564208                0.453437
+10    0.297467  0.828266    0.892884  ...    0.472733               0.246251                0.747720
+11    0.297467  0.000000    0.099259  ...    0.374127               0.564208                0.435042
+12    0.071054  0.000000    0.269413  ...    0.277137               0.832705                0.191535
+13    0.671015  0.267499    0.119445  ...    0.402188               0.564208                0.441304
+14    0.000000  0.867432    0.668520  ...    0.277137               0.688321                0.323930
+15    1.000000  0.608889    0.629915  ...    0.388979               0.564208                0.431989
+16    1.000000  0.156966    0.597394  ...    0.391617               0.340418                0.659793
+17    0.357510  0.799437    0.469754  ...    0.521950               0.832705                0.173757
+18    0.946977  0.000000    0.155609  ...    0.530685               0.171512                0.810964
+19    0.593412  0.165537    0.627418  ...    0.404975               0.426153                0.559579
+
+[20 rows x 7 columns]
+
+
+
+#### PRINTING X_train ####
+Index(['annual_inc', 'dti', 'revol_util', 'loan_status', 'addr_state',
+       'earliest_cr_line_year', 'earliest_cr_line-today'],
+      dtype='object')
+annual_inc                float64
+dti                       float64
+revol_util                float64
+loan_status               float64
+addr_state                float64
+earliest_cr_line_year     float64
+earliest_cr_line-today    float64
+dtype: object
+
+
+    annual_inc       dti  revol_util  ...  addr_state  earliest_cr_line_year  earliest_cr_line-today
+0     0.374144  0.492086    0.382568  ...    0.374127               0.661631                0.358975
+1     0.817553  0.395585    0.005485  ...    0.374127               0.142838                0.811288
+2     1.000000  0.935964    0.821177  ...    0.412601               0.244226                0.720075
+3     0.122248  1.000000    0.634907  ...    0.385960               0.703073                0.301428
+4     0.725442  0.604056    0.673487  ...    0.333200               0.397385                0.587286
+5     0.615797  0.264688    0.000000  ...    0.451285               0.226976                0.736816
+6     0.458196  0.507326    0.830934  ...    0.277137               1.000000                0.049114
+7     1.000000  0.218983    1.000000  ...    0.492898               0.746658                0.287739
+8     0.522439  0.460969    0.077651  ...    0.310184               0.453313                0.527654
+9     0.626734  0.517107    1.000000  ...    0.530685               0.840623                0.159953
+10    0.000000  0.302260    0.500279  ...    0.385960               0.210725                0.749093
+11    0.000000  1.000000    0.639895  ...    0.530685               0.944284                0.077386
+12    0.316468  0.031031    0.171613  ...    0.358611               0.453313                0.527654
+13    0.095005  1.000000    0.184918  ...    0.388979               0.746658                0.287739
+14    0.213848  1.000000    0.816295  ...    0.416523               0.549312                0.441009
+15    0.374144  1.000000    0.496470  ...    0.404975               0.584834                0.411365
+16    0.953853  0.344631    0.000000  ...    0.502226               0.347276                0.630896
+17    0.064978  0.815174    1.000000  ...    0.521950               0.483627                0.523222
+18    0.509979  0.132906    0.039640  ...    0.374127               0.324244                0.658935
+19    1.000000  0.965405    0.827277  ...    0.530685               0.324244                0.642675
+
+[20 rows x 7 columns]
+
+
+
+HYPER OP
+0.8704838104763095
+0.12951618952369046
+7
+PRIOR LIST IS [0.87048381 0.12951619]
+Shape of ModelDF (0, 14)
+##Dropping models that behave poorly##
+local variable 'ind' referenced before assignment
+
+
+<class 'UnboundLocalError'> testtk.py 36
