@@ -143,7 +143,8 @@ def Segregation(df,y):
     print('\nPrinting Cardinality info of obj Discrete Columns!\n')
     print(obj_df.nunique())
     disc = pd.concat([cat_num,obj_df],axis=1)
-    numeric = ForestImputer(numeric,disc,y)
+    if numeric.empty is False:
+        numeric = ForestImputer(numeric,disc,y)
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')
     print(disc.nunique())
     end = time.time()
@@ -546,4 +547,3 @@ def userInteractVisualization(df,targ):
                             pass
 
         print(f'\t Done with Histogram and Bivar plotting in time {time.time() - start} seconds ')
-

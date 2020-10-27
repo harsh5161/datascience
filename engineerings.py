@@ -18,6 +18,8 @@ np.random.seed(2018)
 import nltk
 nltk.download('wordnet',quiet=True)
 from gensim import corpora, models
+from wordcloud import WordCloud,STOPWORDS 
+from IPython.display import Image 
 stemmer = SnowballStemmer('english')
 
 ############################################
@@ -351,7 +353,8 @@ def preprocess(text):
     return result
 
 def topicExtraction(df,validation=False,lda_model_tfidf=None):
-
+  
+  print("Names of columns are",df.columns)
   data_text = df.copy()
   data_text['index'] = data_text.index
   documents = data_text
@@ -364,6 +367,19 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
 
   dictionary = gensim.corpora.Dictionary(processed_docs) #converting into gensim dict
   dictionary.filter_extremes(no_below=10,no_above=0.25, keep_n=1000)   #taking most frequent tokens
+  
+  if validation==False:
+    print("Generating Wordcloud...")
+    word_str = ""
+    for k,v in dictionary.token2id.items():
+        word_str = word_str + k + " "
+    # Generating wordcloud
+    wordcloud = WordCloud(width = 1000, height = 800, random_state=42, background_color='white', colormap='twilight', collocations=False, stopwords = STOPWORDS).generate(word_str)
+    #Saving the image
+    file = str(df.columns[0])+"_wordcloud.png"
+    wordcloud.to_file(file)
+    image = Image(filename=file)
+    display(image)
 
   bow_corpus = [dictionary.doc2bow(doc) for doc in processed_docs] #document to bag of words
 
