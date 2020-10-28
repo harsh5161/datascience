@@ -7,14 +7,14 @@ import numpy as np
 import re
 
 #R packages
-import rpy2.robjects as ro
-from rpy2.robjects.packages import importr
-from rpy2.robjects.conversion import localconverter
-from rpy2.robjects import pandas2ri
+# import rpy2.robjects as ro
+# from rpy2.robjects.packages import importr
+# from rpy2.robjects.conversion import localconverter
+# from rpy2.robjects import pandas2ri
 
 # utils = importr('utils')
 # utils.install_packages('rpart.plot',repos="https://mirror.niser.ac.in/cran/")
-grdevices = importr('grDevices')
+# grdevices = importr('grDevices')
 # utils.install_packages('rattle',repos="https://mirror.niser.ac.in/cran/")
 # utils.install_packages('RColorBrewer',repos="https://mirror.niser.ac.in/cran/")
 
