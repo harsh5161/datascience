@@ -44,7 +44,7 @@ done ...
 		   cmsd2_sns_general_ind is of type float64
 		   pdc_lip is of type float64
 		   submcc_sor_eye_pmpm_ct is of type float64
-Numeric Engineering time taken: 0.03465533256530762
+Numeric Engineering time taken: 0.03126096725463867
 
 
 
@@ -94,7 +94,7 @@ done ...
 		   pdc_lip is of type float64
 		   submcc_sor_eye_pmpm_ct is of type float64
 		   _target_transportation_issues is of type float64
-Numeric Engineering time taken: 0.42998290061950684
+Numeric Engineering time taken: 0.624993085861206
 
 
 
@@ -151,9 +151,8 @@ There are 6 categorical numeric columns
 The pure numeric columns are Index(['cms_tot_ma_payment_amt', 'est_age', 'submcc_men_abus_pmpm_ct',
        'submcc_sor_ear_pmpm_ct', 'pdc_lip', 'submcc_sor_eye_pmpm_ct'],
       dtype='object')
-The categorical numeric columns are Index(['phy_em_pe_ind', 'cmsd2_men_mad_ind', 'ccsp_239_ind',
-       'cmsd2_skn_radiation_ind', 'submcc_inj_comp_ind',
-       'cmsd2_sns_general_ind'],
+The categorical numeric columns are Index(['submcc_inj_comp_ind', 'phy_em_pe_ind', 'cmsd2_men_mad_ind',
+       'ccsp_239_ind', 'cmsd2_skn_radiation_ind', 'cmsd2_sns_general_ind'],
       dtype='object')
 
 We found 2 obj type columns!
@@ -191,11 +190,11 @@ submcc_men_abus_pmpm_ct    False
 submcc_sor_ear_pmpm_ct     False
 pdc_lip                    False
 submcc_sor_eye_pmpm_ct     False
+submcc_inj_comp_ind        False
 phy_em_pe_ind              False
 cmsd2_men_mad_ind          False
 ccsp_239_ind               False
 cmsd2_skn_radiation_ind    False
-submcc_inj_comp_ind        False
 cmsd2_sns_general_ind      False
 cons_homstat               False
 cms_ra_factor_type_cd      False
@@ -214,11 +213,11 @@ submcc_men_abus_pmpm_ct    False
 submcc_sor_ear_pmpm_ct     False
 pdc_lip                    False
 submcc_sor_eye_pmpm_ct     False
+submcc_inj_comp_ind        False
 phy_em_pe_ind              False
 cmsd2_men_mad_ind          False
 ccsp_239_ind               False
 cmsd2_skn_radiation_ind    False
-submcc_inj_comp_ind        False
 cmsd2_sns_general_ind      False
 cons_homstat               False
 cms_ra_factor_type_cd      False
@@ -227,29 +226,29 @@ dtype: bool
 
 Printing Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!
 
+submcc_inj_comp_ind         2
 phy_em_pe_ind               2
 cmsd2_men_mad_ind           2
 ccsp_239_ind                2
 cmsd2_skn_radiation_ind     2
-submcc_inj_comp_ind         2
 cmsd2_sns_general_ind       2
 cons_homstat                6
 cms_ra_factor_type_cd      10
 dtype: int64
 
-Segregation time taken : 1.7123582363128662
+Segregation time taken : 1.718740463256836
 Segregation Done!
 
 #### OUTLIER WINSORIZING ####
  #### DONE ####
 (150, 0)
-Time taken to tokenize the DataFrame 0.7677311897277832
+Time taken to tokenize the DataFrame 0.734365701675415
 Columns that are going to be removed are  []
 Time taken for completion of excess column removal: 0.0
 No Remarks or Comments Found 
-Extracting Review Columns time 0.7990005016326904
+Extracting Review Columns time 0.7656276226043701
 No review/comment columns found
-total text analytics time taken = 0.7990005016326904
+total text analytics time taken = 0.7656276226043701
 Text Engineering Result Empty DataFrame
 Columns: []
 Index: []
@@ -269,14 +268,13 @@ TEXT_DF - (0, 0)
  #### TARGET ENCODING ####
 (55657, 14)
 (55657,)
-Target Encoding Time taken : 0.3144962787628174
+Target Encoding Time taken : 0.2968637943267822
 
  #### FEATURE SELECTION ####
 (55657, 14)
 runnning classifier selector
 
 Binary Classification
-HBox(children=(HTML(value=''), FloatProgress(value=0.0, max=10.0), HTML(value='')))
 
 
 thresh2: 89.2
@@ -289,19 +287,19 @@ The final score sheet of 11 selected columns with importances:
 5    submcc_sor_eye_pmpm_ct      444  True
 12             cons_homstat      266  True
 13    cms_ra_factor_type_cd      164  True
-7         cmsd2_men_mad_ind      122  True
-8              ccsp_239_ind      116  True
+8         cmsd2_men_mad_ind      122  True
+9              ccsp_239_ind      116  True
 4                   pdc_lip      108  True
 3    submcc_sor_ear_pmpm_ct      106  True
 11    cmsd2_sns_general_ind      101  True
-9   cmsd2_skn_radiation_ind       90  True
+10  cmsd2_skn_radiation_ind       90  True
 
 3 columns are eliminated during Feature Selection which are:
-{'phy_em_pe_ind', 'submcc_inj_comp_ind', 'submcc_men_abus_pmpm_ct'}
+{'submcc_inj_comp_ind', 'submcc_men_abus_pmpm_ct', 'phy_em_pe_ind'}
 (55657, 14)
 (55657,)
-Feature Selection Time taken : 5.2214086055755615
-Feature Selection Plot Time taken : 2.447718381881714
+Feature Selection Time taken : 5.068872690200806
+Feature Selection Plot Time taken : 0.26059818267822266
 (55657, 11)
 (55657,)
 
@@ -332,18 +330,44 @@ se              52
 Name: cms_ra_factor_type_cd, dtype: int64
 name 'localconverter' is not defined
 #### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####
-DISCRETE COLUMNS ARE:       phy_em_pe_ind cmsd2_men_mad_ind  ... cons_homstat cms_ra_factor_type_cd
-0               1.0               1.0  ...            y                    cn
-1               1.0               1.0  ...            r                    cp
-2               1.0               0.0  ...            y                    cp
-3               0.0               0.0  ...            y                    cn
-4               0.0               0.0  ...      missing                    cn
-...             ...               ...  ...          ...                   ...
-55652           0.0               0.0  ...            y                    cn
-55653           1.0               0.0  ...            y                    cn
-55654           0.0               0.0  ...            y               missing
-55655           1.0               0.0  ...      missing               missing
-55656           0.0               0.0  ...      missing                    cn
+DISCRETE COLUMNS ARE:       submcc_inj_comp_ind phy_em_pe_ind cmsd2_men_mad_ind ccsp_239_ind  \
+0                     0.0           1.0               1.0          0.0   
+1                     0.0           1.0               1.0          0.0   
+2                     0.0           1.0               0.0          0.0   
+3                     0.0           0.0               0.0          0.0   
+4                     0.0           0.0               0.0          0.0   
+...                   ...           ...               ...          ...   
+55652                 0.0           0.0               0.0          0.0   
+55653                 0.0           1.0               0.0          0.0   
+55654                 0.0           0.0               0.0          0.0   
+55655                 0.0           1.0               0.0          0.0   
+55656                 0.0           0.0               0.0          0.0   
+
+      cmsd2_skn_radiation_ind cmsd2_sns_general_ind cons_homstat  \
+0                         0.0                   1.0            y   
+1                         0.0                   0.0            r   
+2                         0.0                   0.0            y   
+3                         0.0                   1.0            y   
+4                         0.0                   1.0      missing   
+...                       ...                   ...          ...   
+55652                     0.0                   0.0            y   
+55653                     0.0                   0.0            y   
+55654                     0.0                   1.0            y   
+55655                     0.0                   0.0      missing   
+55656                     0.0                   1.0      missing   
+
+      cms_ra_factor_type_cd  
+0                        cn  
+1                        cp  
+2                        cp  
+3                        cn  
+4                        cn  
+...                     ...  
+55652                    cn  
+55653                    cn  
+55654               missing  
+55655               missing  
+55656                    cn  
 
 [55657 rows x 8 columns]
 DISCRETE COLUMNS ARE!!!!!!!: ['cmsd2_men_mad_ind', 'ccsp_239_ind', 'cmsd2_skn_radiation_ind', 'cmsd2_sns_general_ind', 'cons_homstat', 'cms_ra_factor_type_cd']
@@ -426,7 +450,7 @@ This is final shape of Y_train : (55657,)
  #### SAVING INIT INFORMATION ####
  #### DONE ####
 
- TOTAL TRAINING DATA CLEANING AND PLOTS : 19.792561054229736
+ TOTAL TRAINING DATA CLEANING AND PLOTS : 17.69616413116455
 
 	 #### VALIDATION AND SCORING ZONE ####
 Value of Key from Training is:  _id_person_id_syn
@@ -436,116 +460,7 @@ dtype: int64
 NUll values after removal are:  _id_person_id_syn    0
 _id_person_id_syn    0
 dtype: int64
-
- #### TRANSFORMATION AND PREDICTION ####
-num_df - (13915, 6)
-disc_df - (13915, 8)
-DATE_DF - (0, 0)
-TEXT_DF - (0, 0)
-
-This is final shape of X_test : (13915, 11)
-
- #### PRINTING THE LIST OF COLUMNS AND ITS TYPES THAT ENTER THE MODEL TRAINING ####
-#### PRINTING X_test ####
-Index(['cms_tot_ma_payment_amt', 'est_age', 'submcc_sor_ear_pmpm_ct',
-       'pdc_lip', 'submcc_sor_eye_pmpm_ct', 'cmsd2_men_mad_ind',
-       'ccsp_239_ind', 'cmsd2_skn_radiation_ind', 'cmsd2_sns_general_ind',
-       'cons_homstat', 'cms_ra_factor_type_cd'],
-      dtype='object')
-cms_tot_ma_payment_amt     float64
-est_age                    float64
-submcc_sor_ear_pmpm_ct     float64
-pdc_lip                    float64
-submcc_sor_eye_pmpm_ct     float64
-cmsd2_men_mad_ind          float64
-ccsp_239_ind               float64
-cmsd2_skn_radiation_ind    float64
-cmsd2_sns_general_ind      float64
-cons_homstat               float64
-cms_ra_factor_type_cd      float64
-dtype: object
-
-
-    cms_tot_ma_payment_amt   est_age  ...  cons_homstat  cms_ra_factor_type_cd
-0                 0.462091  0.835679  ...      0.429959               0.908118
-1                 0.888655  0.670556  ...      0.416925               0.908118
-2                 0.000000  0.042487  ...      0.000000               0.995346
-3                 0.111514  0.546137  ...      0.000000               0.908118
-4                 0.176490  1.000000  ...      0.000000               0.908118
-5                 0.468339  0.711916  ...      0.000000               0.908118
-6                 0.000000  0.421176  ...      0.645400               0.908118
-7                 0.000000  0.337544  ...      0.000000               0.908118
-8                 0.776808  0.000000  ...      0.847109               0.995346
-9                 1.000000  0.295624  ...      0.416925               0.995346
-10                0.439170  0.504546  ...      0.000000               0.908118
-11                0.000000  0.753223  ...      0.000000               0.908118
-12                0.517711  0.421176  ...      0.416925               0.908118
-13                0.858141  1.000000  ...      0.416925               0.908118
-14                0.374848  1.000000  ...      0.429959               0.908118
-15                0.549770  0.211564  ...      0.416925               0.957739
-16                1.000000  0.876831  ...      0.416925               0.908118
-17                0.359142  0.587668  ...      0.429959               0.908118
-18                0.482951  0.753223  ...      0.000000               0.908118
-19                0.350089  0.379394  ...      0.416925               0.908118
-
-[20 rows x 11 columns]
-
-
-
-#### PRINTING X_train ####
-Index(['cms_tot_ma_payment_amt', 'est_age', 'submcc_sor_ear_pmpm_ct',
-       'pdc_lip', 'submcc_sor_eye_pmpm_ct', 'cmsd2_men_mad_ind',
-       'ccsp_239_ind', 'cmsd2_skn_radiation_ind', 'cmsd2_sns_general_ind',
-       'cons_homstat', 'cms_ra_factor_type_cd'],
-      dtype='object')
-cms_tot_ma_payment_amt     float64
-est_age                    float64
-submcc_sor_ear_pmpm_ct     float64
-pdc_lip                    float64
-submcc_sor_eye_pmpm_ct     float64
-cmsd2_men_mad_ind          float64
-ccsp_239_ind               float64
-cmsd2_skn_radiation_ind    float64
-cmsd2_sns_general_ind      float64
-cons_homstat               float64
-cms_ra_factor_type_cd      float64
-dtype: object
-
-
-    cms_tot_ma_payment_amt   est_age  ...  cons_homstat  cms_ra_factor_type_cd
-0                 1.000000  0.253632  ...      0.000000               0.908118
-1                 0.366575  0.000000  ...      0.847109               0.995346
-2                 0.064221  0.000000  ...      0.000000               0.995346
-3                 0.594218  0.835679  ...      0.000000               0.908118
-4                 0.215595  0.546137  ...      0.685206               0.908118
-5                 0.990880  0.000000  ...      0.645400               0.908118
-6                 0.698225  0.753223  ...      0.000000               0.908118
-7                 0.824277  0.421176  ...      0.685206               0.908118
-8                 0.812151  0.421176  ...      0.685206               0.908118
-9                 0.247352  0.917935  ...      0.685206               0.908118
-10                0.672451  1.000000  ...      0.429959               0.908118
-11                0.000000  1.000000  ...      0.000000               0.908118
-12                1.000000  1.000000  ...      0.000000               0.995346
-13                0.627272  0.958991  ...      0.000000               0.908118
-14                0.418588  0.253632  ...      0.000000               0.908118
-15                0.000000  0.211564  ...      0.685206               0.908118
-16                0.560486  0.084884  ...      0.000000               0.958648
-17                0.000000  0.295624  ...      0.000000               0.958648
-18                0.000000  0.794476  ...      0.000000               0.908118
-19                1.000000  0.462893  ...      0.685206               0.908118
-
-[20 rows x 11 columns]
-
-
-
-HYPER OP
-0.8534236484179888
-0.14657635158201124
-6
-PRIOR LIST IS [0.85342365 0.14657635]
-Shape of ModelDF (0, 14)
-##Dropping models that behave poorly##
-local variable 'ind' referenced before assignment
+'DataFrame' object has no attribute 'dtype'
 
 
 
