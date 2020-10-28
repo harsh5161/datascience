@@ -10,13 +10,13 @@ def getSize(filename):
 def main():
     files = [] # Creating a list of valid files based on extension
         # Only CSV,XLSX,XLS and JSON files will be tested
-        for i in os.listdir('./test/'):
-            try:
-                ext = i.split('.')[1].lower()
-                if ext == 'csv' or ext == 'xlsx' or ext == 'xls' or ext == 'json':
-                    files.append(i)
-            except:
-                pass
+    for i in os.listdir('./test/'):
+        try:
+            ext = i.split('.')[1].lower()
+            if ext == 'csv' or ext == 'xlsx' or ext == 'xls' or ext == 'json':
+                files.append(i)
+        except:
+            pass
     print(files)
 
     # Create a dataframe with filename and size as columns
