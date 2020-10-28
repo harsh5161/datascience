@@ -1,11 +1,27 @@
 import os,sys
 import pandas as pd
 import Training
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Get Size of a specific file using /path/filename.extension
 def getSize(filename):
     return os.stat('./test/' + filename).st_size
 
+class Logger(object):
+    def __init__(self,filena):
+        self.terminal = sys.stdout
+        self.log = open(filena, "w")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)  
+
+    def flush(self):
+        #this flush method is needed for python 3 compatibility.
+        #this handles the flush command by doing nothing.
+        #you might want to specify some extra behavior here.
+        pass    
 # Main Function definition
 def main():
     files = [] # Creating a list of valid files based on extension
@@ -35,8 +51,11 @@ def main():
     print('#### RUNNING WAIT ####')
     # For every file in the files list
     for filename in files_df['Files']:
-        sys.stdout = open('./test/' + filename.split('.')[0] + '_log.txt','w')
+        # sys.stdout = open('./test/' + filename.split('.')[0] + '_log.txt','w')
+        filena = './test/' + filename.split('.')[0] + '_log.txt'
+        sys.stdout = Logger(filena)
         print('Testing {}\n'.format(filename))
+        print("Enter the Target variable:")
         try:
             # Test file
             ret = Training.main(test=True,Path='./test/' + filename)
@@ -50,7 +69,7 @@ def main():
             files_df.loc[indexNumber,'Result'] = 'Error'
         # Increment index to write on the next row of the dataframe
         indexNumber += 1
-        sys.stdout.close()
+        # sys.stdout.close()
 
     # Save the DataFrame to CSV as a report of the test
     files_df.to_csv('./test/TestReport.report')

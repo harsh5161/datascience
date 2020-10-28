@@ -309,44 +309,45 @@ def INIT(df,info):
     TrainingColumns = X.columns
     fe_s = time.time()
 
-    try:
-        featureSelectionPlot(feat_df[:15])
-    except:
-        print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
-    fe_e = time.time()
-    print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
+    # try:
+    #     featureSelectionPlot(feat_df[:15])
+    # except:
+    #     print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
+    # fe_e = time.time()
+    # print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
     print(X.shape)
     print(y.shape)
     ############# FEATURE SELECTION AND PLOTS #####################
 
     ############# CART DECISION TREE VISUALIZATION #####################
-    print('\n #### DECISION TREE VISUALIZATION ####')
-    X_cart = X_old.copy() #making a specific copy for CART because X_old is also being used by sample equation
-    X_cart.reset_index(drop=True, inplace=True)
-    y_cart = y.copy()
-    y_cart.reset_index(drop=True, inplace=True)
-    if class_or_Reg=='Classification':
-        print("Length of X_cart and y_cart",len(X_cart),"---",len(y_cart))
-        ros = RandomOverSampler(sampling_strategy='minority')
-        X_cart_res, y_cart_res = ros.fit_resample(X_cart,y_cart)
-        print("Length of X_cart_res and y_cart_res",len(X_cart_res),"---",len(y_cart_res))
-        passingList = y_cart_res.value_counts(normalize=True).values
-        cart_list =[X_cart_res,y_cart_res]
-        cart_df = pd.concat(cart_list,axis=1)
-    else:
-        passingList = []
-        cart_list =[X_cart,y_cart]
-        cart_df = pd.concat(cart_list,axis=1)
-    try:
-        cart_decisiontree(cart_df,target,class_or_Reg,passingList)
-    except Exception as e:
-        print(e)
-        print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
+    # print('\n #### DECISION TREE VISUALIZATION ####')
+    # X_cart = X_old.copy() #making a specific copy for CART because X_old is also being used by sample equation
+    # X_cart.reset_index(drop=True, inplace=True)
+    # y_cart = y.copy()
+    # y_cart.reset_index(drop=True, inplace=True)
+    # if class_or_Reg=='Classification':
+    #     print("Length of X_cart and y_cart",len(X_cart),"---",len(y_cart))
+    #     ros = RandomOverSampler(sampling_strategy='minority')
+    #     X_cart_res, y_cart_res = ros.fit_resample(X_cart,y_cart)
+    #     print("Length of X_cart_res and y_cart_res",len(X_cart_res),"---",len(y_cart_res))
+    #     passingList = y_cart_res.value_counts(normalize=True).values
+    #     cart_list =[X_cart_res,y_cart_res]
+    #     cart_df = pd.concat(cart_list,axis=1)
+    # else:
+    #     passingList = []
+    #     cart_list =[X_cart,y_cart]
+    #     cart_df = pd.concat(cart_list,axis=1)
+    # try:
+    #     cart_decisiontree(cart_df,target,class_or_Reg,passingList)
+    # except Exception as e:
+    #     print(e)
+    #     print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     ############# CART DECISION TREE VISUALIZATION #####################   
 
     
     ############# SKLEARN TREE VISUALIZATION ##################### 
     # The few lines below consider only columns of object/category type that remained after feature selection
+    print("I am here")
     try:
         vis_disc_cols = []
         print("DISCRETE COLUMNS ARE:",disc_df)

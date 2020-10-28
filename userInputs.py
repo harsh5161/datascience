@@ -189,7 +189,7 @@ def getUserInput(df,test=False):
                 else:print('HyperOP with MAX EVALS = 15')
 
         else:
-            target = None
+            target = getTarget(df.columns)
             key = None
             for col in df.columns:
                 if '_target_' in col:
@@ -199,7 +199,7 @@ def getUserInput(df,test=False):
             for col in df.columns:
                 if '_id_' in col:
                     key = col
-            quick = 'y'
+            quick = True
 
         info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
 
