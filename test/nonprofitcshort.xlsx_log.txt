@@ -10,4 +10,4 @@ The error message is 'utf-8' codec can't decode byte 0xbf in position 4: invalid
 'NoneType' object has no attribute 'rename'
 
 
-<class 'AttributeError'> testtk.py 36
+

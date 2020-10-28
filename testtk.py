@@ -1,4 +1,4 @@
-import os
+import os,sys
 import pandas as pd
 import Training
 
@@ -32,9 +32,10 @@ def main():
 
     # Use this indexNumber to edit other columns of the dataframe
     indexNumber = 0 
-
+    print('#### RUNNING WAIT ####')
     # For every file in the files list
     for filename in files_df['Files']:
+        sys.stdout = open('./test/' + filename.split('.')[0] + '_log.txt','w')
         print('Testing {}\n'.format(filename))
         try:
             # Test file
@@ -49,6 +50,7 @@ def main():
             files_df.loc[indexNumber,'Result'] = 'Error'
         # Increment index to write on the next row of the dataframe
         indexNumber += 1
+        sys.stdout.close()
 
     # Save the DataFrame to CSV as a report of the test
     files_df.to_csv('./test/TestReport.report')
