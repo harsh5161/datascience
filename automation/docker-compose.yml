@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+    autotest-service:
+        build: ./autotest
+        image: autotest
+        container_name: test
+        stdin_open: true # docker run -i
+        tty: true        # docker run -t
+        volumes:
+            - ./autotest:/app
