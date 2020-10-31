@@ -26,3 +26,6 @@ Y
 *.xlsx
 *.txt
 automation/autotest/test/TestReport.report
+MC.csv
+preview.csv
+*.png
