@@ -478,72 +478,239 @@ def getDF(df,model):
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
 
-def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var stores target name!!
+def userInteractVisualization(df,key):
+    import plotly.offline as py
+    import plotly.figure_factory as ff
+    import plotly.graph_objs as gobj
+    py.init_notebook_mode(connected=True)
 
-      l=[]
-      for b in set(df1[targ]):l.append((df1[df1[targ]==b].groupby(base_var).count()[targ]).rename(b))
-      c=pd.concat(l,axis=1)
-      if(df1[targ].nunique()>5):
-          a=list(c.sum(axis=0).sort_values(ascending=False)[:4].index)
-          c=pd.concat([c[a],pd.Series(c[list(set(c.columns)-set(a))].sum(axis=1),name='Others')],axis=1)
-      if(df1[base_var].dtype==np.object or df1[base_var].nunique()/len(df1)>0.1):
-          if(df1[base_var].nunique()<10):
-                a=c.plot(kind='bar')
-                plt.xlabel(base_var)
-                plt.ylabel("Frequency")
-                plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
-                plt.title(targ)
-                plt.show()
-          else:
-            a=c.loc[list(c.sum(axis=1).sort_values().index)[-10:]].plot(kind='bar')
-            plt.xlabel(base_var)
-            plt.ylabel("Frequency")
-            plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
-            plt.title(targ)
-            plt.show()
-           
-      else:
-          a=c.plot(kind='line',alpha=0.5)
-          plt.xlabel(base_var)
-          plt.ylabel("Frequency")
-          plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
-          plt.title(targ)
-          plt.show()
-          
-      return a
+    import plotly.express as px
+    from jupyter_dash import JupyterDash
+    import dash_core_components as dcc
+    import dash_html_components as html
+    from dash.dependencies import Input, Output
+    import dash_table
+    
+    df_copy=df.copy()
+    
+    # if there is a primary then dropping that
+    if key:
+        df= df.drop(key,axis=1)
+    
+    # making a list of numeric and object columns
+    numlist = list(df.select_dtypes(include=['int64','float64']).columns)
+    for col in numlist:
+        if df[col].nunique()<100:
+            numlist.remove(col)
+    objectlist = list(df.select_dtypes(include=['object']).columns)
+    
+    UNBRAND_CONFIG = dict(modeBarButtonsToRemove=['sendDataToCloud'], displaylogo=False, showLink=False)
+    # Build App
+    app = JupyterDash(__name__)
+    
+    # function to plot object columns
+    def plot_objcols(col_name, bar= True, pie= False):
+        values_count = pd.DataFrame(df[col_name].value_counts())
+        values_count.columns = ['count']
+        # convert the index column into a regular column.
+        values_count[col_name] = [ str(i) for i in values_count.index ]
+        # add a column with the percentage of each data point to the sum of all data points.
+        values_count['percent'] = values_count['count'].div(values_count['count'].sum()).multiply(100).round(2)
+        # change the order of the columns.
+        values_count = values_count.reindex([col_name,'count','percent'],axis=1)
+        values_count.reset_index(drop=True,inplace=True)
 
-def userInteractVisualization(df,targ):
-        df1 =  df.copy() #df.sample(n=1000,random_state=1) if len(df)>1000
-        B=list(df1.columns)
-        B.remove(targ)
-        l=[]
-        numlist = list(df1.select_dtypes(include=['int64','float64']).columns)
-        for col in numlist:
-            if df1[col].nunique()<100:
-                numlist.remove(col)
-        objectlist = list(df1.select_dtypes(include=['object']).columns)
-        start = time.time()
-        if numlist:
-            print("Generating Histograms for numeric columns")
-            try:
-                for c in numlist:
-                    df1.hist( column=c, bins=15, color=np.random.rand(3,))
-                    plt.show()
-                
-            except:
-                pass
 
-        if len(objectlist)>2:
-            i=0
-            print("Generating Bivariates for object columns")
-            for c in B:
-                    #Plots for cat features done if top 10 unique_values account for >10% of data (else visulaisation is significant)
-                    if(df1[c].dtype==np.object and np.sum(df1[c].value_counts(normalize=True).iloc[:min(10,df1[c].nunique())])<0.10):continue
-                    if(df1[c].dtype ==np.object):
-                        try:
-                            bivar_ploter(df1,c, targ);
-                            i=i+1
-                        except:
-                            pass
+        # add a font size for annotations0 which is relevant to the length of the data points.
+    #         font_size = 20 - (.25 * len(values_count[col_name]))
+        font_size = 14
 
-        print(f'\t Done with Histogram and Bivar plotting in time {time.time() - start} seconds ')
+        if bar == True:
+            trace0 = gobj.Bar( x = values_count[col_name], y = values_count['count'] )
+
+            annotations0 = [ dict(x = xi,
+                                 y = yi, 
+                                 showarrow=False,
+                                 font={'size':font_size},
+                                 text = "{:,}".format(yi),
+                                 xanchor='center',
+                                 yanchor='bottom' )
+                           for xi,yi,_ in values_count.values ]
+
+            annotations1 = [ dict( x = xi,
+                                  y = yi/2,
+                                  showarrow = False,
+                                  text = "{}%".format(pi),
+                                  xanchor = 'center',
+                                  yanchor = 'middle',
+                                  font = {'color':'yellow'})
+                             for xi,yi,pi in values_count.values if pi > 10 ]
+
+            annotations = annotations0 + annotations1                       
+
+            layout = gobj.Layout( title = col_name.replace('_',' ').capitalize(),
+                                 titlefont = {'size': 20},
+                                 yaxis = {'title':'count'},
+                                 xaxis = {'type':'category'},
+                                annotations = annotations  )
+            figure = gobj.Figure( data = trace0, layout = layout)
+
+        elif pie== True:
+            figure = px.pie(values_count, names=values_count[col_name], values=values_count['count'],title=col_name.replace('_',' ').capitalize())
+
+        return figure
+
+    # function to plot numeric columns
+    def plot_numcols(col_name, hist = True, box=False, violin=False):
+        series = df[col_name]
+        # remove zero values items [ indicates NA values.]
+        series = series[ series != 0 ]
+
+        if hist==True:
+            trace0 = gobj.Histogram( x = series,
+                                    histfunc = 'avg', 
+                                    histnorm = 'probability density',
+                                    opacity=.75,
+                                   marker = {'color':'#EB89B5'})
+
+            layout = gobj.Layout( title = col_name.replace('_',' ').capitalize(),
+                                titlefont = {'size':20},
+                                yaxis = {'title':'Probability/Density'},
+                                xaxis = {'title':col_name, 'type':'-'}
+                                 )
+            figure = gobj.Figure(data = trace0, layout = layout)
+
+        if box==True:
+            figure = gobj.Figure(data=gobj.Box(x=series, y0= col_name), layout = gobj.Layout(title=col_name.replace('_',' ').capitalize()))
+
+        if violin==True:
+            figure = gobj.Figure(data=gobj.Violin(x=series, box_visible=True, line_color='black',
+                                   meanline_visible=True, fillcolor='lightseagreen', opacity=0.6,
+                                   y0=col_name),  
+                                 layout = gobj.Layout(title=col_name.replace('_',' ').capitalize()))
+
+
+        return figure
+
+    # function to display table
+    def get_data_table():
+        data_table = dash_table.DataTable(
+            id='datatable-data',
+            data=df_copy.to_dict('records'),
+            columns=[{'id': c, 'name': c} for c in df_copy.columns],
+    #         style_table={'overflowY': 'scroll'},
+            fixed_rows={'headers': True},
+            style_cell={'width': '150px'},
+            style_header={
+                'backgroundColor': 'rgb(230, 230, 230)',
+                'fontWeight': 'bold'
+            }
+        )
+        return data_table
+
+    app.layout = html.Div([
+        dcc.Tabs(id='tabs-example', value='tab-1', 
+                 children=[
+            dcc.Tab(label='Data Table', value='tab-1', children=[html.Br(),
+                                                                 get_data_table()]),
+            dcc.Tab(label='Numeric Variables', value='tab-2', children= [
+                html.Br(),
+                html.Div(children=["Select a chart type:"]),
+                dcc.RadioItems(id='dynamic-choice1', 
+                               options=[{'label': 'Histogram', 'value': 'hist'}, 
+                                        {'label': 'Box Plot', 'value': 'box'},
+                                        {'label': 'Violin Plot', 'value': 'violin'}],
+                               value='hist'),
+                html.Div(children=[html.Br(),"Select numeric columns to visualize:"]),
+                dcc.Dropdown(
+                    id='dynamic-dropdown1',
+                    options=[{'label': s, 'value': s} for s in numlist],
+                    multi=True,
+                    value="",
+                    placeholder= "Select columns to visualize"
+                ),
+                html.Div(id='container1', children=[])]
+                   ),
+            dcc.Tab(label='Categorical Variables', value='tab-3', children = [
+                html.Br(),
+                html.Div(children=["Select a chart type:"]),
+                dcc.RadioItems(id='dynamic-choice2', 
+                               options=[{'label': 'Bar Chart', 'value': 'bar'}, 
+                                        {'label': 'Pie Chart', 'value': 'pie'}],
+                               value='bar'),
+                html.Div(children=[html.Br(),"Select categorical columns to visualize:"]),
+                dcc.Dropdown(
+                    id='dynamic-dropdown2',
+                    options=[{'label': s, 'value': s} for s in objectlist],
+                    multi=True,
+                    value="",
+                    placeholder= "Select columns to visualize"
+                ),
+                html.Div(id='container2', children=[]) ]
+                   )  
+                 ])
+        ])
+
+    # Define callback to update numeric variable graphs
+    @app.callback(
+        Output('container1','children'), 
+        [Input('dynamic-choice1', 'value'), 
+         Input('dynamic-dropdown1', 'value')] 
+    )       
+    def update_graph(chart_choice, col_list):
+        if chart_choice == 'hist':
+            graphnum={}
+            for col in col_list :
+                graphnum[col] = dcc.Graph(
+                        id='graph'+str(col),
+                        figure= plot_numcols( col ),       
+                        config=UNBRAND_CONFIG
+                    )
+        elif chart_choice== 'box':
+            graphnum={}
+            for col in col_list :
+                graphnum[col] = dcc.Graph(
+                        id='graph'+str(col),
+                        figure= plot_numcols( col,0,1,0 ),        
+                        config=UNBRAND_CONFIG
+                    )
+        elif chart_choice== 'violin':
+            graphnum={}
+            for col in col_list :
+                graphnum[col] = dcc.Graph(
+                        id='graph'+str(col),
+                        figure= plot_numcols( col,0,0,1 ),        
+                        config=UNBRAND_CONFIG
+                    )
+        return [graphnum[col] for col in col_list]
+
+
+    # Define callback to update categorical variable graphs
+    @app.callback(
+        Output('container2','children'), 
+        [Input('dynamic-choice2', 'value'), 
+         Input('dynamic-dropdown2', 'value')] 
+    )       
+    def update_graph(chart_choice, col_list):
+        if chart_choice == 'bar':
+            graphobj={}
+            for col in col_list :
+                graphobj[col] = dcc.Graph(
+                        id='graph1'+str(col),
+                        figure= plot_objcols(col),              
+                        config=UNBRAND_CONFIG
+                    ) 
+        elif chart_choice== 'pie':
+            graphobj={}
+            for col in col_list :
+                graphobj[col] = dcc.Graph(
+                        id='graph1'+str(col),
+                        figure= plot_objcols(col,0,1),             
+                        config=UNBRAND_CONFIG
+                    ) 
+        return [graphobj[col] for col in col_list]
+
+    # Run app and display result inline in the notebook
+    app.run_server(mode='inline')
+    
+        
