@@ -10,6 +10,7 @@ from Viz import *
 from imblearn.over_sampling import RandomOverSampler
 
 def INIT(df,info):
+    exceptionsHandled = 0 # To make a note of number of exceptions handled
     print("Length of the dataframe is", df.shape[0])
     target = info['target']
     key = info['key']
@@ -35,7 +36,7 @@ def INIT(df,info):
     class_or_Reg = targetAnalysis(df[target])
     if not class_or_Reg:
         print('\nExecution stops as We cant deal with such a target')
-        return None,None
+        return None,None,None
 
     if class_or_Reg == 'Classification':
         # Remove Classes with less than 0.05% occurence
@@ -43,7 +44,7 @@ def INIT(df,info):
         if isinstance(returnValue,pd.DataFrame):
             df = returnValue
         elif not returnValue:
-            return None,None
+            return None,None,None
         else:
             pass
 
@@ -134,6 +135,7 @@ def INIT(df,info):
             DATE_DF.index = X.index
             X.drop(date_cols,axis=1,inplace=True)
         except Exception as exceptionMessage:
+            exceptionsHandled += 1
             print('#### DATE ENGINEERING HAD ERRORS ####')
             print('Exception message is {}'.format(exceptionMessage))
             X.drop(date_cols,axis=1,inplace=True)
@@ -220,6 +222,7 @@ def INIT(df,info):
             X.drop(remove_list,axis=1, inplace=True)
             lda_models.dropna(axis=0,inplace=True)
         except Exception as e:
+            exceptionsHandled += 1
             print('#### TEXT ENGINEERING HAD ERRORS ####', e)
             X.drop(some_list,axis=1,inplace=True)
             if(remove_list):
@@ -312,6 +315,7 @@ def INIT(df,info):
     # try:
     #     featureSelectionPlot(feat_df[:15])
     # except:
+        # exceptionsHandled += 1
     #     print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
     # fe_e = time.time()
     # print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
@@ -340,6 +344,7 @@ def INIT(df,info):
     # try:
     #     cart_decisiontree(cart_df,target,class_or_Reg,passingList)
     # except Exception as e:
+    #     exceptionsHandled += 1
     #     print(e)
     #     print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     ############# CART DECISION TREE VISUALIZATION #####################   
@@ -357,6 +362,7 @@ def INIT(df,info):
         print("DISCRETE COLUMNS ARE!!!!!!!:",vis_disc_cols)
         Visualization(X_old,y,class_or_Reg,LE)
     except Exception as e:
+        exceptionsHandled += 1
         print(e)
         print('#### SKLEARN VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     print(X.shape)
@@ -391,6 +397,7 @@ def INIT(df,info):
         SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE)
         
     except Exception as e:
+        exceptionsHandled += 1
         print(e)
         print('SAMPLE EQUATION DID NOT RUN AND HAD ERRORS!!!')
     print(' #### DONE ####')
@@ -409,4 +416,4 @@ def INIT(df,info):
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
                 'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models}
     print(' #### DONE ####')
-    return init_info,validation
+    return init_info,validation,exceptionsHandled

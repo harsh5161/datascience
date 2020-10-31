@@ -38,14 +38,19 @@ def main():
     files_df.sort_values('Size',inplace=True)
     files_df.reset_index(drop=True,inplace=True)
 
-    print('\nPrinting files present in the test folder : \n')
-    print(files_df)
+    if len(files_df) == 0:
+        print('QUITTING!')
+        return None
+    else:
+        print('\nPrinting files present in the test folder : \n')
+        print(files_df)
 
     # Use this indexNumber to edit other columns of the dataframe
     indexNumber = 0
-    print('#### RUNNING WAIT ####')
+
     # For every file in the files list
     for filename in files_df['Files']:
+        print('#### RUNNING WAIT ####')
         # sys.stdout = open('./test/' + filename.split('.')[0] + '_log.txt','w')
         filena = './test/' + filename.split('.')[0] + '_log.txt'
         sys.stdout = Logger(filena)
@@ -55,10 +60,12 @@ def main():
             # props is a parameter that carries a list of Target and ID of one file
             props = [files_df.loc[indexNumber,'Target'],files_df.loc[indexNumber,'ID']]
             # Test file
-            ret = Training.main(props,test=True,Path='./test/' + filename)
+            ret,exceptionsHandled = Training.main(props,test=True,Path='./test/' + filename)
             # Edit dataframe to know if it ran succesfully
-            if ret:files_df.loc[indexNumber,'Result'] = 'Success'
+            if ret:
+                files_df.loc[indexNumber,'Result'] = 'Success'
             else:files_df.loc[indexNumber,'Result'] = 'Error'
+            files_df.loc[indexNumber,'No. of errors'] = exceptionsHandled
         except Exception as e:
             # Print Exceptions
             print(e)

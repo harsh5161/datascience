@@ -58,20 +58,20 @@ def main(props,test=False,Path=None):
                         df_train, _ = train_test_split(df, train_size=1000000,random_state=1, stratify=df[target])
                         print("Dataset size has been capped to 10 lakh rows for better performance")
                         print("Length of the dataset is now",len(df_train))
-                        init_info,validation = INIT(df_train,info)
+                        init_info,validation,exceptionsHandled = INIT(df_train,info)
                     else:
                         print("Dataset has not been capped")
                         print("Length of the dataset is same as original",len(df))
-                        init_info,validation = INIT(df,info)
+                        init_info,validation,exceptionsHandled = INIT(df,info)
                 elif class_or_Reg == 'Regression':
                     dfr = df.sample(n=1000000, random_state=1) if len(df)>1000000 else df.copy()
                     print("Dataset size has been capped to 10 lakh rows for better performance")
                     print("Length of the dataset is now",len(dfr))
-                    init_info,validation = INIT(dfr,info)
+                    init_info,validation,exceptionsHandled = INIT(dfr,info)
                 elif class_or_Reg is None:
-                    init_info,validation = None,None
+                    init_info,validation,exceptionsHandled = None,None,None
             else:
-                init_info,validation = None,None
+                init_info,validation,exceptionsHandled = None,None,None
             tte = time.time()
             print('\n TOTAL TRAINING DATA CLEANING AND PLOTS : {}'.format(tte-tts))
             ################## TRAINING INIT ##################
@@ -87,7 +87,7 @@ def main(props,test=False,Path=None):
             spinnerBool = False
     except KeyboardInterrupt:
         print('QUITTING!')   
-        return None
+        return None,exceptionsHandled
     # except Exception as e:
     #     print('Code did not run completely')
     #     print('Code ran into an error')
@@ -96,8 +96,8 @@ def main(props,test=False,Path=None):
     #     return None
     ee = time.time()
     print('\n#### TOTAL TIME TAKEN : {} ####'.format(ee-te))
-    return 1
+    return 1,exceptionsHandled
 
 if __name__ == '__main__':
     # Main Function call
-    ret = main()
+    ret_value,exceptionsHandled = main()
