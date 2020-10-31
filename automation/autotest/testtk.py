@@ -6,7 +6,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Get Size of a specific file using /path/filename.extension
 def getSize(filename):
-    return os.stat('./test/' + filename).st_size
+    try:
+        return os.stat('./test/' + filename).st_size
+    except FileNotFoundError:
+        print('File \'{}\' does not exist in the directory!'.format(filename))
+        return None
+    except Exception:
+        print('Something went wrong for the file \'{}\''.format(filename))
 
 class Logger(object):
     def __init__(self,filena):
@@ -24,22 +30,10 @@ class Logger(object):
         pass    
 # Main Function definition
 def main():
-    files = [] # Creating a list of valid files based on extension
-        # Only CSV,XLSX,XLS and JSON files will be tested
-    for i in os.listdir('./test/'):
-        try:
-            ext = i.split('.')[1].lower()
-            if ext == 'csv' or ext == 'xlsx' or ext == 'xls' or ext == 'json':
-                files.append(i)
-        except:
-            pass
-    print(files)
-
-    # Create a dataframe with filename and size as columns
-    # Sort the dataframe in ascending order of size
-    # To test smaller files first and then moving on to the bigger files
-    files_df = pd.DataFrame({'Files':files})
+    # Creating a dataFrame for listing files,size,target and/or ID
+    files_df = pd.read_csv('./test/TEST_LIST.csv')
     files_df['Size'] = files_df['Files'].apply(getSize)
+    files_df.dropna(subset='Size',inplace=True)
     files_df.sort_values('Size',inplace=True)
     files_df.reset_index(drop=True,inplace=True)
 
@@ -47,7 +41,7 @@ def main():
     print(files_df)
 
     # Use this indexNumber to edit other columns of the dataframe
-    indexNumber = 0 
+    indexNumber = 0
     print('#### RUNNING WAIT ####')
     # For every file in the files list
     for filename in files_df['Files']:
@@ -55,10 +49,12 @@ def main():
         filena = './test/' + filename.split('.')[0] + '_log.txt'
         sys.stdout = Logger(filena)
         print('Testing {}\n'.format(filename))
-        print("Enter the Target variable:")
+        # print("Enter the Target variable:")
         try:
+            # props is a parameter that carries a list of Target and ID of one file
+            props = [files_df.loc[indexNumber,'Target'],files_df.loc[indexNumber,'ID']]
             # Test file
-            ret = Training.main(test=True,Path='./test/' + filename)
+            ret = Training.main(test=True,Path='./test/' + filename,props)
             # Edit dataframe to know if it ran succesfully
             if ret:files_df.loc[indexNumber,'Result'] = 'Success'
             else:files_df.loc[indexNumber,'Result'] = 'Error'

@@ -155,7 +155,7 @@ def importFile(path,nrows=None):
 ######## getUserInput Function #######
 ######################################
 
-def getUserInput(df,test=False):
+def getUserInput(df,test=False,props):
     if isinstance(df,pd.DataFrame):
         print('\nDataFrame Succesfully imported\n')
 
@@ -189,16 +189,8 @@ def getUserInput(df,test=False):
                 else:print('HyperOP with MAX EVALS = 15')
 
         else:
-            target = getTarget(df.columns)
-            key = None
-            for col in df.columns:
-                if '_target_' in col:
-                    target = col
-                    break
-            
-            for col in df.columns:
-                if '_id_' in col:
-                    key = col
+            target = props[0]
+            key = props[1]
             quick = True
 
         info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
