@@ -155,7 +155,7 @@ def importFile(path,nrows=None):
 ######## getUserInput Function #######
 ######################################
 
-def getUserInput(df,test=False,props):
+def getUserInput(df,props,test=False):
     if isinstance(df,pd.DataFrame):
         print('\nDataFrame Succesfully imported\n')
 

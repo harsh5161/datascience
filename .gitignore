@@ -25,3 +25,5 @@ Dtree.png
 X
 Y
 *.xlsx
+*.txt
+automation/autotest/test/TestReport.report

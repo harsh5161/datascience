@@ -31,9 +31,10 @@ class Logger(object):
 # Main Function definition
 def main():
     # Creating a dataFrame for listing files,size,target and/or ID
+    
     files_df = pd.read_csv('./test/TEST_LIST.csv')
     files_df['Size'] = files_df['Files'].apply(getSize)
-    files_df.dropna(subset='Size',inplace=True)
+    files_df.dropna(subset=['Size'],inplace=True)
     files_df.sort_values('Size',inplace=True)
     files_df.reset_index(drop=True,inplace=True)
 
@@ -54,7 +55,7 @@ def main():
             # props is a parameter that carries a list of Target and ID of one file
             props = [files_df.loc[indexNumber,'Target'],files_df.loc[indexNumber,'ID']]
             # Test file
-            ret = Training.main(test=True,Path='./test/' + filename,props)
+            ret = Training.main(props,test=True,Path='./test/' + filename)
             # Edit dataframe to know if it ran succesfully
             if ret:files_df.loc[indexNumber,'Result'] = 'Success'
             else:files_df.loc[indexNumber,'Result'] = 'Error'

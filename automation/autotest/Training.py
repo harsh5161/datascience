@@ -14,7 +14,7 @@ import re
 from sklearn.model_selection import train_test_split
 from engineerings import numeric_engineering
 
-def main(test=False,Path=None,props):
+def main(props,test=False,Path=None):
     '''
     PROTON MAIN FUNCTION
     '''
@@ -26,7 +26,7 @@ def main(test=False,Path=None,props):
         df,csvPath = importFile(path,nrows=30)
         df = df.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
         df = dataHandler(df) # If first few rows contains unnecessary info
-        info = getUserInput(df,test=test,props)
+        info = getUserInput(df,props,test=test)
         if not info:
             error = True
     else:
