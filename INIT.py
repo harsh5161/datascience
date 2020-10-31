@@ -52,14 +52,10 @@ def INIT(df,info):
 
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
-    # ues = time.time()
-    # if key:
-    #     x = df.drop(key,axis=1)
-    #     userInteractVisualization(x,target)
-    # else:
-    #     userInteractVisualization(df,target)
-    # uee = time.time()
-    # print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
+    ues = time.time()
+    userInteractVisualization(df,key)
+    uee = time.time()
+    print('Dashboard time taken : {}'.format(uee-ues))
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
