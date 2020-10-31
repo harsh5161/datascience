@@ -30,6 +30,21 @@ All plots are univariate.<br />
 No such condition has been added in the dashboard yet: If the top 10 unique values in an object column does not account for more than 10% of the data then that column is not considered for bivariate plotting.<br />
 
 The following packages need to be installed to generate dashboard on your system:<br />
+Package                       Version                  <br />       
+----------------------------- -------------------   <br />
+dash                          1.16.3      <br />
+dash-bootstrap-components     0.10.7      <br />
+dash-core-components          1.12.1      <br /> 
+dash-html-components          1.1.1       <br /> 
+dash-renderer                 1.8.2       <br /> 
+dash-table                    4.10.1      <br /> 
+jupyter-dash                  0.3.1       <br /> 
+jupyter-plotly-dash           0.4.2       <br /> 
+jupyter-server-proxy          1.5.0       <br /> 
+plotly                        4.11.0       <br /> 
+graphviz                      0.14.1       <br /> 
+
+You can copy paste these lines in your notebook and run them : <br />
 !pip install plotly   <br />
 !pip install dash     <br />
 !pip install dash-bootstrap-components   <br />
