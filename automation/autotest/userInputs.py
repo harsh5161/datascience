@@ -192,7 +192,7 @@ def getUserInput(df,props,test=False):
         else:
             target = props[0]
             key = props[1]
-            if key == np.nan: # If key is not given in TEST_LIST.csv, then None
+            if np.isnan(key)==True: # If key is not given in TEST_LIST.csv, then None
                 key = None
             quick = True
 
