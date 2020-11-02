@@ -36,31 +36,42 @@ def ForestImputer(num_df,disc_df,target):
     concat_list = [num_df,disc_df]
     df = pd.concat(concat_list,axis=1)
     #testing purposes
-    print("checking Initial Presence of Missing Per Column",df.isna().any())
+    # print("checking Initial Presence of Missing Per Column",df.isna().any())
+    # print("Printing the total number of columns present in the dataframe",df.shape[1])
+    # print("Printing the count of column with missing values",df.isna().any().sum())
     #testing purposes
     cat_list = disc_df.columns.to_list()
     num_list = num_df.columns.to_list()
+
+    forester = 1 #MissForest imputation will be done
+    if df.isna().any().sum() > 0.50 * len(df.columns):
+        forester = 0 # Mean imputation will be done
+        print("Dataframe has too many columns with null values, hence mean imputation will be done")
+        df.fillna(value=df.mean(),inplace=True)
+        print("Printing the missing values after mean imputation logic",df.isna().any().sum())
 
     TE = TargetEncoder(cols=cat_list) #target encoding t=categorical variables
     df1 = TE.fit_transform(df,target)
 
     class_or_reg = targetAnalysis(target)
     if class_or_reg == 'Classification':
-        imputer = MissForest(max_iter=1,copy=True,max_depth=10,class_weight="balanced",n_estimators=25)
+        imputer = MissForest(max_iter=5,copy=True,max_depth=10,class_weight="balanced",n_estimators=100)
     elif class_or_reg == 'Regression':
-        imputer = MissForest(max_iter=1,copy=True,max_depth=10,n_estimators=25)
-    X = imputer.fit_transform(df1)
-
+        imputer = MissForest(max_iter=5,copy=True,max_depth=10,n_estimators=100)
+    if forester ==1:
+        start = time.time()
+        print("MissForest imputation will be done...")
+        X = imputer.fit_transform(df1)
+        print("Time taken for the completion of MissForest is :",time.time()-start)
+    elif forester ==0:
+        X = df1
     df2 = pd.DataFrame(X,index=df1.index,columns=df1.columns) #converting numpy array back to dataframe after transformation call
-
-    print("Checking Final Presence of Missing Per Column",df2.isna().any())
-    print("!!!---!!!")
-
+    # print("Checking Final Presence of Missing Per Column",df2.isna().any())
+    # print("!!!---!!!")
     for col in df.columns:
         if col in df2.columns:
             if col not in cat_list:
                 df[col] = df2[col]
-    
     numeric = df[num_list]
     return numeric
 
