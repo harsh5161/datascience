@@ -389,7 +389,7 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
     corpus_tfidf = tfidf[bow_corpus] #generating the TF-IDF of the corpus
     print("!!!!!!",len(corpus_tfidf))
     start = time.time()
-    lda_model_tfidf = gensim.models.LdaMulticore(corpus_tfidf, num_topics=10, id2word=dictionary, passes=1, workers=6) #multiprocessing Latent Dirilichtion Allocation Model
+    lda_model_tfidf = gensim.models.LdaModel(corpus_tfidf, num_topics=10, id2word=dictionary) #multiprocessing Latent Dirilichtion Allocation Model, passes=1, workers=6
     end = time.time()
     print(end-start)
     for idx, topic in lda_model_tfidf.print_topics(-1):
