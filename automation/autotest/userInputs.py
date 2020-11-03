@@ -20,7 +20,7 @@ def importFile(path,nrows=None):
 
         except FileNotFoundError:
             print('File not found, Check the name, path, spelling mistakes')
-            error = True
+            # error = True
             return None
 
         except UnicodeDecodeError:
@@ -79,7 +79,7 @@ def importFile(path,nrows=None):
 
             except ValueError:
                 print('File not found, Check the name, path, spelling mistakes')
-                error = True
+                # error = True
                 return None
 
     # IF THE EXTENSION IS XL
@@ -114,7 +114,7 @@ def importFile(path,nrows=None):
             #######
         except FileNotFoundError:
             print('File not found, Check the name, path, spelling mistakes')
-            error = True
+            # error = True
             return None
 
     def importTable(path):
@@ -127,7 +127,7 @@ def importFile(path,nrows=None):
             return df
         except FileNotFoundError:
             print('File not found, Check the name, path, spelling mistakes')
-            error = True
+            # error = True
             return None
 
     try:
@@ -192,7 +192,7 @@ def getUserInput(df,props,test=False):
         else:
             target = props[0]
             key = props[1]
-            if np.isnan(key)==True: # If key is not given in TEST_LIST.csv, then None
+            if key == '': # If key is not given in TEST_LIST.csv, then None
                 key = None
             quick = True
 

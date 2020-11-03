@@ -179,8 +179,8 @@ def score(df,init_info,validation=False):
 
             axcm= plt.subplot()
             skplt.metrics.plot_confusion_matrix(y_test, y_pred, cmap= 'RdPu', ax =axcm)
-            axcm.set_xlabel('Predicted value');
-            axcm.set_ylabel('Actual value');
+            axcm.set_xlabel('Predicted value')
+            axcm.set_ylabel('Actual value')
             if len(priorList) ==2:
 
                 skplt.metrics.plot_lift_curve(y_test, y_probas)
@@ -219,7 +219,7 @@ def score(df,init_info,validation=False):
                 df_mean[['Decile','Actualvalue_mean','Predictedvalue_mean']]=sorted_df.groupby('decile', as_index=False)[['y_test','y_pred']].mean()
                 df_mean['Actualvalue_mean']= pd.Series(df_mean['Actualvalue_mean']).round(decimals=2) #rounding off values
                 df_mean['Predictedvalue_mean']= pd.Series(df_mean['Predictedvalue_mean']).round(decimals=2) #rounding off values
-                fig, ax1 = plt.subplots(figsize=(10, 7))
+                _, ax1 = plt.subplots(figsize=(10, 7))
                 plt.xticks(df_mean['Decile'])
                 tidy = pd.melt(df_mean, id_vars='Decile', value_vars= ['Actualvalue_mean','Predictedvalue_mean'],value_name='Mean values per decile')
                 sns.lineplot(x='Decile', y='Mean values per decile', hue='variable', data=tidy, ax=ax1)
