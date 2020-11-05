@@ -126,7 +126,7 @@ def importFile(path,nrows=None):
             return None
 
     try:
-        ext = path.split('.')[1].lower().strip()
+        ext = path.split('.')[-1].strip()
         print('extension is {}'.format(ext))
         if ext == 'csv' or ext == 'tsv':
             df = importCsv(path)
@@ -147,22 +147,28 @@ def importFile(path,nrows=None):
         print('The error message is {}'.format(e))
         return None,None
 
+def getForecastPeriod():
+    inp = input('Enter the forecast period in the format years,months,days : ').strip().split(',')
+    return (int(inp[0]) * 365 + int(inp[1]) * 30 + int(inp[2]))
+
 def getInfo(cols,datecols,test=False):
     if not test:
         print('The columns found are :')
         print(cols)
         target = input('Enter the target column : ')
-        print('The date columns found are :')
+        print('\nThe date columns found are :')
         print(datecols)
         primaryDate = input('Enter the primary date column : ')
-        if target =='' or primaryDate == '':
+        forecastPeriod = getForecastPeriod()
+        print('The forecast period is : {} days'.format(forecastPeriod))
+        if target =='' or primaryDate == '' or forecastPeriod == None:
             print('Empty entries')
             return None
         elif (target not in cols) or (primaryDate not in datecols):
             print('Entry not found in respective columns')
             return None
         else:
-            info = {'Target':target,'PrimaryDate':primaryDate}
+            info = {'Target':target,'PrimaryDate':primaryDate,'ForecastPeriod':forecastPeriod}
             return info
     else:
         # Pass all test parameters into info
