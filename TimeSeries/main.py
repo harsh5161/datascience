@@ -3,6 +3,7 @@ import pandas as pd
 from userInputs import importFile,getInfo
 from engineerings import getDateColumns
 from init import INIT
+import joblib
 
 def main(test=False,props=None):
     print('This is Time Series Folder and All functions and files will be contained here')
@@ -27,6 +28,7 @@ def main(test=False,props=None):
         print('QUITTING!')
         return None,None
     else:
+        joblib.dump(info,'info');print('INFO SAVED!')
         validation,init_info = INIT(path,info)
         print(validation,init_info) # Just to utilize the created variable
 

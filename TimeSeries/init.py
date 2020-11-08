@@ -1,8 +1,9 @@
 import pandas as pd
 from userInputs import importFile
 from engineerings import numeric_engineering,date_engineering
-from fbprophet.forecaster import Prophet # According to the installed directory and not as in documentation
-
+from traces import TimeSeries
+import joblib
+from datetime import datetime
 
 def INIT(path,info):
     print('\nINIT STARTED!')
@@ -10,15 +11,10 @@ def INIT(path,info):
     df,_ = importFile('./test/' + path)
     print(df.shape)
 
-    print('\nRunning univariate time series using FBProphet without data cleaning!')
-    print('\n Creating FBProphet Instance!')
-    m = Prophet()
-    print('\nPreparing DataSet!')
-    prophetDF = df[[info['PrimaryDate'],info['Target']]]
-    prophetDF.columns = ['ds','y']
-    prophetDF.ds = pd.to_datetime(prophetDF.ds,errors='coerce')
-    prophetDF.dropna(inplace=True)
-    print(prophetDF.isnull().sum())
-    m.fit(prophetDF)
+    df = numeric_engineering(df)
+    df[info['PrimaryDate']] = pd.to_datetime(df[info['PrimaryDate']])
 
     return None,None
+
+# For testing purpose
+# INIT('messy3.csv',joblib.load('info'))
