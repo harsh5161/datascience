@@ -1,6 +1,11 @@
 # Logical Proceeding of ProtonAutoML (v. 1.0+)
 
-Flow of informations starts from Training <br />
+# Restructuring Details
+The main to be run is now "run.ipynb" <br />
+The features are all now packages and maintained separately. <br />
+<br />
+<br />
+Flow of informations starts from Run <br />
 As the data enters the system, we check the column names for special characters and we remove them. This is done because the Light GBM ML model does not support<br /> special characters in the column names.<br />
 <br />
 A random sample of 1000 rows of the original dataset is then taken and we perform numeric engineering on this sample, we do this to call the targetAnalysis() <br />that is used to check if the target variable is “Classification” or “Regression” or “None”. Then we cap the dataset at a maximum length of 10,00,000 rows.<br /> Stratification done for Classification Problems and Random Sampling done for Regression problems.<br />
