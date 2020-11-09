@@ -1,7 +1,7 @@
 # Logical Proceeding of ProtonAutoML (v. 1.0+)
 
 # Restructuring Details
-The main to be run is now "run.ipynb" <br />
+The main notebook to be run is now "run.ipynb" <br />
 The features are all now packages and maintained separately. <br />
 <br />
 <br />
