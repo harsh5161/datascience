@@ -158,55 +158,22 @@ def importFile(path,nrows=None):
 def getUserInput(df):
     if isinstance(df,pd.DataFrame):
         print('\nDataFrame Succesfully imported\n')
-
         print(df.columns)
+        # Get Key Column
+        key = getKey(df.columns)
+        if not key:
+            key = findKey(df.columns[0])
+        if key:
+            print("Dropping Key from the axis")
+            df.drop(key,axis=1,inplace=True)
 
-        # Get Target from user
-        target = getTarget(df.columns)
+        # Remove User Specified ID Columns
+        df = removeUserSpecifiedIDs(df)
 
-        if not target:
-            # Quit the whole process
-            print('\nQuitting Process\n')
-            return None
-        else:
-            # Get Key Column
-            key = getKey(df.columns)
-            if not key:
-                key = findKey(df.columns[0])
-            if key:
-                df.drop(key,axis=1,inplace=True)
-
-            # Remove User Specified ID Columns
-            df = removeUserSpecifiedIDs(df,True)
-
-            # Remove Successive Targets
-            df = removeUserSpecifiedIDs(df)
-
-            # Quick/Slow results for max evals
-            quick = quick_slow()
-            if quick:print('QUICK MODELLING WITH DEFAULT PARAMETERS')
-            else:print('HyperOP with MAX EVALS = 15')
-
-        info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
+        info = {'key':key,'cols':df.columns.to_list()}
 
         return info
     else:
-        return None
-
-######################################
-######## getTarget Function #######
-######################################
-
-def getTarget(columns):
-    print('\nEnter \'quit\' to quit')
-    target = input('What would you like to predict? : ')
-    if target == 'quit':
-        return None
-    elif target in columns:
-        print('Target Spotted!')
-        return target
-    else:
-        print('Target {} Not found in the data'.format(target))
         return None
 
 ######################################
@@ -234,7 +201,7 @@ def findKey(column):
     if 'id' in column.lower():
         dec = input("Is the column \'{}\' an identification column? If yes, enter y : ".format(column))
         if dec == 'y':
-            print('Identification column obtained')
+            print(f'Identification column {column} obtained')
             return column
         else:
             print('Identification column not obtained/found')
@@ -244,16 +211,10 @@ def findKey(column):
 ######## removeUserSpecifiedIDs Function #######
 ######################################
 
-def removeUserSpecifiedIDs(df,successiveTarget=False):
+def removeUserSpecifiedIDs(df):
     removed_cols = set()
     not_found_cols = set()
-    if not successiveTarget:
-        print('Would you like to remove any other ID,zip Code,Phone Numbers,UNIQUE lists, ')
-        print('Or columns that have only one unique entry? If yes, enter the column names below ')
-    else:
-        print('Do you think you have Successive Targets based on the current target? If yes, enter the column names below ')
-    print('in this format separated by commas: col1,col2,col3')
-    cols = input()
+    cols = input("Would you like to remove any columns that you dont want to be included in segmentation, if so enter the columns in this format separated by commas: col1,col2,col3 ")
     if not cols:
         print('No Columns removed')
         return df
@@ -276,13 +237,6 @@ def removeUserSpecifiedIDs(df,successiveTarget=False):
             print('Invalid Entry of columns! No Columns removed')
             return df
 
-######################################
-######## quick_slow Function #######
-######################################
-
-def quick_slow():
-    inp = input('Do you want quick results or slower results? If quick enter y : ').lower()
-    return True if inp == 'y' else False
 
 ######################################
 ######## dataHandler Function #######

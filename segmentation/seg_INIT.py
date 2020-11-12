@@ -10,11 +10,8 @@ from segmentation.seg_Viz import *
 from imblearn.over_sampling import RandomOverSampler
 
 def INIT(df,info):
-    print("Length of the dataframe is", df.shape[0])
-    target = info['target']
     key = info['key']
     cols = info['cols']
-    cols.append(target)
     if key:
         cols.append(key)
     df = df[cols]
@@ -30,26 +27,6 @@ def INIT(df,info):
         df = numeric_engineering(df)
     ############ TARGET NUMERIC ENGINEERING ###########
 
-    # Find Classification or Regression
-    class_or_Reg = None #INIT
-    class_or_Reg = targetAnalysis(df[target])
-    if not class_or_Reg:
-        print('\nExecution stops as We cant deal with such a target')
-        return None,None
-
-    if class_or_Reg == 'Classification':
-        # Remove Classes with less than 0.05% occurence
-        returnValue = removeLowClass(df,target)
-        if isinstance(returnValue,pd.DataFrame):
-            df = returnValue
-        elif not returnValue:
-            return None,None
-        else:
-            pass
-
-
-    print('{} column needs {}'.format(target,class_or_Reg))
-
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     # ues = time.time()
@@ -59,59 +36,24 @@ def INIT(df,info):
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
-    # Remove all rows with Target Column Empty
-    beforeIndex = df.index
-    df.dropna(subset=[target],inplace=True)
-    afterIndex = df.index
-    rowsRemoved = list(set(beforeIndex)-set(afterIndex))
-    print('\n {} rows were removed since target had these missing'.format(len(rowsRemoved)))
-    del beforeIndex,afterIndex
-
-    ############# TRAIN VALIDATION SPLIT ###########
-    if class_or_Reg == 'Classification':
-        LE = LabelEncoder()
-        df[target] = LE.fit_transform(df[target])
-        try:
-            train,validation = train_test_split(df,test_size=0.2,random_state=1,stratify=df[target])
-        except:
-            train,validation = train_test_split(df,test_size=0.2,random_state=1)
-    else:
-        LE = None
-        df[target].clip(lower=df[target].quantile(0.1),upper=df[target].quantile(0.9),inplace=True)
-        try:
-            train,validation = train_test_split(df,test_size=0.2,random_state=1,stratify=df[target])
-        except:
-            train,validation = train_test_split(df,test_size=0.2,random_state=1)
-    ############# TRAIN VALIDATION SPLIT ###########
-
     init_cols = df.columns
-    X = train.drop(target,axis=1)
-    y = train[target]
+    print("Init columns are as follows",init_cols)
+    X = df 
     if key:
         X.drop(key,axis=1,inplace=True)
-    del train
+    print(X.head(10))
     del df
 
     # Remove columns and rows with more than 50% missing values
     print('\nRemoving Rows and Columns with more than 50% missing\n')
-    X,y = DatasetSelection(X,y)
+    X = DatasetSelection(X)
 
     print('After removal of highly missing rows and columns')
     MISSING = pd.DataFrame(((X.isnull().sum().sort_values(ascending=False)*100/len(X)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
 
-    # print("length of X going into sampling!!!!!!!!!!!!",len(X))
-    # print("length of y going into sampling!!!!!!!!!!!!",len(y))
-    # # Sampling Data
-    # print('Sampling Data!')
-    # X,y = data_model_select(X,y)
-    # print('After sampling:')
-    print('Shape of X_train is {}'.format(X.shape))
-    print('Shape of y_train is {}'.format(y.shape))
-    if class_or_Reg == 'Classification':
-        print('printing target variable distribution for classification:\n')
-        print(pd.Series(y).value_counts(normalize=True))
-
+    print('Shape of Xis {}'.format(X.shape))
+   
     ######## DATE ENGINEERING #######
     print('\n#### DATE ENGINEERING RUNNING WAIT ####')
 #     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
@@ -144,7 +86,7 @@ def INIT(df,info):
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
 
-    num_df, disc_df, useless_cols = Segregation(X,y)
+    num_df, disc_df, useless_cols = Segregation(X)
     if not disc_df.empty:
         disc_df = disc_df.astype('category')
         disc_cat = {}
@@ -267,7 +209,6 @@ def INIT(df,info):
     print(' #### DONE ####')
     ############# PEARSON CORRELATION ############
 
-    y.reset_index(drop=True, inplace=True)
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
     DATE_DF.reset_index(drop=True, inplace=True)
@@ -278,93 +219,28 @@ def INIT(df,info):
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
     concat_list = [num_df,disc_df,DATE_DF,TEXT_DF]
     X = pd.concat(concat_list,axis=1)
-    X_old = X.copy()# X_old is before Target Encoding
-
-    ############# TRANSFORMATIONS ############
-    print('\n #### TRANSFORMATIONS ####')
-    TE = TargetEncoder(cols=disc_df.columns)
-    print('\n #### TARGET ENCODING ####')
+    
+    print("This is what the data looks like before going into transformations and encoding",X)
+    ############# ENCODING ############
+    print("Encoding categorical variables")
+    LE = LabelEncoder()
+    print('\n #### LABEL ENCODING ####')
     te_start = time.time()
-    X = TE.fit_transform(X,y)
+    X_rec = X[disc_df.columns].apply(LE.fit_transform)
+    for col in X_rec.columns:
+        X[col] = X_rec[col]
     te_end = time.time()
     print(X.shape)
-    print(y.shape)
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
     ############# TRANSFORMATIONS ############
 
-    ############# FEATURE SELECTION AND PLOTS ############
-    print('\n #### FEATURE SELECTION ####')
-    fe_s = time.time()
-    rem,feat_df = FeatureSelection(X,y,class_or_Reg)
-    fe_e = time.time()
-    print(X.shape)
-    print(y.shape)
-    print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
-    X.drop(rem,axis=1,inplace=True)
-    X_old.drop(rem,axis=1,inplace=True)  # removing columns through feature selection without target encoding
+    ############# NORMALISATION AND TRANSFORMATIONS #####################
     TrainingColumns = X.columns
-    fe_s = time.time()
-
-    try:
-        featureSelectionPlot(feat_df[:15])
-    except:
-        print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
-    fe_e = time.time()
-    print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
-    print(X.shape)
-    print(y.shape)
-    ############# FEATURE SELECTION AND PLOTS #####################
-
-    ############# CART DECISION TREE VISUALIZATION #####################
-    print('\n #### DECISION TREE VISUALIZATION ####')
-    X_cart = X_old.copy() #making a specific copy for CART because X_old is also being used by sample equation
-    X_cart.reset_index(drop=True, inplace=True)
-    y_cart = y.copy()
-    y_cart.reset_index(drop=True, inplace=True)
-    if class_or_Reg=='Classification':
-        print("Length of X_cart and y_cart",len(X_cart),"---",len(y_cart))
-        ros = RandomOverSampler(sampling_strategy='minority')
-        X_cart_res, y_cart_res = ros.fit_resample(X_cart,y_cart)
-        print("Length of X_cart_res and y_cart_res",len(X_cart_res),"---",len(y_cart_res))
-        passingList = y_cart_res.value_counts(normalize=True).values
-        cart_list =[X_cart_res,y_cart_res]
-        cart_df = pd.concat(cart_list,axis=1)
-    else:
-        passingList = []
-        cart_list =[X_cart,y_cart]
-        cart_df = pd.concat(cart_list,axis=1)
-    try:
-        cart_decisiontree(cart_df,target,class_or_Reg,passingList)
-    except Exception as e:
-        print(e)
-        print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
-    ############# CART DECISION TREE VISUALIZATION #####################   
-
-    
-    ############# SKLEARN TREE VISUALIZATION ##################### 
-    # The few lines below consider only columns of object/category type that remained after feature selection
-    try:
-        vis_disc_cols = []
-        print("DISCRETE COLUMNS ARE:",disc_df)
-        for col in disc_df.columns:
-            if col in X.columns:
-                vis_disc_cols.append(col)
-        print("DISCRETE COLUMNS ARE!!!!!!!:",vis_disc_cols)
-        Visualization(X_old,y,class_or_Reg,LE)
-    except Exception as e:
-        print(e)
-        print('#### SKLEARN VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
-    print(X.shape)
-    print(y.shape)
-    ############# SKLEARN TREE VISUALIZATION ##################### 
-
-    ############# NORMALISATION AND TRANSFORMATIONS ##################### 
     print('\n #### NORMALIZATION ####')
     MM = MinMaxScaler(feature_range=(1, 2))
     X = pd.DataFrame(MM.fit_transform(X),columns=TrainingColumns)
     print(' #### DONE ####')
     print(X.shape)
-    print(y.shape)
     print('\n #### POWER TRANSFORMATIONS ####')
     PT = PowerTransformer(method = 'box-cox')
     X = pd.DataFrame(PT.fit_transform(X),columns=TrainingColumns)
@@ -372,36 +248,23 @@ def INIT(df,info):
     X = pd.DataFrame(new_mm.fit_transform(X),columns=TrainingColumns)
     print(' #### DONE ####')
     print(X.shape)
-    print(y.shape)
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
 
-    ############# SAMPLE EQUATION ##################### 
-    print('\n #### Printing Sample Equation of the DATA ####')
-    # The few lines below consider only columns of object/category type that remained after feature selection
-    try:
-        vis_disc_cols = []
-        for col in disc_df.columns:
-            if col in X.columns:
-                vis_disc_cols.append(col)
-        SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE)
-        
-    except Exception as e:
-        print(e)
-        print('SAMPLE EQUATION DID NOT RUN AND HAD ERRORS!!!')
-    print(' #### DONE ####')
+    ############# DIMENSIONALITY REDUCTION ##################### 
 
-    print('\nThis is final shape of X_train : {}'.format(X.shape))
-    print('This is final shape of Y_train : {}\n'.format(y.shape))
-    ############# SAMPLE EQUATION ##################### 
+    print("This is what the data looks like before going into dimensionality reduction",X)
+
+
+
+    ############# DIMENSIONALITY REDUCTION ##################### 
 
 
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
-                'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
-                'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
-                 'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
-                'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
+                'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,
+                'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
+                'KEY':key,'X_train':X,'disc_cat':disc_cat,
                 'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models}
     print(' #### DONE ####')
-    return init_info,validation
+    return init_info

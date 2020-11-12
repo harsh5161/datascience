@@ -1,7 +1,6 @@
 from segmentation.seg_userInputs import *
 from segmentation.seg_INIT import *
 from segmentation.seg_score import *
-from segmentation.seg_all_other_functions import targetAnalysis
 import time
 import pandas as pd
 import numpy as np
@@ -129,44 +128,12 @@ def seg_main():
             df = dataHandler(df) # If first few rows contains unnecessary info
             tts = time.time()
             if isinstance(df,pd.DataFrame):
-                target = info['target']
-                print("###Performing Initial Numeric Engineering for Capping Purposes###")
-                dfsamp = df.sample(n=1000,random_state=1) if len(df)>1000 else df.copy()
-                dfsamp = numeric_engineering(dfsamp)
-                dfsamp = dfsamp.dropna(axis=0,subset=[target])
-                class_or_Reg = targetAnalysis(dfsamp[target])                    
-                if class_or_Reg == 'Classification':
-                    if len(df) >1000000:
-                        df_train, _ = train_test_split(df, train_size=1000000,random_state=1, stratify=df[target])
-                        print("Dataset size has been capped to 10 lakh rows for better performance")
-                        print("Length of the dataset is now",len(df_train))
-                        init_info,validation = INIT(df_train,info)
-                    else:
-                        print("Dataset has not been capped")
-                        print("Length of the dataset is same as original",len(df))
-                        init_info,validation = INIT(df,info)
-                elif class_or_Reg == 'Regression':
-                    dfr = df.sample(n=1000000, random_state=1) if len(df)>1000000 else df.copy()
-                    print("Dataset size has been capped to 10 lakh rows for better performance")
-                    print("Length of the dataset is now",len(dfr))
-                    init_info,validation = INIT(dfr,info)
-                elif class_or_Reg is None:
-                    init_info,validation = None,None
+                init_info= INIT(df,info)
             else:
-                init_info,validation = None,None
+                init_info = None,None
             tte = time.time()
             print('\n TOTAL TRAINING DATA CLEANING AND PLOTS : {}'.format(tte-tts))
             ################## TRAINING INIT ##################
-
-            if isinstance(validation,pd.DataFrame):
-                ################## VALIDATION AND PREDICTION ##################
-                score(validation,init_info,validation=True)
-                ################## VALIDATION AND PREDICTION ##################
-                output()
-                print('\n\t #### CODE EXECUTED SUCCESSFULLY ####')
-                print('\n\t #### END ####')
-            else:
-                print('\n\t #### CODE DID NOT RUN COMPLETELY ####')
             spinnerBool = False
     except KeyboardInterrupt:
         print('QUITTING!')   

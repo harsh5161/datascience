@@ -12,25 +12,7 @@ from sklearn.utils import class_weight
 import pydotplus
 from category_encoders import TargetEncoder
 from missingpy import MissForest
-def targetAnalysis(df):
-    print('\n### TARGET ANALYSIS ENTERED ###')
-    Type = str(df.dtypes)
-    # IF INT OR FLOAT IN TARGET, and IF NUMBER OF UNIQUE IS LESS, CLASSIFICATION, ELSE, REGRESSION
-    print('Target has {} unique values'.format(df.nunique()))
-    print('Printing % occurence of each class in target Column')
-    print(df.value_counts(normalize=True))
-    if ('int' in Type) or ('float' in Type):
-        if df.nunique() < 5:
-            return 'Classification'
-        else:
-            return 'Regression'
-
-    else:
-        if df.nunique() < 5:
-            return 'Classification'
-        else:
-            return None
-def ForestImputer(num_df,disc_df,target):
+def ForestImputer(num_df,disc_df):
     num_df.reset_index(drop=True,inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
     concat_list = [num_df,disc_df]
@@ -50,14 +32,18 @@ def ForestImputer(num_df,disc_df,target):
         df.fillna(value=df.mean(),inplace=True)
         print("Printing the missing values after mean imputation logic",df.isna().any().sum())
 
-    TE = TargetEncoder(cols=cat_list) #target encoding t=categorical variables
-    df1 = TE.fit_transform(df,target)
+    # print("Before Label Encoding")
+    # print(df)
+    LE = LabelEncoder()#target encoding the categorical variables
+    df_new = df[cat_list].apply(LE.fit_transform)
+    df1 = df.copy()
+    for col in df_new.columns:
+        df1[col] = df_new[col]
 
-    class_or_reg = targetAnalysis(target)
-    if class_or_reg == 'Classification':
-        imputer = MissForest(max_iter=5,copy=True,max_depth=10,class_weight="balanced",n_estimators=100)
-    elif class_or_reg == 'Regression':
-        imputer = MissForest(max_iter=5,copy=True,max_depth=10,n_estimators=100)
+    # print("After Label Encoding")
+    # print(df1)
+
+    imputer = MissForest(max_iter=5,copy=True,max_depth=10,n_estimators=100)
     if forester ==1:
         start = time.time()
         print("MissForest imputation will be done...")
@@ -75,7 +61,7 @@ def ForestImputer(num_df,disc_df,target):
     numeric = df[num_list]
     return numeric
 
-def Segregation(df,y):
+def Segregation(df):
     print('\n#### Entering Segregation ####\n')
     start = time.time()
     num = df._get_numeric_data().columns
@@ -155,14 +141,14 @@ def Segregation(df,y):
     print(obj_df.nunique())
     disc = pd.concat([cat_num,obj_df],axis=1)
     if numeric.empty is False:
-        numeric = ForestImputer(numeric,disc,y)
+        numeric = ForestImputer(numeric,disc)
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')
     print(disc.nunique())
     end = time.time()
     print('\nSegregation time taken : {}'.format(end-start))
     return numeric,disc,unique
 
-def DatasetSelection(X,Y):
+def DatasetSelection(X):
   X1=X.copy()
   X2=X.copy()
   index=list(X.index)
@@ -181,19 +167,15 @@ def DatasetSelection(X,Y):
     index2=[]
   Rowsdrop2=(list(set(index)-set(index2)))#storing the indices of the rows getting dropped above
   if len(Rowsdrop1)<len(Rowsdrop2): #checking in which case is number of rows getting dropped is lesser
-    Y.drop(Rowsdrop1,inplace=True)
     print("Columns are getting dropped first then columns")
     print("The columns getting dropped are {}".format(list(set(X.columns)-set(X1.columns))))
     print("Shape of the dataframe: {}".format(X1.shape))
-    print("Shape of the target column {}".format(Y.shape))
     return X1,Y #returns resultant dataframe and target column
   else:
-    Y.drop(Rowsdrop2,inplace=True)
     print("Rows are getting dropped first then rows")
     print("The columns getting dropped are {}".format(list(set(X.columns)-set(X2.columns))))
     print("Shape of the dataframe: {}".format(X2.shape))
-    print("Shape of the target column {}".format(Y.shape))
-    return X2,Y
+    return X2
 
 def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     obj_df = pd.DataFrame(X[disc_df_columns])     # collect all 'category' columns
