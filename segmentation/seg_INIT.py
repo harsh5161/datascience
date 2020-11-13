@@ -231,6 +231,7 @@ def INIT(df,info):
         X[col] = X_rec[col]
     te_end = time.time()
     print(X.shape)
+    print(X.dtypes)
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
     ############# TRANSFORMATIONS ############
 
@@ -253,7 +254,9 @@ def INIT(df,info):
     ############# DIMENSIONALITY REDUCTION ##################### 
 
     print("This is what the data looks like before going into dimensionality reduction",X)
-
+    for col in disc_df.columns:
+        X[col] =  X[col].astype('category')
+    famd(X)
 
 
     ############# DIMENSIONALITY REDUCTION ##################### 

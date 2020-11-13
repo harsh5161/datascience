@@ -12,6 +12,7 @@ from sklearn.utils import class_weight
 import pydotplus
 from category_encoders import TargetEncoder
 from missingpy import MissForest
+import prince
 def ForestImputer(num_df,disc_df):
     num_df.reset_index(drop=True,inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
@@ -470,6 +471,15 @@ def getDF(df,model):
         print('The column names don\'t match with the ones that were present during Training')
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
+
+def famd(df):
+    FAMD = prince.FAMD(random_state=42,engine='fbpca')
+    X_FAMD = FAMD.fit_transform(df)
+    print("Inside FAMD")
+    print(X_FAMD)
+    # print("inverting famd") #You invert PCA type analysis by giving the cluster centers as the input to the famd.inverse_transform function, this may not be possible 
+    # print(FAMD.inverse_transform(X_FAMD))
+
 
 def userInteractVisualization(df,key):
     import plotly.offline as py
