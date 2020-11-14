@@ -187,7 +187,11 @@ def getUserInput(df):
             if quick:print('QUICK MODELLING WITH DEFAULT PARAMETERS')
             else:print('HyperOP with MAX EVALS = 15')
 
-        info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick}
+            graph = disable_graphs()
+            if graph:print("Graphs are now turned off for this output session")
+            else:print("Graphs are now turned on for this output session")
+
+        info = {'target':target,'key':key,'cols':df.drop([target],axis=1).columns.to_list(),'q_s':quick,'graph':graph}
 
         return info
     else:
@@ -286,6 +290,18 @@ def quick_slow():
 
 ######################################
 ######## dataHandler Function #######
+######################################
+
+######################################
+######## disable_graphs Function #######
+######################################
+
+def disable_graphs():
+    val = input("Do you want to disable graphs for this output session? If disable press y : ").lower()
+    return True if val == 'y' else False
+
+######################################
+######## disable_graphs Function #######
 ######################################
 
 def dataHandler(dx):
