@@ -220,7 +220,9 @@ def INIT(df,info):
     concat_list = [num_df,disc_df,DATE_DF,TEXT_DF]
     X = pd.concat(concat_list,axis=1)
     
-    print("This is what the data looks like before going into transformations and encoding",X)
+    # print("This is what the data looks like before going into transformations and encoding",X)
+    X = drop_single_valued_features(X)
+
     ############# ENCODING ############
     print("Encoding categorical variables")
     LE = LabelEncoder()
@@ -252,11 +254,14 @@ def INIT(df,info):
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
 
     ############# DIMENSIONALITY REDUCTION ##################### 
-
-    print("This is what the data looks like before going into dimensionality reduction",X)
+    n_comp = calculate_n_components(X)
+    if n_comp == 1:
+        n_comp = 2
+    print(f"{n_comp} Principal Components will be generated in dimensionality reduction")
+    # print("This is what the data looks like before going into dimensionality reduction",X)
     for col in disc_df.columns:
-        X[col] =  X[col].astype('category')
-    famd(X)
+        X[col] =  X[col].astype('category') #FAMD requires the presence of both numeric and categorical variables
+    X_reduced = famd(X,n_comp)
 
 
     ############# DIMENSIONALITY REDUCTION ##################### 

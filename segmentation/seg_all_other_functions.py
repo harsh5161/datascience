@@ -471,14 +471,48 @@ def getDF(df,model):
         print('The column names don\'t match with the ones that were present during Training')
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
+def drop_single_valued_features(df):
+    for col in df.columns:
+        if df[col].nunique() ==1 :
+            print(f"Dropping {col}...")
+            df.drop(col,axis=1,inplace=True)
+    return df
+def calculate_n_components(df): #Dont delete the comments in this functions
+    print("Calculating number of components....")
+    #Generating a covariance matrix
+    covMatrix = np.cov(df.T,bias=True)
+    eigen_vals, eigen_vecs = np.linalg.eig(covMatrix)
+    #Making a list of (eigenvalue,eigenvevtor) tuples
+    # eig_pairs = [(np.abs(eigen_vals[i]), eigen_vecs[:,i]) for i in range(len(eigen_vals))]
 
-def famd(df):
-    FAMD = prince.FAMD(random_state=42,engine='fbpca')
-    X_FAMD = FAMD.fit_transform(df)
+    #Sorting the paired tuples in descending order or eigen values
+    # eig_pairs.sort(key = lambda x: x[0],reverse=True)
+
+    tot = sum(eigen_vals)
+    var_exp = [(i/tot)*100 for i in sorted(eigen_vals,reverse=True)]
+    cum_var_exp = np.cumsum(var_exp)
+    print(f"The variance captured by each component is \n {var_exp}")
+    print(40* "-")
+    print(f"The cumulative variance we capture as we travel through each components are \n {cum_var_exp}")
+    for i in cum_var_exp:
+        if i>90.0:
+            n_components = np.where(cum_var_exp == i)
+            break
+    req_var = ''.join(map(str,n_components[0]))
+    print(f"type is {type(req_var)} and the value is {req_var}")
+    return int(req_var)
+def famd(df,n):
+    try:
+        FAMD = prince.FAMD(n_components= n,random_state=42,engine='sklearn')
+        X_FAMD = FAMD.fit_transform(df)
+    except AssertionError:
+        FAMD = prince.FAMD(n_components= n-1,random_state=42,engine='sklearn')
+        X_FAMD = FAMD.fit_transform(df)
     print("Inside FAMD")
     print(X_FAMD)
     # print("inverting famd") #You invert PCA type analysis by giving the cluster centers as the input to the famd.inverse_transform function, this may not be possible 
     # print(FAMD.inverse_transform(X_FAMD))
+    return X_FAMD
 
 
 def userInteractVisualization(df,key):
