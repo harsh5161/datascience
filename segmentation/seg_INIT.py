@@ -7,6 +7,7 @@ from sklearn.preprocessing import LabelEncoder,PowerTransformer,MinMaxScaler
 from category_encoders import TargetEncoder
 import joblib
 from segmentation.seg_Viz import *
+from segmentation.seg_modelling import *
 from imblearn.over_sampling import RandomOverSampler
 
 def INIT(df,info):
@@ -222,7 +223,7 @@ def INIT(df,info):
     
     # print("This is what the data looks like before going into transformations and encoding",X)
     X = drop_single_valued_features(X)
-
+    X_df = X.copy()
     ############# ENCODING ############
     print("Encoding categorical variables")
     LE = LabelEncoder()
@@ -262,11 +263,21 @@ def INIT(df,info):
     for col in disc_df.columns:
         X[col] =  X[col].astype('category') #FAMD requires the presence of both numeric and categorical variables
     X_reduced = famd(X,n_comp)
-
+    # X_reduced = pd.DataFrame(X_reduced) #Convert to dataframe to be used in modelling
+    # print(isinstance(X_reduced,pd.DataFrame))
 
     ############# DIMENSIONALITY REDUCTION ##################### 
 
+    ############# CLUSTERING ##################### 
 
+    algo = Segmentation()
+    algo.clustering_algorithms(X_reduced,X_df)
+
+
+
+
+
+    ############# CLUSTERING ##################### 
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
