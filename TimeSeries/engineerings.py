@@ -207,3 +207,20 @@ def date_engineering(df, possible_datecols, validation=False):
     print('\nDate Engineering Time Taken : {}'.format(end-start))
     print('\n\t #### DONE ####')
     return df.drop(date_cols,axis=1)
+
+
+############################################
+############## TIME ENGINEERING ############
+############################################
+
+def time_engineering(df=None):
+    print('1. Find Space between dates')
+    print('\t depending on the space,')
+    print('2. Get Day,Month,Year,Quarter')
+    print('3. Get Near Holiday/not(+-5 days)')
+    print('4. Get Weekend/Not')
+    print('5. Get Hour, minute, within bussiness hour/not')
+    print('6. Get Morning/Afternoon/Evening/Night')
+
+    print('\nRemove columns with only one level')
+    print('Return the dataframe')
