@@ -14,6 +14,7 @@ from category_encoders import TargetEncoder
 from missingpy import MissForest
 import prince
 def ForestImputer(num_df,disc_df):
+    print("Check",disc_df)
     num_df.reset_index(drop=True,inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
     concat_list = [num_df,disc_df]
@@ -35,11 +36,14 @@ def ForestImputer(num_df,disc_df):
 
     # print("Before Label Encoding")
     # print(df)
-    LE = LabelEncoder()#target encoding the categorical variables
-    df_new = df[cat_list].apply(LE.fit_transform)
-    df1 = df.copy()
-    for col in df_new.columns:
-        df1[col] = df_new[col]
+    if not disc_df.empty:
+        LE = LabelEncoder()#target encoding the categorical variables
+        df_new = df[cat_list].apply(LE.fit_transform)
+        df1 = df.copy()
+        for col in df_new.columns:
+            df1[col] = df_new[col]
+    else:
+        df1= df.copy()
 
     # print("After Label Encoding")
     # print(df1)
@@ -501,18 +505,26 @@ def calculate_n_components(df): #Dont delete the comments in this functions
     req_var = ''.join(map(str,n_components[0]))
     print(f"type is {type(req_var)} and the value is {req_var}")
     return int(req_var)
-def famd(df,n):
-    try:
-        FAMD = prince.FAMD(n_components= n,random_state=42,engine='sklearn')
-        X_FAMD = FAMD.fit_transform(df)
-    except AssertionError:
-        FAMD = prince.FAMD(n_components= n-1,random_state=42,engine='sklearn')
-        X_FAMD = FAMD.fit_transform(df)
-    print("Inside FAMD")
-    print(X_FAMD)
-    # print("inverting famd") #You invert PCA type analysis by giving the cluster centers as the input to the famd.inverse_transform function, this may not be possible 
-    # print(FAMD.inverse_transform(X_FAMD))
-    return X_FAMD
+def dimensionality_reduction(df,n,DISC_VAL):
+    if DISC_VAL:
+        print("Mixed Variables of Numeric and Categorical found, applying FAMD Dimensionality Reduction Technique")
+        try:
+            FAMD = prince.FAMD(n_components= n,random_state=42,engine='sklearn')
+            X = FAMD.fit_transform(df)
+        except AssertionError:
+            FAMD = prince.FAMD(n_components= n-1,random_state=42,engine='sklearn')
+            X = FAMD.fit_transform(df)
+        print("Inside FAMD")
+        print(X)
+        # print("inverting famd") #You invert PCA type analysis by giving the cluster centers as the input to the famd.inverse_transform function, this may not be possible 
+        # print(FAMD.inverse_transform(X_FAMD))
+    else:
+        print("Only Numeric Variables foundm applying PCA Dimensionality Reduction Technique")
+        PCA = prince.PCA(n_components= n,random_state=42,engine='sklearn')
+        X = PCA.fit_transform(df)
+        print("Inside PCA")
+        print(X)
+    return X
 
 
 def userInteractVisualization(df,key):

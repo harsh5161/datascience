@@ -89,11 +89,13 @@ def INIT(df,info):
 
     num_df, disc_df, useless_cols = Segregation(X)
     if not disc_df.empty:
+        DISC_VAL = True
         disc_df = disc_df.astype('category')
         disc_cat = {}
         for column in disc_df:
             disc_cat[column] = disc_df[column].cat.categories
     else:
+        DISC_VAL = False
         disc_df = pd.DataFrame()
         disc_cat = {}
     print('Segregation Done!')
@@ -225,17 +227,21 @@ def INIT(df,info):
     X = drop_single_valued_features(X)
     X_df = X.copy()
     ############# ENCODING ############
-    print("Encoding categorical variables")
-    LE = LabelEncoder()
-    print('\n #### LABEL ENCODING ####')
-    te_start = time.time()
-    X_rec = X[disc_df.columns].apply(LE.fit_transform)
-    for col in X_rec.columns:
-        X[col] = X_rec[col]
-    te_end = time.time()
-    print(X.shape)
-    print(X.dtypes)
-    print('Target Encoding Time taken : {}'.format(te_end-te_start))
+    if not disc_df.empty:
+        print("Encoding categorical variables")
+        LE = LabelEncoder()
+        print('\n #### LABEL ENCODING ####')
+        te_start = time.time()
+        X_rec = X[disc_df.columns].apply(LE.fit_transform)
+        for col in X_rec.columns:
+            X[col] = X_rec[col]
+        te_end = time.time()
+        print(X.shape)
+        print(X.dtypes)
+        print('Target Encoding Time taken : {}'.format(te_end-te_start))
+    else:
+        print("No categorical columns found, so no encoding required")
+        LE = None
     ############# TRANSFORMATIONS ############
 
     ############# NORMALISATION AND TRANSFORMATIONS #####################
@@ -260,9 +266,10 @@ def INIT(df,info):
         n_comp = 2
     print(f"{n_comp} Principal Components will be generated in dimensionality reduction")
     # print("This is what the data looks like before going into dimensionality reduction",X)
+    print("disc_df columns", disc_df.columns)
     for col in disc_df.columns:
-        X[col] =  X[col].astype('category') #FAMD requires the presence of both numeric and categorical variables
-    X_reduced = famd(X,n_comp)
+        X[col] =  X[col].astype(str) #FAMD requires the presence of both numeric and categorical variables
+    X_reduced = dimensionality_reduction(X,n_comp,DISC_VAL)
     # X_reduced = pd.DataFrame(X_reduced) #Convert to dataframe to be used in modelling
     # print(isinstance(X_reduced,pd.DataFrame))
 
