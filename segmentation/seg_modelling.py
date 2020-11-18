@@ -11,7 +11,7 @@ import time
 
 class Segmentation:
     def silplots(X):
-        range_n_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+        range_n_clusters = [i for i in range(2,11)]
         silhouette_avg_n_clusters = []
         
         sil_score_max = -1 #this is the minimum possible score
@@ -31,7 +31,7 @@ class Segmentation:
 
             # Initialize the clusterer with n_clusters value and a random generator
             # seed of 10 for reproducibility.
-            clusterer = KMeans(n_clusters=n_clusters, init = 'k-means++', random_state=42)
+            clusterer = KMeans(n_clusters=n_clusters, init = 'k-means++',max_iter=100, random_state=42)
             cluster_labels = clusterer.fit_predict(X)
 
             # The silhouette_score gives the average value for all the samples.
@@ -125,7 +125,7 @@ class Segmentation:
         st=time.time()
         inertias = []
         for k in range(1,11):
-            model = KMeans(n_clusters= k, init = 'k-means++', random_state = 42)
+            model = KMeans(n_clusters= k, init = 'k-means++',max_iter=100, random_state = 42)
             model.fit(pca_components)
             inertias.append(model.inertia_)
         

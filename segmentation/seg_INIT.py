@@ -53,7 +53,7 @@ def INIT(df,info):
     MISSING = pd.DataFrame(((X.isnull().sum().sort_values(ascending=False)*100/len(X)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
 
-    print('Shape of Xis {}'.format(X.shape))
+    print('Shape of X is {}'.format(X.shape))
    
     ######## DATE ENGINEERING #######
     print('\n#### DATE ENGINEERING RUNNING WAIT ####')
@@ -224,7 +224,21 @@ def INIT(df,info):
     X = pd.concat(concat_list,axis=1)
     
     # print("This is what the data looks like before going into transformations and encoding",X)
-    X = drop_single_valued_features(X)
+    single_vals = drop_single_valued_features(X) #change this part to accomodate for the changes in num_df
+    for single in single_vals:
+        if single in num_df.columns:
+            num_df.drop(single,axis=1,inplace=True)
+        elif single in disc_df.columns:
+            disc_df.drop(single,axis=1,inplace=True)
+        elif single in DATE_DF.columns:
+            DATE_DF.drop(single,axis=1,inplace=True)
+        elif single in TEXT_DF.columns:
+            TEXT_DF.drop(single, axis=1, inplace=True)
+        
+        X.drop(single, axis=1, inplace=True)
+
+
+    #Making a copy of the dataframe that will required in cluster profiling
     X_df = X.copy()
     ############# ENCODING ############
     if not disc_df.empty:

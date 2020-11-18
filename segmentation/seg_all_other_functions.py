@@ -476,11 +476,13 @@ def getDF(df,model):
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
 def drop_single_valued_features(df):
+    req_list = []
     for col in df.columns:
         if df[col].nunique() ==1 :
             print(f"Dropping {col}...")
-            df.drop(col,axis=1,inplace=True)
-    return df
+            # df.drop(col,axis=1,inplace=True)
+            req_list.append(col)
+    return req_list
 def calculate_n_components(df): #Dont delete the comments in this functions
     print("Calculating number of components....")
     #Generating a covariance matrix
@@ -494,17 +496,19 @@ def calculate_n_components(df): #Dont delete the comments in this functions
 
     tot = sum(eigen_vals)
     var_exp = [(i/tot)*100 for i in sorted(eigen_vals,reverse=True)]
+    print(type(var_exp))
     cum_var_exp = np.cumsum(var_exp)
+    print(type(cum_var_exp))
     print(f"The variance captured by each component is \n {var_exp}")
     print(40* "-")
     print(f"The cumulative variance we capture as we travel through each components are \n {cum_var_exp}")
-    for i in cum_var_exp:
-        if i>90.0:
-            n_components = np.where(cum_var_exp == i)
-            break
-    req_var = ''.join(map(str,n_components[0]))
-    print(f"type is {type(req_var)} and the value is {req_var}")
-    return int(req_var)
+    for i in var_exp:
+        if i <10.0:
+            current =  var_exp.index(i)
+            if var_exp[current] - var_exp[current+1] < 1.0:
+                n_components = current+1
+                break
+    return n_components
 def dimensionality_reduction(df,n,DISC_VAL):
     if DISC_VAL:
         print("Mixed Variables of Numeric and Categorical found, applying FAMD Dimensionality Reduction Technique")
