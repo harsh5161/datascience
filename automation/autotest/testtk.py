@@ -1,7 +1,9 @@
 import os,sys
 import pandas as pd
+import numpy as np
 import Training
 import warnings
+import re
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Get Size of a specific file using /path/filename.extension
@@ -33,6 +35,7 @@ def main():
     # Creating a dataFrame for listing files,size,target and/or ID
     
     files_df = pd.read_csv('./test/TEST_LIST.csv')
+    # files_df  = files_df.apply(np.vectorize(cleaner))
     files_df['Size'] = files_df['Files'].apply(getSize)
     files_df.dropna(subset=['Size'],inplace=True)
     files_df.sort_values('Size',inplace=True)

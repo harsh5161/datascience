@@ -17,6 +17,11 @@ def score(df,init_info,validation=False):
         X_train = init_info['X_train']
         y_train = init_info['y_train']
 
+        if init_info['KEY']:
+            key  = init_info['KEY']
+        else:
+            key = None
+
         if init_info['ML'] == 'Classification':
             priorList = y_train.value_counts(normalize=True).values
         else:
@@ -34,9 +39,13 @@ def score(df,init_info,validation=False):
         print("Total no. of null values present in the Key: ",df[init_info['KEY']].isna().sum())
         df.dropna(axis=0,subset=[init_info['KEY']],inplace=True)
         print("NUll values after removal are: ",df[init_info['KEY']].isna().sum())
-        if df[init_info['KEY']].dtype == np.float64:             # if the key is float convert it to int
-            df[init_info['KEY']]=df[init_info['KEY']].astype(int)        
+        try:
+            if df[key].dtype == np.float64:             # if the key is float convert it to int
+                df[init_info['KEY']]=df[init_info['KEY']].astype(int) 
+        except:
+            pass       
         k_test = df[init_info['KEY']]
+        k_test.name = 'Key'
         k_test.index = X_test.index
     else:
         k_test = X_test.index
@@ -246,13 +255,14 @@ def score(df,init_info,validation=False):
         joblib.dump(init_info,'model_info',compress=9)
 
     preview_length = 100 if len(X_test)>100 else len(X_test)
+
     if validation:
-        preview = pd.DataFrame({k_test.name:k_test.tolist(),
-                                'Actual Values':y_test.tolist(),
-                                'Predicted Values':y_pred.tolist()})
+        preview = pd.DataFrame({k_test.name:k_test.values.tolist(),
+                                'Actual Values':y_test.values.tolist(),
+                                'Predicted Values':y_pred.values.tolist()})
     else:
-        preview = pd.DataFrame({k_test.name:k_test.tolist(),
-                                'Predicted Values':y_pred.tolist()})
+        preview = pd.DataFrame({k_test.name:k_test.values.tolist(),
+                                'Predicted Values':y_pred.values.tolist()})
 
     if init_info['ML'] == 'Classification':
         preview = pd.concat([preview,y_probas],axis=1)
