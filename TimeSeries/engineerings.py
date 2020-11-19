@@ -1,26 +1,7 @@
-# Numeric Engineering 1(To be tested)
-#For converting allnumeric data in columns like currency remperature, numbers in numeric form etc.. into numeric form
 import pandas as pd
 import numpy as np
 import time
 import holidays
-# import swifter
-# import spacy
-# from collections import Counter
-# from string import punctuation
-# from textblob import TextBlob
-# import gensim
-# from gensim.utils import simple_preprocess
-# from gensim.parsing.preprocessing import STOPWORDS
-# from nltk.stem import WordNetLemmatizer, SnowballStemmer
-# from nltk.stem.porter import *
-# np.random.seed(2018)
-# import nltk
-# nltk.download('wordnet',quiet=True)
-# from gensim import corpora, models
-# from wordcloud import WordCloud,STOPWORDS 
-# from IPython.display import Image 
-# stemmer = SnowballStemmer('english')
 
 ############################################
 ############## NUMERIC ENGINEERING #########
@@ -120,7 +101,6 @@ def getDateColumns(df,withPossibilies=0):
     else:
         return DATE_COLUMNS,Possible_date_col,Possibility
 
-def date_engineering(df, possible_datecols, validation=False):
     import itertools
     
     def fixdate(entry):    # function to introduce '-' before and after month and and removing timestamp if it is seperated from date by':' 
@@ -208,19 +188,66 @@ def date_engineering(df, possible_datecols, validation=False):
     print('\n\t #### DONE ####')
     return df.drop(date_cols,axis=1)
 
+def nearHol(currentDate, us_hols, currentYear):
+        new_list = []
+        append = new_list.append
+        for date, _ in us_hols:
+            if(date.year == currentYear):
+                append(date)
+        flag = 1
+        for i in new_list:
+            a = (currentDate.date()-i).days
+
+            if abs(a)<=5:flag =1;break
+            else:flag = 0
+
+        return 0 if flag == 0 else 1
 
 ############################################
 ############## TIME ENGINEERING ############
 ############################################
 
-def time_engineering(df=None):
-    print('1. Find Space between dates')
-    print('\t depending on the space,')
-    print('2. Get Day,Month,Year,Quarter')
-    print('3. Get Near Holiday/not(+-5 days)')
-    print('4. Get Weekend/Not')
-    print('5. Get Hour, minute, within bussiness hour/not')
-    print('6. Get Morning/Afternoon/Evening/Night')
+def time_engineering(props):
+    print('#### ENTERING TIME ENGINEERING ####')
+    print('UNPACKING PROPS')
+    # Unpacking Props parameter
+    df = props['df']
+    primaryDate = props['info']['PrimaryDate']
 
-    print('\nRemove columns with only one level')
-    print('Return the dataframe')
+    print('\nSorting DataFrame according to Primary Date Column')
+    df.sort_values(by=[primaryDate],inplace=True)
+    df.reset_index(inplace=True,drop=True)
+
+    # Exploiting Date Column
+    print('\nObtaining Year,Quarter,Month,Week,Day of Week,Day,Hour,Minute,Seconds,Weekend or not\n')
+    df['Year'] = df[primaryDate].dt.year
+    df['Quarter'] = df[primaryDate].dt.quarter
+    df['Month'] = df[primaryDate].dt.month
+    df['Week'] = df[primaryDate].dt.week
+    df['Day of Week'] = df[primaryDate].dt.dayofweek
+    df['Day'] = df[primaryDate].dt.day
+    df['Hour'] = df[primaryDate].dt.hour
+    df['Minute'] = df[primaryDate].dt.minute
+    df['Seconds'] = df[primaryDate].dt.second
+    df['Weekend_or_not'] = df['Day of Week'].apply(lambda x: 1 if x in [5,6,0,1] else 0)
+
+    print('\nThings yet to be done')
+    print('1. Find Space between dates and equally space them!')
+    print('3. Get Near Holiday/not(+-5 days)')
+    print('5. Get business hours/not')
+    print('6. Get Morning/Afternoon/Evening/Night\n')
+
+    # Removing columns that have absolutely one level
+    print('\nRemoving columns with only one level')
+    for column in df:
+        if df[column].nunique() == 1:
+            print('Column \'{}\' will be dropped since it has 1 level'.format(column))
+            df.drop(column,axis=1,inplace=True)
+
+    print('\nPrinting DataFrame Head\n')
+    print(df.head())
+
+    print('\n#### PACKING/UPDATING PROPS ####\n')
+    props['df'] = df
+    print('#### TIME ENGINEERING DONE ####')
+    return props
