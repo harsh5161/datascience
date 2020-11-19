@@ -8,7 +8,8 @@ If you are on a Windows platform ensure that you have enabled virtualisation in 
 
 # Take the 'automation' folder from the repository
 <br />
-Save it to your desired location 
+Only take the folder named automation, you can ignore anything else that maybe present in the repo. Save it to your desired location.
+For example, if you pasted the folder called automation to your desktop then the path to it can be obtained by checking the properties to the folder.
 <br />
 
 # Open Terminal or Windows Powershell
@@ -16,11 +17,19 @@ Save it to your desired location
 Use 'cd' to change directory. <br />
 cd to the directory where you stored the above folder.<br />
 For eg.<br />
-The command would be `cd C:\Users\X\Desktop\automation`<br />
+The command would be <br /> cd C:\Users\X\Desktop\automation<br />
+<br /> when you copy the file path from the properties, the actual folder name is not added to path by default, so ensure that you add \automation if its not already there.
 
 # Run the following command
 <br />
 docker-compose run --rm autotest-service<br />
+
+# Adding TestFiles 
+<br />
+Inside the folder called automation, there is another folder called test, that is essentially where you want to put the files that you you intend on testing. <br />
+There is a .csv file present called TEST_LIST.csv, that is the file you need to edit to add information about newer datasets.<br />
+P.S: Once you add a row to TEST_LIST.csv, there is no need to delete them even if you are not planning on testing those files in that session. Meaning, you just need to add the information for that dataset if it isn't already present in TEST_LIST.csv<br />
+<br />
 
 # Appendix
 The first time you run the above command the initial build will take a substantial amount of time depending on your internet connection. <br />
