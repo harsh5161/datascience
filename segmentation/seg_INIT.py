@@ -292,54 +292,14 @@ def INIT(df,info):
     ############# CLUSTERING ##################### 
 
     algo = Segmentation()
-    algo.clustering_algorithms(X_reduced,X_df)
+    segdata= algo.clustering_algorithms(X_reduced,X_df)
     
     # Displaying Cluster magnitudes
-    ## table
-    print("\nThe following table shows cluster magnitudes...")
-    segdata = pd.read_csv("Segmentation.csv")
-    cmags = segdata['K-means Segments'].value_counts().to_frame()
-    cmags= cmags.reset_index()                               # to rename columns
-    cmags.columns= ['Cluster number', 'Frequency']           # renaming columns
-    cmags= cmags.sort_values('Cluster number', ascending =True, ignore_index=True)
-    cmags['Percent']= round((cmags['Frequency']/cmags['Frequency'].sum())* 100, 2)
-    cmags['Cummulative Frequency'] = cmags['Frequency'].cumsum()
-    cmags['Cummulative Percent'] = round(((cmags['Frequency']/cmags['Frequency'].sum())* 100).cumsum(),2)
-    display(cmags)
+    ClusterMags(segdata)
     
-    ## bar chart
-    sns.barplot(x=cmags['Cluster number'], y = cmags['Frequency'],  
-            data = cmags, palette="husl").set_title('Cluster Magnitudes')
-    plt.show()
     
     # Cluster Profiling
-    ## for numeric variables
-#     num_cols =[]  # to get numeric columns present in segmentation.csv
-#     for col in num_df.columns:
-#         if col in segdata.columns:
-#             num_cols.append(col)
-    means=pd.DataFrame(segdata.groupby('K-means Segments')[num_df.columns.to_list()].agg(np.mean))
-    means=means.reset_index()                                           # to rename columns
-    means.columns= means.columns[:1].tolist()+ num_df.columns.to_list()   # renaming columns
-    print("\nCluster Profiles Using Numeric Variables...")
-    display(means)
-    
-    ## for categorical variables
-    joblib.dump(disc_df, 'discdf')  # only for testing
-    
-    print("\nCluster profiles for each categorical variable...")
-    for col in disc_df.columns:
-#         if col in segdata.columns:     # if that categorical column is present in segmentation.csv
-        cp = pd.crosstab(index=segdata['K-means Segments'], 
-                         columns=segdata[col],
-                         margins=True, margins_name ='Total')
-
-    #     cp.columns = [segdata[col].unique().tolist()+['rowtotal']]
-    #     cp.index= [segdata['K-means Segments'].unique().tolist()+['coltotal']]
-
-    #     cp.reset_index(inplace= True )
-    #     cp.columns = ['K-means Segments'] + segdata[col].unique().tolist() +['rowtotal']
-        display(cp)
+    ClusterProfiling(segdata, num_df, disc_df)
 
 
     ############# CLUSTERING ##################### 
