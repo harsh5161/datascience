@@ -182,14 +182,14 @@ def DatasetSelection(X,Y):
   Rowsdrop2=(list(set(index)-set(index2)))#storing the indices of the rows getting dropped above
   if len(Rowsdrop1)<len(Rowsdrop2): #checking in which case is number of rows getting dropped is lesser
     Y.drop(Rowsdrop1,inplace=True)
-    print("Columns are getting dropped first then columns")
+    print("Rows are getting dropped first then columns")
     print("The columns getting dropped are {}".format(list(set(X.columns)-set(X1.columns))))
     print("Shape of the dataframe: {}".format(X1.shape))
     print("Shape of the target column {}".format(Y.shape))
     return X1,Y #returns resultant dataframe and target column
   else:
     Y.drop(Rowsdrop2,inplace=True)
-    print("Rows are getting dropped first then rows")
+    print("Columns are getting dropped first then rows")
     print("The columns getting dropped are {}".format(list(set(X.columns)-set(X2.columns))))
     print("Shape of the dataframe: {}".format(X2.shape))
     print("Shape of the target column {}".format(Y.shape))

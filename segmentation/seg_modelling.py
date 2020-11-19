@@ -163,10 +163,11 @@ class Segmentation:
         et=time.time()
         print("\n Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st))) 
 
-        df_new = pd.concat([df.reset_index(drop =True),pd.DataFrame(pca_components)], axis =1)
-        pca_list = df_new.columns.values[-14:].tolist()
-        num = pca_components.shape[1]
-        df_new.columns.values[-num:] = [f'Principal-Component {i}' for i in range(0,num)]
+#         df_new = pd.concat([df.reset_index(drop =True),pd.DataFrame(pca_components)], axis =1)
+        df_new = df.reset_index(drop =True)
+#         pca_list = df_new.columns.values[-14:].tolist()
+#         num = pca_components.shape[1]
+#         df_new.columns.values[-num:] = [f'Principal-Component {i}' for i in range(0,num)]
         df_new['K-means Segments'] = model.labels_
         df_new.to_csv("Segmentation.csv")
 
