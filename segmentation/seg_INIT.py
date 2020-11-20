@@ -242,7 +242,7 @@ def INIT(df,info):
     X_df = X.copy()
     ############# ENCODING ############
     if not disc_df.empty:
-        print("Encoding categorical variables")
+        print("\nEncoding categorical variables")
         LE = LabelEncoder()
         print('\n #### LABEL ENCODING ####')
         te_start = time.time()
@@ -292,10 +292,14 @@ def INIT(df,info):
     ############# CLUSTERING ##################### 
 
     algo = Segmentation()
-    algo.clustering_algorithms(X_reduced,X_df)
-
-
-
+    segdata= algo.clustering_algorithms(X_reduced,X_df)
+    
+    # Displaying Cluster magnitudes
+    ClusterMags(segdata)
+    
+    
+    # Cluster Profiling
+    ClusterProfiling(segdata, num_df, disc_df)
 
 
     ############# CLUSTERING ##################### 
