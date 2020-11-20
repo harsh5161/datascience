@@ -292,17 +292,27 @@ def calculate_n_components(df): #Dont delete the comments in this functions
     tot = sum(eigen_vals)
     var_exp = [(i/tot)*100 for i in sorted(eigen_vals,reverse=True)]
     print(type(var_exp))
-    cum_var_exp = np.cumsum(var_exp)
+    cum_var_exp = np.cumsum(var_exp).tolist()
     print(type(cum_var_exp))
     print(f"The variance captured by each component is \n {var_exp}")
     print(40* "-")
     print(f"The cumulative variance we capture as we travel through each components are \n {cum_var_exp}")
-    for i in var_exp:
-        if i <10.0:
-            current =  var_exp.index(i)
-            if var_exp[current] - var_exp[current+1] < 1.0:
-                n_components = current+1
+    try:
+        for i in var_exp:
+            if i <10.0:
+                current =  var_exp.index(i)
+                if var_exp[current] - var_exp[current+1] < 1.0:
+                    n_components = current+1
+                    trigger = 'Triggered'
+                    break
+        print(f"Try block {trigger}")
+    except:
+        for i in cum_var_exp:
+            if i>90.0:
+                trigger = 'Trigger'
+                n_components = cum_var_exp.index(i)+1
                 break
+        print(f"Except block {trigger}")
     return n_components
 def dimensionality_reduction(df,n,DISC_VAL):
     if DISC_VAL:
