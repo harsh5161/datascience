@@ -1,6 +1,6 @@
 # Modular Imports
-import numpy as np
-import pandas as pd
+# import numpy as np
+# import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 from userInputs import importFile,getInfo
@@ -9,9 +9,11 @@ from plots import basicPlot
 from init import INIT
 import joblib
 
-# Time series Packages
+# =============================================================================
+# # Time series Packages
 # import pmdarima as pm
 # import fbprophet as Prophet
+# =============================================================================
 
 def main(test=False,props=None):
     print('This is Time Series Folder and All functions and files will be contained here')
@@ -45,7 +47,7 @@ def main(test=False,props=None):
     frontEndProgressBar = 0.05
     
     props = time_engineering(props)
-    frontEndProgressBar = 0.15
+    frontEndProgressBar = 0.1
     
     basicPlot(props)
     frontEndProgressBar = 0.20
