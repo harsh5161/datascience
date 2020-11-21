@@ -1,9 +1,17 @@
+# Modular Imports
 import numpy as np
 import pandas as pd
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 from userInputs import importFile,getInfo
-from engineerings import getDateColumns
+from engineerings import getDateColumns,time_engineering
+from plots import basicPlot
 from init import INIT
 import joblib
+
+# Time series Packages
+# import pmdarima as pm
+# import fbprophet as Prophet
 
 def main(test=False,props=None):
     print('This is Time Series Folder and All functions and files will be contained here')
@@ -22,19 +30,29 @@ def main(test=False,props=None):
     if len(datecols) == 0:
         print('No datecolumns found, QUITTING!')
         return None,None
-    else:
-        info = getInfo(df.columns,datecols) # Get Target and Primary Date Column
+    
+    info = getInfo(df.columns,datecols) # Get Target and Primary Date Column
+    
     if not info:
         print('QUITTING!')
         return None,None
-    else:
-        joblib.dump(info,'info');print('INFO SAVED!')
-        validation,init_info = INIT(path,info)
-        print(validation,init_info) # Just to utilize the created variable
 
-    return None,None
+    info['DateColumns'] = datecols
+    joblib.dump(info,'info');print('INFO SAVED!')
+    
+    # Reimporting complete data, slicing date and target columns,
+    props = INIT(path,info)
+    frontEndProgressBar = 0.05
+    
+    props = time_engineering(props)
+    frontEndProgressBar = 0.15
+    
+    basicPlot(props)
+    frontEndProgressBar = 0.20
+    
+    return 1,props['exceptionsHandled']
 
 if __name__ == '__main__':
     returnValue,numberOfErrors = main()
-
+    print('\n#### Code run successfully ####\n')
 

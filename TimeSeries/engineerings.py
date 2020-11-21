@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import time
-import holidays
+# import holidays
 
 ############################################
 ############## NUMERIC ENGINEERING #########
@@ -101,92 +101,6 @@ def getDateColumns(df,withPossibilies=0):
     else:
         return DATE_COLUMNS,Possible_date_col,Possibility
 
-    import itertools
-    
-    def fixdate(entry):    # function to introduce '-' before and after month and and removing timestamp if it is seperated from date by':' 
-        months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
-        for month in months:
-            if month in str(entry).lower():
-                index1= entry.find(month)
-                index2= index1+3
-                entry = entry[:index1]+'-'+entry[index1:index2]+'-'+entry[index2:]
-                index3=entry.find(':')  #only specific to messy dataset
-                entry=entry[:index3]
-        return entry  
-    
-    start = time.time()
-    
-    if possible_datecols:
-        for col in possible_datecols:
-            df[col]=df[col].apply(fixdate)
-            
-    print('\n\t Entering Date Engineering')
-    df = df.apply(pd.to_datetime,errors='coerce')
-    print('\nPrinting Missing % of date columns')
-    MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
-    print(MISSING)
-    
-    if validation==False:   # dropping columns with missing greater than 35% only in training not scoring
-        print('Dropping Columns with missing greater than 35% of total number of entries')
-        df.dropna(thresh=len(df)*0.65,axis=1,inplace=True)
-    try:     
-        for c in df.columns:
-            df[c].fillna(df[c].mode()[0],inplace=True)    # replacing null values with mode 
-
-    except:
-        for c in df.columns:
-            df[c].fillna(df[c].mean(),inplace=True)   # if error in mode then replacing null values with mean      
-     
-    date_cols = df.columns
-    visualize_dict = dict.fromkeys(date_cols, [])
-
-    # creating separate month and year columns, and difference from current date
-    for i in date_cols:
-        df[str(i)+"_month"] = df[str(i)].dt.month.astype(int)
-        df[str(i)+"_year"] = df[str(i)].dt.year.astype(int)
-        df[str(i)+"-today"] = (pd.to_datetime('today')-df[str(i)]).dt.days.astype(int)
-        visualize_dict[str(i)] =  visualize_dict[str(i)] + [str(i)+"_month"] + [str(i)+"_year"]+[str(i)+"-today"]
-
-    # create difference columns
-    diff_days = list()
-    if (len(date_cols)>1) :
-        for i in itertools.combinations(date_cols,2):
-            diff_days = diff_days + [str(i[0])+"-"+str(i[1])]
-            df[str(i[0])+"-"+str(i[1])]=(df[i[0]]-df[i[1]]).dt.days.astype(int)
-
-
-    print('\n\t #### RUNNING WAIT ####')
-
-    # See Near Holiday or not
-    def nearHol(currentDate, us_hols, currentYear):
-        new_list = []
-        append = new_list.append
-        for date, _ in us_hols:
-            if(date.year == currentYear):
-                append(date)
-        flag = 1
-        for i in new_list:
-            a = (currentDate.date()-i).days
-
-            if abs(a)<=5:flag =1;break
-            else:flag = 0
-
-        return 0 if flag == 0 else 1
-
-    for col in date_cols:
-        # print('LOOP')
-        #creating a unique list of all years corresponding to a column to minimise mapping
-        us_hols = holidays.US(years=df[str(col)+'_year'].unique(), expand= False)
-        #creating a new columns to check if a date falls near a holiday
-        df[str(col)+'_Holiday'] = df.apply(lambda x: nearHol(x[col],us_hols.items(),x[str(col)+'_year']),axis=1)
-        visualize_dict[str(col)] =  visualize_dict[str(col)] + [str(col)+"_nearestHoliday"]
-
-    print("\nVisualizing Coloumns Generated\n {}" .format(visualize_dict))
-    print("\nThe Following columns were generated to get days between dates of two seperate date columns\n {}".format(diff_days))
-    end = time.time()
-    print('\nDate Engineering Time Taken : {}'.format(end-start))
-    print('\n\t #### DONE ####')
-    return df.drop(date_cols,axis=1)
 
 def nearHol(currentDate, us_hols, currentYear):
         new_list = []
@@ -208,8 +122,8 @@ def nearHol(currentDate, us_hols, currentYear):
 ############################################
 
 def time_engineering(props):
-    print('#### ENTERING TIME ENGINEERING ####')
-    print('UNPACKING PROPS')
+    print('\n#### ENTERING TIME ENGINEERING ####')
+    print('\nUNPACKING PROPS')
     # Unpacking Props parameter
     df = props['df']
     primaryDate = props['info']['PrimaryDate']
