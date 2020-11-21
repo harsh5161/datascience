@@ -127,13 +127,40 @@ def time_engineering(props):
     # Unpacking Props parameter
     df = props['df']
     primaryDate = props['info']['PrimaryDate']
-
+    
     print('\nSorting DataFrame according to Primary Date Column')
     df.sort_values(by=[primaryDate],inplace=True)
     df.reset_index(inplace=True,drop=True)
-
+    
+    print('\nDropping rows with empty Date')
+    df.dropna(subset=[primaryDate],inplace=True)
+    
+    print('\nFinding a set of all spaces present in the primary Date Column')
+    spaces = []
+    for i in range(len(df)-1):
+        # print('Checking index {}'.format(i))
+        spaces.append((df.loc[i+1][primaryDate]-df.loc[i][primaryDate]))
+    uniqueSpaces = set(spaces)
+    # print(uniqueSpaces)
+    if len(uniqueSpaces) == 1:
+        print('The Data is equally spaced!')
+    else:
+        spacesDictionary = {}
+        for space in uniqueSpaces:
+            spacesDictionary[space] = spaces.count(space)
+        print('The spaces found are : ')
+        print(spacesDictionary)
+        keys = list(spacesDictionary.keys())
+        values = list(spacesDictionary.values())
+        bestSpace = keys[values.index(max(values))]
+        print('\nThe best space found is : {}'.format(bestSpace))    
+        print('\nResetting index!')
+        df.reset_index(drop=True,inplace=True)
+        print('\nEqually Spacing Time Series data with space {}'.format(bestSpace))
+        
     # Exploiting Date Column
-    print('\nObtaining Year,Quarter,Month,Week,Day of Week,Day,Hour,Minute,Seconds,Weekend or not\n')
+    print('\nCreating exogenous Date Variables from Primary Date Column')
+    print('Obtaining Year,Quarter,Month,Week,Day of Week,Day,Hour,Minute,Seconds,Weekend or not')
     df['Year'] = df[primaryDate].dt.year
     df['Quarter'] = df[primaryDate].dt.quarter
     df['Month'] = df[primaryDate].dt.month
@@ -146,7 +173,7 @@ def time_engineering(props):
     df['Weekend_or_not'] = df['Day of Week'].apply(lambda x: 1 if x in [5,6,0,1] else 0)
 
     print('\nThings yet to be done')
-    print('1. Find Space between dates and equally space them!')
+    print('1. Equally Space Data')
     print('3. Get Near Holiday/not(+-5 days)')
     print('5. Get business hours/not')
     print('6. Get Morning/Afternoon/Evening/Night\n')
@@ -161,7 +188,7 @@ def time_engineering(props):
     print('\nPrinting DataFrame Head\n')
     print(df.head())
 
-    print('\n#### PACKING/UPDATING PROPS ####\n')
+    print('\n#### PACKING/UPDATING and RETURNING PROPS ####\n')
     props['df'] = df
     print('#### TIME ENGINEERING DONE ####')
     return props
