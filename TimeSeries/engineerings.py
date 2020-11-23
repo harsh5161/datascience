@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import time
-# import holidays
+import holidays
 
 ############################################
 ############## NUMERIC ENGINEERING #########
@@ -19,19 +19,19 @@ def numeric_engineering(df):
 
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     # print(f'object type columns are {obj_columns}')
-    print(f'\t\t stripping spaces, symbols, and lower casing all entries')
+    print('\t\t stripping spaces, symbols, and lower casing all entries')
     df[obj_columns]=df[obj_columns].apply(lambda x: x.astype(str).str.strip(' %$€£¥+').str.lower())
     print('done ...')
-    print(f'\t\t Replacing empty and invalid strings')
+    print('\t\t Replacing empty and invalid strings')
     possible_empties = ['-','n/a','na','nan','nil',np.inf,-np.inf,'']
     df[obj_columns]=df[obj_columns].replace(possible_empties,np.nan)
     print('done ...')
-    print(f'\t\t Replacing commas if present in Currencies')
+    print('\t\t Replacing commas if present in Currencies')
     df[obj_columns]=df[obj_columns].apply(lambda x:returnMoney(x))
     print('done ...')
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     df1 = df[obj_columns].copy()
-    print(f'\t\t Finding Numeric Columns')
+    print('\t\t Finding Numeric Columns')
     df1 = df1.apply(lambda x : pd.to_numeric(x,errors='coerce'))
     df1.dropna(axis=1,thresh = 0.65*len(df),inplace=True)
     new_num_cols = df1.columns
@@ -101,22 +101,6 @@ def getDateColumns(df,withPossibilies=0):
     else:
         return DATE_COLUMNS,Possible_date_col,Possibility
 
-
-def nearHol(currentDate, us_hols, currentYear):
-        new_list = []
-        append = new_list.append
-        for date, _ in us_hols:
-            if(date.year == currentYear):
-                append(date)
-        flag = 1
-        for i in new_list:
-            a = (currentDate.date()-i).days
-
-            if abs(a)<=5:flag =1;break
-            else:flag = 0
-
-        return 0 if flag == 0 else 1
-
 ############################################
 ############## TIME ENGINEERING ############
 ############################################
@@ -135,7 +119,7 @@ def time_engineering(props):
     print('\nDropping rows with empty Date')
     df.dropna(subset=[primaryDate],inplace=True)
     
-    print('\nFinding a set of all spaces present in the primary Date Column')
+    print('\nFinding a set of all spaces present in the primary Date Column\n')
     spaces = []
     for i in range(len(df)-1):
         # print('Checking index {}'.format(i))
@@ -148,7 +132,7 @@ def time_engineering(props):
         spacesDictionary = {}
         for space in uniqueSpaces:
             spacesDictionary[space] = spaces.count(space)
-        print('The spaces found are : ')
+        print('The spaces found are (space:frequency format): ')
         print(spacesDictionary)
         keys = list(spacesDictionary.keys())
         values = list(spacesDictionary.values())
@@ -156,27 +140,73 @@ def time_engineering(props):
         print('\nThe best space found is : {}'.format(bestSpace))    
         print('\nResetting index!')
         df.reset_index(drop=True,inplace=True)
-        print('\nEqually Spacing Time Series data with space {}'.format(bestSpace))
+        
         
     # Exploiting Date Column
     print('\nCreating exogenous Date Variables from Primary Date Column')
     print('Obtaining Year,Quarter,Month,Week,Day of Week,Day,Hour,Minute,Seconds,Weekend or not')
     df['Year'] = df[primaryDate].dt.year
-    df['Quarter'] = df[primaryDate].dt.quarter
-    df['Month'] = df[primaryDate].dt.month
+    df['quarter'] = df[primaryDate].dt.quarter
+    df['month'] = df[primaryDate].dt.month
     df['Week'] = df[primaryDate].dt.week
-    df['Day of Week'] = df[primaryDate].dt.dayofweek
+    df['day of Week'] = df[primaryDate].dt.dayofweek
     df['Day'] = df[primaryDate].dt.day
     df['Hour'] = df[primaryDate].dt.hour
     df['Minute'] = df[primaryDate].dt.minute
     df['Seconds'] = df[primaryDate].dt.second
-    df['Weekend_or_not'] = df['Day of Week'].apply(lambda x: 1 if x in [5,6,0,1] else 0)
+    df['Weekend_or_not'] = df['day of Week'].apply(lambda x: 1 if x in [5,6,0,1] else 0)
+    df['BusinessHrs_or_not'] = df['Hour'].apply(lambda x: 1 if 9<=x<=17 else 0)
+    
+    quarters = {1:'Q1',2:'Q2',3:'Q3',4:'Q4'}
+    months = {1:'January',2:'February',3:'March',4:'April',5:'May',6:'June',7:'July',8:'August',
+              9:'September',10:'October',11:'November',12:'December'}
+    days_of_week = {0:'Monday',1:'Tuesday',2:'Wednesday',3:'Thursday',4:'Friday',5:'Saturday',
+                    6:'Sunday'}
+    
+    print('Creating English levels for Visualization purposes!')
+    def getQuarter(entry):
+        try:
+            return quarters[entry]
+        except:
+            return np.nan
+    
+    def getMonth(entry):
+        try:
+            return months[entry]
+        except:
+            return np.nan
+        
+    def getDayOfWeek(entry):
+        try:
+            return days_of_week[entry]
+        except:
+            return np.nan
 
+    df['Quarter'] = df['quarter'].apply(getQuarter)
+    df['Month'] = df['month'].apply(getMonth)
+    df['Day of Week'] = df['day of Week'].apply(getDayOfWeek)
+    
+    englishLevelsCols = ['Quarter','Month','Day of Week']
+    props['EnglishCols'] = englishLevelsCols
+    
+    print('\nCreating a dictionary of holidays for every year present in the data')
+    holidayDictionary = {}
+    uniqueYears = df['Year'].unique().tolist()
+    for year in uniqueYears:
+        holidayDictionary[year] = pd.to_datetime(list(holidays.US(years=year).keys()))
+    
+    def nearHol(entry):
+        hols_list = holidayDictionary[entry.year]
+        for holiday in hols_list:
+            if abs((entry-holiday).days) <= 5:
+                return 1
+        else:
+            return 0
+    
+    df['Near Holiday'] = df[primaryDate].apply(nearHol)
+        
     print('\nThings yet to be done')
     print('1. Equally Space Data')
-    print('3. Get Near Holiday/not(+-5 days)')
-    print('5. Get business hours/not')
-    print('6. Get Morning/Afternoon/Evening/Night\n')
 
     # Removing columns that have absolutely one level
     print('\nRemoving columns with only one level')

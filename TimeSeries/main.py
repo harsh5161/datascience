@@ -22,6 +22,9 @@ def main(test=False,props=None):
     if not test:
         # For single file manual testing
         path = input('Enter filename for TimeSeries : ').strip()
+        if path == '':
+            print('\nNo File Selected, QUITTING!')
+            return 1,0
         df,_ = importFile('./test/' + path,nrows=100)
     else:
         # For Automated Testing
@@ -45,12 +48,15 @@ def main(test=False,props=None):
     # Reimporting complete data, slicing date and target columns,
     props = INIT(path,info)
     frontEndProgressBar = 0.05
+    print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
     
     props = time_engineering(props)
-    frontEndProgressBar = 0.1
+    frontEndProgressBar = 0.10
+    print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
     
     basicPlot(props)
     frontEndProgressBar = 0.20
+    print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
     
     return 1,props['exceptionsHandled']
 
