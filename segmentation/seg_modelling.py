@@ -168,7 +168,7 @@ class Segmentation:
 #         pca_list = df_new.columns.values[-14:].tolist()
 #         num = pca_components.shape[1]
 #         df_new.columns.values[-num:] = [f'Principal-Component {i}' for i in range(0,num)]
-        df_new['K-means Segments'] = model.labels_
+        df_new['Segments (Clusters)'] = model.labels_
 #         df_new.to_csv("Segmentation.csv")
         return df_new
 
