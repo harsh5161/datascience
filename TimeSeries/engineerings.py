@@ -141,6 +141,36 @@ def time_engineering(props):
         print('\nResetting index!')
         df.reset_index(drop=True,inplace=True)
         
+        print('\nEqually Spacing Primary Date Column')
+        
+        primaryDateList = df[primaryDate].tolist()
+        
+        beforeLen = len(primaryDateList)
+        
+        interpolationNeeded = 0
+        
+        for i in range(len(primaryDateList)-1):
+            if primaryDateList[i+1] - primaryDateList[i] == bestSpace:
+                print('Spaced at {}'.format(i))
+            elif primaryDateList[i+1] - primaryDateList[i] > bestSpace:
+                print('Needs interpolation at {}'.format(i))
+                interpolationNeeded += 1
+                primaryDateList.insert(i+1,primaryDateList[i]+bestSpace)
+            else:
+                print('Needs Deletion at {}'.format(i))
+          
+        print('\nLen before spacing is {}'.format(beforeLen))
+        print('Len after spacing is {}'.format(len(primaryDateList)))
+        print('Interpolation needed : {}'.format(interpolationNeeded))
+        
+        newSpaces = set()
+        
+        for i in range(len(primaryDateList)-1):
+            newSpaces.add(primaryDateList[i+1]-primaryDateList[i])
+            
+        print(newSpaces)
+        print(len(newSpaces))
+        
         
     # Exploiting Date Column
     print('\nCreating exogenous Date Variables from Primary Date Column')
