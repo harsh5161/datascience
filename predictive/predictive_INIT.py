@@ -112,6 +112,39 @@ def INIT(df,info):
         print('printing target variable distribution for classification:\n')
         print(pd.Series(y).value_counts(normalize=True))
 
+    ######## LAT-LONG ENGINEERING #########
+    print('\n#### LAT-LONG ENGINEERING RUNNING WAIT ####')
+
+    lat,lon,lat_lon_cols  = findLatLong(X)
+    print("lat columns are",lat)
+    print("long columns are",lon)
+    print("lat-long columns are",lat_lon_cols)
+    if (lat and lon) or lat_lon_cols:
+        print('Respective columns will undergo lat-long engineering and will be imputed in the function itself')
+        try:
+            print("Lat-Long Engineering Running...")
+            LAT_LONG_DF = latlongEngineering(X,lat,lon,lat_lon_cols)
+            print(LAT_LONG_DF)
+            print(LAT_LONG_DF.shape)
+            if lat: X.drop(lat,axis=1,inplace=True)
+            if lon: X.drop(lon,axis=1,inplace=True)
+            if lat_lon_cols: X.drop(lat_lon_cols,axis=1,inplace=True)
+        except Exception as exceptionMessage:
+            print('#### LAT-LONG ENGINEERING HAD ERRORS ####')
+            print('Exception message is {}'.format(exceptionMessage))
+            if lat: X.drop(lat,axis=1,inplace=True)
+            if lon: X.drop(lon,axis=1,inplace=True)
+            if lat_lon_cols: X.drop(lat_lon_cols,axis=1,inplace=True)
+            LAT_LONG_DF = pd.DataFrame(None)
+            lat = []
+            lon = []
+            lat_lon_cols = []
+    else:
+        print("No Latitude or Longitude Columns found")
+        LAT_LONG_DF = pd.DataFrame(None)
+        lat = []
+        lon = []
+        lat_lon_cols = []
     ######## DATE ENGINEERING #######
     print('\n#### DATE ENGINEERING RUNNING WAIT ####')
 #     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
@@ -272,11 +305,13 @@ def INIT(df,info):
     disc_df.reset_index(drop=True, inplace=True)
     DATE_DF.reset_index(drop=True, inplace=True)
     TEXT_DF.reset_index(drop=True, inplace=True)
+    LAT_LONG_DF.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
-    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF]
+    print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
+    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF]
     X = pd.concat(concat_list,axis=1)
     X_old = X.copy()# X_old is before Target Encoding
 
@@ -402,6 +437,6 @@ def INIT(df,info):
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
-                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models}
+                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols}
     print(' #### DONE ####')
     return init_info,validation
