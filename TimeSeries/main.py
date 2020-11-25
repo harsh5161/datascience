@@ -51,6 +51,8 @@ def main(test=False,props=None):
     print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
     
     props = time_engineering(props)
+    if props == dict():
+        print('QUITTING!');return None,None
     frontEndProgressBar = 0.10
     print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
     

@@ -138,39 +138,42 @@ def time_engineering(props):
         values = list(spacesDictionary.values())
         bestSpace = keys[values.index(max(values))]
         print('\nThe best space found is : {}'.format(bestSpace))    
-        print('\nResetting index!')
-        df.reset_index(drop=True,inplace=True)
+        print('\nSetting index to Primary Date!')
+        df.index = df[primaryDate]
         
         print('\nEqually Spacing Primary Date Column')
         
         primaryDateList = df[primaryDate].tolist()
+        # interpolationNeeded = 0
         
-        beforeLen = len(primaryDateList)
-        
-        interpolationNeeded = 0
-        
-        for i in range(len(primaryDateList)-1):
-            if primaryDateList[i+1] - primaryDateList[i] == bestSpace:
-                print('Spaced at {}'.format(i))
-            elif primaryDateList[i+1] - primaryDateList[i] > bestSpace:
-                print('Needs interpolation at {}'.format(i))
-                interpolationNeeded += 1
+        i = 0 # for while loop
+        while i < len(primaryDateList)-1:
+            if primaryDateList[i+1] - primaryDateList[i] > bestSpace:
+                # interpolationNeeded += 1
                 primaryDateList.insert(i+1,primaryDateList[i]+bestSpace)
-            else:
-                print('Needs Deletion at {}'.format(i))
-          
-        print('\nLen before spacing is {}'.format(beforeLen))
-        print('Len after spacing is {}'.format(len(primaryDateList)))
-        print('Interpolation needed : {}'.format(interpolationNeeded))
-        
-        newSpaces = set()
-        
+            elif primaryDateList[i+1] - primaryDateList[i] < bestSpace:
+                primaryDateList[i+1] = primaryDateList[i] + bestSpace
+            i += 1
+
+        newSpaces = set() # Creating a set of all new spaces
+
         for i in range(len(primaryDateList)-1):
             newSpaces.add(primaryDateList[i+1]-primaryDateList[i])
             
+        print('\nPrining new space')
         print(newSpaces)
-        print(len(newSpaces))
+        print('The total number new of unique spaces found is {}'.format(len(newSpaces)))
+        if len(newSpaces) == 1:
+            print('#### THE DATE IS EQUALLY SPACED! ####')
+        else:
+            print('THE DATA IS NOT EQUALLY SPACED!')
+            return dict()
         
+        primaryDateColumn = pd.Series(None,index=primaryDateList)
+        df = pd.concat([df,primaryDateColumn],axis=1)
+        df.drop([0],axis=1,inplace=True)
+        df[primaryDate] = df.index
+        df.reset_index(drop=True,inplace=True)
         
     # Exploiting Date Column
     print('\nCreating exogenous Date Variables from Primary Date Column')
@@ -192,20 +195,20 @@ def time_engineering(props):
               9:'September',10:'October',11:'November',12:'December'}
     days_of_week = {0:'Monday',1:'Tuesday',2:'Wednesday',3:'Thursday',4:'Friday',5:'Saturday',
                     6:'Sunday'}
-    
+
     print('Creating English levels for Visualization purposes!')
     def getQuarter(entry):
         try:
             return quarters[entry]
         except:
             return np.nan
-    
+
     def getMonth(entry):
         try:
             return months[entry]
         except:
             return np.nan
-        
+
     def getDayOfWeek(entry):
         try:
             return days_of_week[entry]
@@ -234,9 +237,6 @@ def time_engineering(props):
             return 0
     
     df['Near Holiday'] = df[primaryDate].apply(nearHol)
-        
-    print('\nThings yet to be done')
-    print('1. Equally Space Data')
 
     # Removing columns that have absolutely one level
     print('\nRemoving columns with only one level')
