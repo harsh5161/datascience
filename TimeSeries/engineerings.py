@@ -252,3 +252,12 @@ def time_engineering(props):
     props['df'] = df
     print('#### TIME ENGINEERING DONE ####')
     return props
+
+def train_test_split(props):
+    df = props['df']
+    target = props['info']['Target']
+    margin = props['Margin']
+    X_train,y_train = df[:margin].drop(target,axis=1),df[:margin][target]
+    X_test,y_test = df[margin:].drop(target,axis=1),df[margin:][target]
+    return X_train,y_train,X_test,y_test
+    
