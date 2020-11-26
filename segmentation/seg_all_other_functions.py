@@ -26,7 +26,7 @@ def ForestImputer(num_df,disc_df):
     #testing purposes
     cat_list = disc_df.columns.to_list()
     num_list = num_df.columns.to_list()
-
+    print(f"The number of columns with missing values are {df.isna().any().sum()}")
     forester = 1 #MissForest imputation will be done
     if df.isna().any().sum() > 0.50 * len(df.columns):
         forester = 0 # Mean imputation will be done
@@ -145,8 +145,12 @@ def Segregation(df):
     print('\nPrinting Cardinality info of obj Discrete Columns!\n')
     print(obj_df.nunique())
     disc = pd.concat([cat_num,obj_df],axis=1)
-    if numeric.empty is False:
+    if numeric.empty is False and len(numeric)<50000:
+        print("MissForest Imputation can be attempted")
         numeric = ForestImputer(numeric,disc)
+    else:
+        print("Mean Imputation will be done")
+        numeric.fillna(numeric.mean(),inplace=True)
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')
     print(disc.nunique())
     end = time.time()

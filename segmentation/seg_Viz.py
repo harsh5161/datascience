@@ -119,6 +119,6 @@ def ClusterProfiling(segdata, num_df, disc_df):
 
         styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, subset= cat_cp.columns[:-1]).set_caption(str(col)+" (%)").set_precision(2) #styling
         
-        dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png')# save as image
+        # dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png')# save as image
         display(styled_cat_cp)
         
