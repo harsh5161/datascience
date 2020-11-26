@@ -4,14 +4,14 @@
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 from userInputs import importFile,getInfo
-from engineerings import getDateColumns,time_engineering
-from plots import basicPlot
+from engineerings import getDateColumns,time_engineering,train_test_split
+from plots import basicPlot,decompositionPlot
 from init import INIT
 import joblib
 
+# Time series Packages
+from pmdarima import auto_arima
 # =============================================================================
-# # Time series Packages
-# import pmdarima as pm
 # import fbprophet as Prophet
 # =============================================================================
 
@@ -35,31 +35,48 @@ def main(test=False,props=None):
     if len(datecols) == 0:
         print('No datecolumns found, QUITTING!')
         return None,None
-    
+
     info = getInfo(df.columns,datecols) # Get Target and Primary Date Column
-    
+
     if not info:
         print('QUITTING!')
         return None,None
 
     info['DateColumns'] = datecols
     joblib.dump(info,'info');print('INFO SAVED!')
-    
+
     # Reimporting complete data, slicing date and target columns,
     props = INIT(path,info)
     frontEndProgressBar = 0.05
     print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
-    
+
     props = time_engineering(props)
     if props == dict():
         print('QUITTING!');return None,None
     frontEndProgressBar = 0.10
     print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
-    
+
     basicPlot(props)
     frontEndProgressBar = 0.20
-    print('\n{}% done on frontEndProgessBar\n'.format(frontEndProgressBar*100))
+    print('\n{}% done on frontEndProgessBar'.format(frontEndProgressBar*100))
+
+    props['Margin'] = int(len(df)*0.8)
+    X_train,y_train,X_test,y_test = train_test_split(props)
+    print('\nTrain_Test_Split (FIT SAMPLE / HOLD_OUT SAMPLE SPLIT DONE!)')
+
+    print('\nApplying Linear Interpolation to the Training Target Column')    
+    y_train.interpolate(inplace=True)
+    frontEndProgressBar = 0.30
+    print('\n{}% done on frontEndProgessBar'.format(frontEndProgressBar*100))
+
+# =============================================================================
+#     decompositionPlot(props)
+#     frontEndProgressBar = 0.40
+#     print('\n{}% done on frontEndProgessBar'.format(frontEndProgressBar*100))
+# =============================================================================
     
+    
+
     return 1,props['exceptionsHandled']
 
 if __name__ == '__main__':
