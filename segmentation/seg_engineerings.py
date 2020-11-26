@@ -475,9 +475,14 @@ def segregator(df):
         elif a.count("Long") > 0.9*len(df):
             long_cols.append(col)
     if not long_cols:
-        for i in range(1,len(lat_cols),2):
-            long_cols.append(lat_cols[i])
-            lat_cols.remove(lat_cols[i])
+        try:
+            for i in range(1,len(lat_cols),2):
+                long_cols.append(lat_cols[i])
+                lat_cols.remove(lat_cols[i])
+        except:
+            print("Lat-Long Length Mismatch")
+            lat_cols = []
+            long_cols = []
     return lat_cols,long_cols
 
 def pseudoFormat(df):
@@ -495,7 +500,7 @@ def findLatLong(df):
     if lat_long_cols:
         print("Columns that are are of the form Lat-Long are as follows",lat_long_cols)
     columns = Floater(df,"returnFloat")  #List of float columns that could be lat or long
-    print(f"The individual columns that contain float/np.nan values are as follows {columns}")
+    print(f"The columns that could be Lat/Long are as follows {columns}")
     desired = [] 
     requisites = ["Lat","Long","Latitude","Longitude"]
     for val in itertools.product(columns,requisites):
