@@ -28,7 +28,7 @@ td_prop = [
   ]
 
 # Set table styles
-styls = [
+styls = [ dict(props = [('border-collapse','collapse'), ('border-spacing','0px')]),
   dict(selector="th", props=th_prop),
   dict(selector="td", props=td_prop),
   dict(selector="caption", 
@@ -91,11 +91,11 @@ def ClusterProfiling(segdata, num_df, disc_df):
     num_cp.sort_index(inplace=True)
     
     def highlight(x):  # function for highlighting cells  
-        return ['background-color: #CC0000' if v > np.quantile(segdata[x.name[8:]].values,0.75) 
-                else ('background-color: #FFCC66' if v < np.quantile(segdata[x.name[8:]].values,0.25) else '' ) for v in x]
+        return ['background-color: #0e7a8f' if v > np.quantile(segdata[x.name[8:]].values,0.75) 
+                else ('background-color: #a1d6e2' if v < np.quantile(segdata[x.name[8:]].values,0.25) else '' ) for v in x]
     
     styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
-    dfi.export(styled_num_cp,'Numeric var cluster profiles.png')  # storing as image
+    dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1)  # storing as image
     print("\nCluster Profiles Using Numeric Variables...")
     display(styled_num_cp)  # displaying df
     
@@ -113,12 +113,14 @@ def ClusterProfiling(segdata, num_df, disc_df):
         cat_cp = cat_cp[:-1]   #deleting last row because we dont want column totals
         
         def cat_highlight(x):
-            return ['background-color: #CC0000' if v > 80 
-                    else ('background-color: #FF9966' if (v < 20 and v >0) 
-                          else ('background-color: #CCFFFF' if v==0 else '')) for v in x]
+            return ['background-color: #0e7a8f' if v > 80 
+                    else ('background-color: #a1d6e2' if (v < 20 and v >0) 
+                          else ('background-color: #bcbabe' if v==0 else '')) for v in x]
 
         styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, subset= cat_cp.columns[:-1]).set_caption(str(col)+" (%)").set_precision(2) #styling
         
-        # dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png')# save as image
+        dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image
+        
+        
         display(styled_cat_cp)
         
