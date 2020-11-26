@@ -5,6 +5,7 @@ import numpy as np
 import time
 import itertools
 from math import sin,cos,sqrt,pow
+import decimal
 import holidays
 import swifter
 import spacy
@@ -429,7 +430,7 @@ def floatCheck(x):
         return False
 
 def checkFormat(x):
-    if x>-180.0 and x<180.0:
+    if x>-180.0 and x<180.0 and decimal.Decimal(str(x)).as_tuple().exponent <= -5 :
         return True
     else:
         return False
