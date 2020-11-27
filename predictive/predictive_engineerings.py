@@ -467,7 +467,7 @@ def Floater(df,value):
         elif value == "confirmLatLong":
             a = df[column].apply(lambda x: checkFormat(x)).to_list()
         # print(f"printing true value counts {a.count(True)}")
-        if a.count(True) >0.9*len(df):
+        if a.count(True) >0.75*len(df):
             floaters.append(column)
     return floaters
 
