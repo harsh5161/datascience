@@ -432,9 +432,12 @@ def floatCheck(x):
         return False
 
 def checkFormat(x):
-    if x>-180.0 and x<180.0 and decimal.Decimal(str(x)).as_tuple().exponent <= -5 :
-        return True
-    else:
+    try:
+        if (decimal.Decimal(str(x)).as_tuple().exponent <= -3) and (x>-180.0 and x<180.0): 
+            return True
+        else:
+            return False
+    except:
         return False
 
 def checkLatLong(x):

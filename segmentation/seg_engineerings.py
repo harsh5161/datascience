@@ -430,9 +430,12 @@ def floatCheck(x):
         return False
 
 def checkFormat(x):
-    if x>-180.0 and x<180.0 and decimal.Decimal(str(x)).as_tuple().exponent <= -5 :
-        return True
-    else:
+    try:
+        if (decimal.Decimal(str(x)).as_tuple().exponent <= -3) and (x>-180.0 and x<180.0): 
+            return True
+        else:
+            return False
+    except:
         return False
 
 def checkLatLong(x):
@@ -462,7 +465,7 @@ def Floater(df,value):
         elif value == "confirmLatLong":
             a = df[column].apply(lambda x: checkFormat(x)).to_list()
         # print(f"printing true value counts {a.count(True)}")
-        if a.count(True) >0.9*len(df):
+        if a.count(True) >0.75*len(df):
             floaters.append(column)
     return floaters
 
