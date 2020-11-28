@@ -399,3 +399,146 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
   print("Time for append", end-start)
 
   return asf, lda_model_tfidf
+
+
+############################################
+############## EMAIL URL ENGINEERING ##############
+############################################
+
+################### EMAIL AND URL IDENTIFICATION FUNCTIONS ###################
+def identifyEmailUrlColumns(df,email=True): # Default email parameter is true for email identification
+                                            # Email parameter is false for URL identification
+    # Identification of columns having email addresses
+    start = time.time()
+    
+    
+    # Creating a dictionary with column names as keys and possibilities of that column
+    # being an email/url as values    
+    possibilities = {}
+    
+    if email:
+        print('\nIdentifying Email Columns\n')
+        # Initializing possibilities dictionary 
+        for column in df:
+            if ('mail' in column):          # If the string 'mail' is found in column names, initialize with 10% possibility
+                possibilities[column] = 0.1
+            else:                           # Else initialize with 0 possibility
+                possibilities[column] = 0            
+                
+    else:
+        print('\nIdentifying URL Columns\n')
+        # Initializing possibilities dictionary 
+        for column in df:
+            if ('url' in column) or ('link' in column): # If the string 'url or link' is found in column names
+                possibilities[column] = 0.1
+            else:                           # Else initialize with 0 possibility
+                possibilities[column] = 0     
+        
+    if email:
+        # For every column in df, for every entry in a column, if the entry has @ and . in it, increase possibility 
+        # by a fraction calculated by the length of the dataframe
+        for column in df:
+            for entry in df[column]:
+                if ('@' in entry) and ('.' in entry) and (' ' not in entry):
+                    possibilities[column] += 100/len(df)
+                elif entry == '': # If we found empty string, do nothing
+                    pass
+                else:
+                    possibilities[column] -= 100/len(df)      
+    else:
+        # For every column in df, for every entry in column, if the entry has https:// or http:// in it, increase possibility 
+        # by a fraction calculated by the length of the dataframe
+        for column in df:
+            for entry in df[column]:
+                if (('https://' in entry) or ('http://' in entry)) and (entry.count('.')>0):
+                    possibilities[column] += 100/len(df)
+                elif entry == '': # If we found empty string, do nothing
+                    pass
+                else:
+                    possibilities[column] -= 100/len(df)
+                    
+    # Converting dictionary to series, the possibility series - poss_series               
+    poss_series = pd.Series(possibilities)
+    
+    if email:
+        print('The possibilities of columns being email_address are as below:\n')
+        print(poss_series)
+        # If possibility of a columns is greater than -45, then we consider it
+        email_cols = poss_series[poss_series>-45].index    
+        print('\nThe email columns found are: {}'.format(email_cols)) 
+        end = time.time()
+        print('Email Address identification time taken : {}'.format(end-start))
+        return email_cols
+    else:
+        print('The possibilities of columns being url are as below:\n')
+        print(poss_series)
+        # If possibility of a columns is greater than -45, then we consider it
+        url_cols = poss_series[poss_series>-45].index    
+        print('\nThe url columns found are: {}'.format(url_cols)) 
+        end = time.time()
+        print('URL identification time taken : {}'.format(end-start))
+        return url_cols
+
+
+################### EMAIL AND URL ENGINEERINGS ###################
+def emailUrlEngineering(df,email=True): # Default email parameter is true for email engineering
+                                        # Email parameter is false for URL engineering
+    ############################## EMAIL ENGINEERING ##############################
+    
+    start = time.time()
+    
+    if email:
+        print('\n########## EMAIL ENGINEERING RUNNING ##########')
+        # Get the first domain name, example: a@b.gov.edu.com, in this b alone is taken
+        def getDomainName(col):
+            try:
+                return col[1].split('.')[0]
+            except:
+                return np.nan # Invalid Entry
+    else:
+        print('\n########## URL ENGINEERING RUNNING ##########')
+        def getDomainName(col):
+            try:
+                return col.split('://')[1].split('/')[0].split('.')[0]
+            except:
+                return np.nan # Invalid Entry
+    
+    # Making a note of newly created columns
+    newCols = []
+    # For every column in email columns, get Domain Name, create a new column and check the missing percentage
+    for column in df.columns:
+        domain_name = column + '_domain'
+        if email:
+            df[domain_name] = df[column].str.rsplit('@')
+            df[domain_name] = df[domain_name].apply(getDomainName)
+        else:
+            df[domain_name] = df[column].apply(getDomainName)
+        # Checking percentage of missing values
+        if df[domain_name].isnull().sum()/len(df) >= 0.5:
+            print('The newly created \'{}\' column has 50% or more missing values!'.format(domain_name))
+            print('And hence will be dropped!')
+            df.drop(domain_name,axis=1)
+        else:
+            newCols.append(domain_name)
+            
+    if len(newCols) == 0:
+        return_df = pd.DataFrame(None) # Will help return empty dataframe
+    else:
+        return_df = pd.DataFrame(df[newCols].fillna('missing')) # Returning DataFrame that contain only newly created columns
+                                                                # With missing imputation done
+        
+    end = time.time()
+    if email:
+        print('\nNew Columns created from Email engineering are: {}'.format(newCols))
+        print('\nEmail Engineering time taken: {}'.format(end-start))
+    else:
+        print('\nNew Columns created from URL engineering are: {}'.format(newCols))
+        print('\nURL Engineering time taken: {}'.format(end-start)) 
+    
+    return return_df 
+
+
+
+############################################
+############## EMAIL URL ENGINEERING ##############
+############################################
