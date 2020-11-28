@@ -121,6 +121,45 @@ def INIT(df,info):
     print(' #### DONE ####')
     ######## DATE ENGINEERING #######
 
+    ######## EMAIL URL ENGINEERING ########
+    obj_df  = X.select_dtypes('object') # Sending in only object dtype columns
+    short_obj_df = obj_df.astype(str).sample(3000).dropna(how='all') if len(obj_df)>3000 else obj_df.astype(str).dropna(how='all')
+    email_cols = identifyEmailUrlColumns(short_obj_df,email=True)
+    if len(email_cols)>0:
+        try:
+            EMAIL_DF = emailUrlEngineering(X[email_cols])
+            X.drop(email_cols,axis=1,inplace=True) # If any email columns found, we drop it after engineering
+            EMAIL_DF.reset_index(drop=True)
+        except Exception as e:
+            print('### EMAIL ENGINEERING HAD ERRORS ###')
+            print(f'The Exception message is {e}')
+            X.drop(email_cols,axis=1,inplace=True)
+            EMAIL_DF = pd.DataFrame(None)
+            email_cols  = []
+    else:
+        print("No Email columns found")
+        EMAIL_DF = pd.DataFrame(None)
+        email_cols = []
+
+    url_cols = identifyEmailUrlColumns(short_obj_df,email=False)
+    if len(url_cols)>0:
+        try:
+            URL_DF = emailUrlEngineering(X[url_cols])
+            X.drop(url_cols,axis=1) # If any email columns found, we drop it post engineering
+            URL_DF.reset_index(drop=True)
+        except Exception as e:
+            print('### URL ENGINEERING HAD ERRORS ###')
+            print(f'The Exception is as {e}')
+            X.drop(url_cols,axis=1)
+            URL_DF = pd.DataFrame(None)
+            url_cols  = []
+    else:
+        print("No URL columns found")
+        URL_DF = pd.DataFrame(None)
+        url_cols = []
+    ######## EMAIL URL ENGINEERING ########
+
+
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
 
@@ -254,12 +293,16 @@ def INIT(df,info):
     DATE_DF.reset_index(drop=True, inplace=True)
     TEXT_DF.reset_index(drop=True, inplace=True)
     LAT_LONG_DF.reset_index(drop=True, inplace=True)
+    EMAIL_DF.reset_index(drop=True, inplace=True)
+    URL_DF.reset_index(drop=True, inplace= True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
-    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF]
+    print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
+    print('URL_DF -  {}'.format(URL_DF,shape))
+    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF]
     X = pd.concat(concat_list,axis=1)
     
     # print("This is what the data looks like before going into transformations and encoding",X)
@@ -275,6 +318,10 @@ def INIT(df,info):
             TEXT_DF.drop(single, axis=1, inplace=True)
         elif single in LAT_LONG_DF.columns:
             LAT_LONG_DF.drop(single, axis=1, inplace=True)
+        elif single in EMAIL_DF.columns:
+            EMAIL_DF.drop(single, axis =1, inplace=True)
+        elif single in URL_DF.columns:
+            URL_DF.drop(single, axis=1, inplace=True)
         
         X.drop(single, axis=1, inplace=True)
 
@@ -352,6 +399,6 @@ def INIT(df,info):
                 'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,
                 'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'KEY':key,'X_train':X,'disc_cat':disc_cat,
-                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols}
+                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols}
     print(' #### DONE ####')
     return init_info
