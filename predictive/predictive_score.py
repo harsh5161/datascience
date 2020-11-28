@@ -80,6 +80,28 @@ def score(df,init_info,validation=False):
 
     if init_info['remove_list'] is not None:
         X_test.drop(columns=init_info['remove_list'],axis=1,inplace=True)
+    if  init_info['EMAIL_STATUS'] is False:   
+        email_cols = init_info['email_cols']
+        if len(email_cols)>0:
+            EMAIL_DF = emailUrlEngineering(X_test[email_cols])
+            EMAIL_DF.reset_index(drop=True)
+            #EMAIL_DF.fillna('missing', inplace=True)
+            print(EMAIL_DF)
+        else:
+            EMAIL_DF = pd.DataFrame()
+    else:
+        EMAIL_DF = pd.DataFrame()
+    if init_info['URL_STATUS'] is False:
+        url_cols = init_info['url_cols']
+        if len(url_cols)>0:
+            URL_DF = emailUrlEngineering(X_test[url_cols], email=False)
+            URL_DF.reset_index(drop=True)
+            #URL_DF.fillna('missing',inplace=True)
+            print(URL_DF)
+        else:
+            URL_DF = pd.DataFrame()
+    else:
+        URL_DF =  pd.DataFrame()
 
     some_list = init_info['some_list']
     lda_models = init_info['lda_models']
@@ -116,12 +138,16 @@ def score(df,init_info,validation=False):
     DATE_DF.reset_index(drop=True, inplace=True)
     TEXT_DF.reset_index(drop=True, inplace=True)
     LAT_LONG_DF.reset_index(drop=True, inplace=True)
+    EMAIL_DF.reset_index(drop=True,inplace=True)
+    URL_DF.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
-    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF],axis=1)
+    print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
+    print('URL_DF - {}'.format(URL_DF.shape))
+    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF],axis=1)
     X_test = init_info['TargetEncoder'].transform(X_test)
     X_test = X_test[init_info['TrainingColumns']]
     X_test = X_test.fillna(X_test.mode())
