@@ -78,8 +78,6 @@ def score(df,init_info,validation=False):
     else:
         disc_df = pd.DataFrame()
 
-    if init_info['remove_list'] is not None:
-        X_test.drop(columns=init_info['remove_list'],axis=1,inplace=True)
     if  init_info['EMAIL_STATUS'] is False:   
         email_cols = init_info['email_cols']
         if len(email_cols)>0:
@@ -103,6 +101,10 @@ def score(df,init_info,validation=False):
     else:
         URL_DF =  pd.DataFrame()
 
+
+    if init_info['remove_list'] is not None:
+        X_test.drop(columns=init_info['remove_list'],axis=1,inplace=True)
+    
     some_list = init_info['some_list']
     lda_models = init_info['lda_models']
 

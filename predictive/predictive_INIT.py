@@ -353,6 +353,8 @@ def INIT(df,info):
     DATE_DF.reset_index(drop=True, inplace=True)
     TEXT_DF.reset_index(drop=True, inplace=True)
     LAT_LONG_DF.reset_index(drop=True, inplace=True)
+    EMAIL_DF.reset_index(drop=True, inplace=True)
+    URL_DF.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
