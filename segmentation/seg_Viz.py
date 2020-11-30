@@ -4,7 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import dataframe_image as dfi
 
-
+from collections import defaultdict
+from collections import OrderedDict
 ########## CSS for styling dataframe ################
 
 # Set CSS properties for th elements in dataframe
@@ -62,9 +63,17 @@ def ClusterMags(segdata):
             data = cmags, palette="husl").set_title('Cluster Magnitudes')
     sns_plot.figure.savefig('Cmags_barchart.png')
     plt.show()
-
     
-def ClusterProfiling(segdata, num_df, disc_df):
+    ## creating a dict to store cluster numbers and their respective percentages
+    clp=pd.DataFrame(cmags[['Cluster numbers','Percent']])
+    clp.set_index('Cluster numbers', inplace= True)
+    cluster_percentages=clp.to_dict()
+    cluster_percentages=cluster_percentages['Percent']
+    print(cluster_percentages)
+    return cluster_percentages
+    
+    
+def ClusterProfiling_Tables(segdata, num_df, disc_df):
     
     ## for numeric variables
     num_cp=pd.DataFrame(segdata.groupby('Segments (Clusters)')[num_df.columns.to_list()].agg(np.mean))  #calculating means per cluster
@@ -90,16 +99,54 @@ def ClusterProfiling(segdata, num_df, disc_df):
     num_cp.index = num_cp.index + 2 
     num_cp.sort_index(inplace=True)
     
-    def highlight(x):  # function for highlighting cells  
-        return ['background-color: #0e7a8f' if v > np.quantile(segdata[x.name[8:]].values,0.75) 
-                else ('background-color: #a1d6e2' if v < np.quantile(segdata[x.name[8:]].values,0.25) else '' ) for v in x]
+    def highlight(x):  # function for highlighting cells   
+        return ['background: #fffcb0' if v== x.iloc[0] 
+                else ('background-color: #0e7a8f' if v > np.quantile(segdata[x.name[8:]].values,0.75) 
+                else ('background-color: #a1d6e2' if v < np.quantile(segdata[x.name[8:]].values,0.25) 
+                      else '' )) for v in x]
     
     styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
     dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1)  # storing as image
     print("\nCluster Profiles Using Numeric Variables...")
     display(styled_num_cp)  # displaying df
     
-    ## for categorical variables     
+    ## recording high and low mean values of numeric variables per cluster        
+    num_cp_copy=num_cp.set_index('Segments (Clusters)')
+
+    high_mean_vals= defaultdict(list) # dictionary to store which cluster has high values of which numeric column
+    low_mean_vals= defaultdict(list)  # dictionary to store which cluster has low values of which numeric column
+    hmv_T={}
+    lmv_T={}
+    for c in num_cp_copy.columns:
+        hmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]>np.quantile(segdata[c[8:]].values, 0.75)].index.to_list()
+        lmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]<np.quantile(segdata[c[8:]].values, 0.25)].index.to_list()
+
+    for node, neighbours in hmv_T.items():  # loop to invert hmv_T dictionary mapping 
+        for neighbour in neighbours:
+            high_mean_vals[neighbour].append(node)                  
+
+    for node, neighbours in lmv_T.items():  # loop to invert lmv_T dictionary mapping 
+        for neighbour in neighbours:
+            low_mean_vals[neighbour].append(node)                  
+
+    for i in num_cp_copy.index.values[1:]:  # adding missing cluster numbers in keys
+        if i not in high_mean_vals.keys():
+            high_mean_vals[i]=[]
+
+        if i not in low_mean_vals.keys():
+            low_mean_vals[i]=[]
+
+    high_mean_vals=OrderedDict(sorted(high_mean_vals.items()))  # sorting 
+    low_mean_vals=OrderedDict(sorted(low_mean_vals.items()))
+
+    print("\nhigh_mean_vals::", high_mean_vals)
+    print("\nlow_mean_vals::", low_mean_vals)
+    
+    ## for categorical variables  
+    high_percent_levels={} # dictionary to store which cluster has high percentage of a categorical column's level
+    zero_percent_levels={} # dictionary to store which cluster has zero percentage of a categorical column's level
+
+    
     print("\nCluster profiles for each categorical variable...")
     for col in disc_df.columns:
         cat_cp = pd.crosstab(index=segdata['Segments (Clusters)'], 
@@ -108,19 +155,77 @@ def ClusterProfiling(segdata, num_df, disc_df):
 
     #     cat_cp.columns.name=cat_cp.index.name  
         cat_cp.rename_axis(None, axis=1, inplace=True)    # removing cat_cp.columns.name
-        cat_cp.rename(columns = {'Total':'Row total'}, inplace = True) # renaming total column
+        cat_cp.rename(columns = {'Total':'Row total'}, index= {'Total':'Overall Dataset'}, inplace = True) # renaming total column and index
         cat_cp=(cat_cp.div(cat_cp["Row total"], axis=0)*100)  # dividing by row total and getting percentage of frequency
-        cat_cp = cat_cp[:-1]   #deleting last row because we dont want column totals
+        cat_cp = cat_cp.iloc[np.arange(-1, len(cat_cp)-1)]   #shifting the last row to first position
+        cat_cp.drop(['Row total'], axis= 1, inplace =True)   #dropping row total column
         
-        def cat_highlight(x):
-            return ['background-color: #0e7a8f' if v > 80 
-                    else ('background-color: #a1d6e2' if (v < 20 and v >0) 
-                          else ('background-color: #bcbabe' if v==0 else '')) for v in x]
+        for c in cat_cp.columns:          # scaling overall dataset % to 100 for easy comparison
+            ov= cat_cp[c].loc['Overall Dataset']
+            cat_cp[c]= (cat_cp[c]/ov)*100
 
-        styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, subset= cat_cp.columns[:-1]).set_caption(str(col)+" (%)").set_precision(2) #styling
-        
-        dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image
-        
-        
+        def cat_highlight(x):
+            if x.name == "Overall Dataset":
+                return ['background: #fffcb0' for v in x]
+            else:
+                return ['background-color: #0e7a8f' if v > 150 
+                        else ('background-color: #46abc2' if (v <= 150 and v >100) 
+                              else ('background-color: #bcbabe' if v==0 else '')) for v in x]
+
+        styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling       
+        dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image        
         display(styled_cat_cp)
+        
+        ## for text cluster profiles
+        cat_cp_copy=cat_cp.copy()
+
+        hpl_T={}
+        zpl_T={}
+
+        for c in cat_cp_copy.columns: 
+            hpl_T[c]=cat_cp_copy[cat_cp_copy[c]>150].index.to_list()
+            zpl_T[c]=cat_cp_copy[cat_cp_copy[c]==0].index.to_list()
+
+        high_percent_levels[col] = defaultdict(list)
+        for node, neighbours in hpl_T.items():  # loop to invert hpl_T dictionary mapping 
+            for neighbour in neighbours:
+                high_percent_levels[col][neighbour].append(node)                  
+
+        zero_percent_levels[col] = defaultdict(list)        
+        for node, neighbours in zpl_T.items():  # loop to invert zpl_T dictionary mapping 
+            for neighbour in neighbours:
+                zero_percent_levels[col][neighbour].append(node)                  
+
+        for i in cat_cp_copy.index.values[1:]:   #loop to add missing cluster numbers to keys
+            if i not in high_percent_levels[col].keys():
+                high_percent_levels[col][i]=[]
+
+            if i not in zero_percent_levels[col].keys():
+                zero_percent_levels[col][i]=[]
+
+        high_percent_levels[col]=OrderedDict(sorted(high_percent_levels[col].items()))  #sorting
+        zero_percent_levels[col]=OrderedDict(sorted(zero_percent_levels[col].items()))
+
+        print("\nhigh_percent_levels:::\n",high_percent_levels) 
+        print("\nzero_percent_levels:::\n",zero_percent_levels) 
+     
+    return high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels
+
+def ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels):
+    print("\n\n\n\t\t_____________CLUSTER PROFILES_______________\n")
+    for i in range(0,len(cluster_percentages)):
+        print("\033[1m\033[4m"+"\nCLUSTER {}:".format(i)+"\033[0m") 
+        print("\nCluster {} represents {}% of the Overall dataset.".format(i,cluster_percentages[i]))
+        
+        if high_mean_vals[i]:
+            print("It contains relatively high values of the following numeric variables: {}".format(high_mean_vals[i]))
+            
+        if low_mean_vals[i]:
+            print("It contains relatively low values of the following numeric variables: {}".format(low_mean_vals[i]))
+        
+        for k in high_percent_levels.keys():
+            if high_percent_levels[k][i]: 
+                print ("For the variable '{}', it contains more of categories- {}.".format(k, high_percent_levels[k][i]))
+            if zero_percent_levels[k][i]:
+                    print("For the variable '{}', it does not contain categories- {}.".format(k, zero_percent_levels[k][i]))
         
