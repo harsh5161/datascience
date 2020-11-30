@@ -3,6 +3,8 @@
 import pandas as pd
 import numpy as np
 import time
+import itertools
+from math import sin,cos,sqrt,pow
 import holidays
 import swifter
 import spacy
@@ -541,4 +543,155 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
 
 ############################################
 ############## EMAIL URL ENGINEERING ##############
+############################################
+
+############################################
+############## LAT-LONG ENGINEERING ##############
+############################################
+
+def floatCheck(x):
+    if isinstance(x,float) is True:# Accepts floating point numbers as well as np.nan  (testing)#and float.is_integer(x) is False:
+        return True
+    else:
+        return False
+
+def checkFormat(x):
+    try:
+        if (decimal.Decimal(str(x)).as_tuple().exponent <= -3) and (x>-180.0 and x<180.0): 
+            return True
+        else:
+            return False
+    except:
+        return False
+
+def checkLatLong(x):
+    if x > -180.0 and x < 180.0:
+        if x > -90.0 and x < 90.0:
+            return "Lat"
+        return "Long"
+    else:
+        return np.nan
+
+def checkCondition(x):
+    try:
+        if x[0]=='(' and x[-1]==')' and len(x.split(','))==2:
+            return True
+        else:
+            return False
+    except TypeError:
+        return np.nan
+
+def Floater(df,value):
+    print(value)
+    floaters = []
+    for column in df.columns: #add try catch block
+        # print(f"testing column {column}")
+        if value == "returnFloat":
+            a = df[column].apply(lambda x: floatCheck(x)).to_list()
+        elif value == "confirmLatLong":
+            a = df[column].apply(lambda x: checkFormat(x)).to_list()
+        # print(f"printing true value counts {a.count(True)}")
+        if a.count(True) >0.9*len(df):
+            floaters.append(column)
+    return floaters
+
+def segregator(df):
+    lat_cols = []
+    long_cols = []
+    for col in df.columns:
+        a = df[col].apply(lambda x: checkLatLong(x)).to_list()
+        if a.count("Lat") > 0.9*len(df):
+            lat_cols.append(col)
+        elif a.count("Long") > 0.9*len(df):
+            long_cols.append(col)
+    if not long_cols:
+        try:
+            for i in range(1,len(lat_cols),2):
+                long_cols.append(lat_cols[i])
+                lat_cols.remove(lat_cols[i])
+        except:
+            print("Lat-Long Length Mismatch")
+            lat_cols = []
+            long_cols = []
+    return lat_cols,long_cols
+
+def pseudoFormat(df):
+    lat_long_cols = []
+    for col in df.columns:
+        a = df[col].apply(lambda x: checkCondition(x)).to_list()
+        if a.count(True) > 0.9*len(df):
+            lat_long_cols.append(col)
+    return lat_long_cols
+def findLatLong(df):
+    lat_cols = []
+    long_cols = []
+    lat_long_cols = [] # will add logic for lat-long columns of the form (lat,long)
+    lat_long_cols = pseudoFormat(df)
+    if lat_long_cols:
+        print("Columns that are are of the form Lat-Long are as follows",lat_long_cols)
+    columns = Floater(df,"returnFloat")  #List of float columns that could be lat or long
+    print(f"The columns that could be Lat/Long are as follows {columns}")
+    desired = [] 
+    requisites = ["Lat","Long","Latitude","Longitude"]
+    for val in itertools.product(columns,requisites):
+        if val[0].lower().find(val[1].lower()) != -1 and val[0] not in desired:
+            desired.append(val[0])
+            columns.remove(val[0])
+    #Removing columns with low nunique()
+    for col in columns[:]: 
+        if df[col].nunique() <100:
+            columns.remove(col)
+    #We check if there are any lat or long columns present in the rest of the float columns
+    if columns:
+        possible = Floater(df[columns],"confirmLatLong")
+        if possible: #If they are of Lat Long format then add it to desired list
+            desired.extend(possible)
+
+    if desired:
+        lat_cols, long_cols = segregator(df[desired])
+
+
+    
+    return lat_cols, long_cols,lat_long_cols
+
+def distanceCalc(x_list):
+    x = cos(float(x_list[0])) * cos(float(x_list[1]))
+    y = cos(float(x_list[0])) * sin(float(x_list[1]))
+    z = sin(float(x_list[0]))
+    return sqrt(pow(x-1,2)+pow(y-0,2)+pow(z-0,2))
+
+def convertCartesian(x):
+    try:
+        x_list = x[x.find('(')+1:x.find(')')].split(',')
+        return distanceCalc(x_list)
+    except AttributeError:
+        return 0.0
+def originGenerator(latitude,longitude):
+    temp = {}
+    temp[latitude.name] = latitude
+    temp[longitude.name] = longitude
+    temp_df = pd.DataFrame.from_dict(temp)
+    ser = temp_df.apply(lambda x:distanceCalc([x[0],x[1]]),axis=1)
+    return ser 
+def latlongEngineering(df,lat_cols,long_cols,lat_long_cols):
+    req = {}
+    if lat_long_cols:
+        for c in lat_long_cols:
+                ser = df[c].apply(lambda x: convertCartesian(x))
+                req[f'{c}-Origin'] = ser 
+    if lat_cols and long_cols and len(lat_cols) == len(long_cols):
+        for i in range(len(lat_cols)):  
+            ser = originGenerator(df[lat_cols[i]],df[long_cols[i]])
+            ser.fillna(0.0,inplace=True)
+            req[f'{lat_cols[i]}_{long_cols[i]}-Origin'] = ser
+    else:
+        print("Lat columns and Long columns length mismatch")
+
+    if req:
+        return pd.DataFrame.from_dict(req) 
+    else:
+        return None
+
+############################################
+############## LAT-LONG ENGINEERING ##############
 ############################################

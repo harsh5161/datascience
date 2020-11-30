@@ -42,6 +42,18 @@ def score(df,init_info,validation=False):
         k_test = X_test.index
         k_test.name = 'S.No'
 
+    lat = init_info['lat']
+    lon = init_info['lon']
+    lat_lon_cols = init_info['lat_lon_cols']
+    if (lat and lon) or lat_lon_cols:
+        print('Running Lat-Long on validation dataset')
+        LAT_LONG_DF = latlongEngineering(X_test,lat,lon,lat_lon_cols)
+        # LAT_LONG_DF.fillna(0.0,inplace=True)
+        print(LAT_LONG_DF)
+    else:
+        LAT_LONG_DF = pd.DataFrame()
+
+
     date_cols = init_info['DateColumns']
     possible_datecols= init_info['PossibleDateColumns']
     if date_cols:
@@ -128,15 +140,17 @@ def score(df,init_info,validation=False):
     disc_df.reset_index(drop=True, inplace=True)
     DATE_DF.reset_index(drop=True, inplace=True)
     TEXT_DF.reset_index(drop=True, inplace=True)
+    LAT_LONG_DF.reset_index(drop=True, inplace=True)
     EMAIL_DF.reset_index(drop=True,inplace=True)
     URL_DF.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
+    print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF],axis=1)
+    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF],axis=1)
     X_test = init_info['TargetEncoder'].transform(X_test)
     X_test = X_test[init_info['TrainingColumns']]
     X_test = X_test.fillna(X_test.mode())
