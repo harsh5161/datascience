@@ -301,7 +301,7 @@ def INIT(df,info):
     print('TEXT_DF - {}'.format(TEXT_DF.shape))
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
-    print('URL_DF -  {}'.format(URL_DF,shape))
+    print('URL_DF -  {}'.format(URL_DF.shape))
     concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF]
     X = pd.concat(concat_list,axis=1)
     
@@ -385,11 +385,14 @@ def INIT(df,info):
     segdata= algo.clustering_algorithms(X_reduced,X_df)
     
     # Displaying Cluster magnitudes
-    ClusterMags(segdata)
+    cluster_percentages=ClusterMags(segdata)
     
     
-    # Cluster Profiling
-    ClusterProfiling(segdata, num_df, disc_df)
+    # Cluster Profiling Tables
+    high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(segdata, num_df, disc_df)
+    
+    # Cluster Profiling Text
+    ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels)
 
 
     ############# CLUSTERING ##################### 
