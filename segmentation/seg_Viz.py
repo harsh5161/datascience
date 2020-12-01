@@ -206,20 +206,21 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     return high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels
 
 def ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels):
+    cp_text={}
     print("\n\n\n\t\t_____________CLUSTER PROFILES_______________\n")
     for i in range(0,len(cluster_percentages)):
-        print("\033[1m\033[4m"+"\nCLUSTER {}:".format(i)+"\033[0m") 
-        print("\nCluster {} represents {}% of the Overall dataset.".format(i,cluster_percentages[i]))
+        cp_text[i]=str("\033[1m\033[4m"+"\nCLUSTER {}:".format(i)+"\033[0m")
+        cp_text[i]+=str("\nCluster {} represents {}% of the Overall dataset.".format(i,cluster_percentages[i]))
         
         if high_mean_vals[i]:
-            print("It contains relatively high values of the numeric variables- {}".format(str(high_mean_vals[i])[1:-1]))
+            cp_text[i]+=str("\nIt contains relatively high values of the numeric variables- {}".format(str(high_mean_vals[i])[1:-1]))
             
         if low_mean_vals[i]:
-            print("It contains relatively low values of the numeric variables- {}".format(str(low_mean_vals[i])[1:-1]))
+            cp_text[i]+=str("\nIt contains relatively low values of the numeric variables- {}".format(str(low_mean_vals[i])[1:-1]))
         
         for k in high_percent_levels.keys():
             if high_percent_levels[k][i]: 
-                print ("For the variable '{}', it contains more of categories- {}.".format(k, str(high_percent_levels[k][i])[1:-1]))
+                cp_text[i]+=str("\nFor the variable '{}', it contains more of categories- {}.".format(k, str(high_percent_levels[k][i])[1:-1]))
             if zero_percent_levels[k][i]:
-                    print("For the variable '{}', it does not contain categories- {}.".format(k, str(zero_percent_levels[k][i])[1:-1]))
-        
+                cp_text[i]+=str("\nFor the variable '{}', it does not contain categories- {}.".format(k, str(zero_percent_levels[k][i])[1:-1]))
+        print(cp_text[i])
