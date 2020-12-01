@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import dataframe_image as dfi
 
 from collections import defaultdict
-from collections import OrderedDict
+
 ########## CSS for styling dataframe ################
 
 # Set CSS properties for th elements in dataframe
@@ -80,29 +80,23 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     num_cp=num_cp.reset_index()                                           # to rename columns
     num_cp.columns= num_cp.columns[:1].tolist()+ ['Mean of ' + i for i in num_df.columns.to_list()]   # renaming columns
 
-####### this commented block can be used for testing quantile logic ###########################
-#     columns = [i[8:] for i in num_cp.columns[1:]]  #adding quantiles 1 and 3 of each column in num_cp
-#     quant3=[]
-#     quant1=[]
-#     for col in columns:
-#         quant3.append(np.quantile(segdata[col].values,0.75))
-#         quant1.append(np.quantile(segdata[col].values,0.25))
-#     q1=['quantile 1']+quant1
-#     q3=['quantile 3']+quant3
-#     q=pd.DataFrame([q1,q3],columns= num_cp.columns)
-#     num_cp=pd.concat([num_cp,q], ignore_index=True)
-###################################################################################################
-
     overall_means = segdata[num_df.columns.to_list()].mean(axis=0).to_list()  # calculating means in overall dataset
     overall_row = ['Overall Dataset'] + overall_means
     num_cp.loc[-1] = overall_row           # adding overall means row at the top of the table
     num_cp.index = num_cp.index + 2 
     num_cp.sort_index(inplace=True)
     
+#     display(num_cp) #before scaling # can be used for testing
+    
+    for c in num_cp.columns[1:]:          # scaling overall dataset % to 100 for easy comparison
+            ov= num_cp[c].iloc[0]
+            num_cp[c]= (num_cp[c]/ov)*100
+
+    
     def highlight(x):  # function for highlighting cells   
         return ['background: #fffcb0' if v== x.iloc[0] 
-                else ('background-color: #0e7a8f' if v > np.quantile(segdata[x.name[8:]].values,0.75) 
-                else ('background-color: #a1d6e2' if v < np.quantile(segdata[x.name[8:]].values,0.25) 
+                else ('background-color: #0e7a8f' if v > 150 
+                else ('background-color: #a1d6e2' if v < 50
                       else '' )) for v in x]
     
     styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
@@ -118,8 +112,8 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     hmv_T={}
     lmv_T={}
     for c in num_cp_copy.columns:
-        hmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]>np.quantile(segdata[c[8:]].values, 0.75)].index.to_list()
-        lmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]<np.quantile(segdata[c[8:]].values, 0.25)].index.to_list()
+        hmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]>150].index.to_list() 
+        lmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]<50].index.to_list()
 
     for node, neighbours in hmv_T.items():  # loop to invert hmv_T dictionary mapping 
         for neighbour in neighbours:
@@ -135,9 +129,9 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
 
         if i not in low_mean_vals.keys():
             low_mean_vals[i]=[]
-
-    high_mean_vals=OrderedDict(sorted(high_mean_vals.items()))  # sorting 
-    low_mean_vals=OrderedDict(sorted(low_mean_vals.items()))
+        
+    high_mean_vals=dict(sorted(high_mean_vals.items()))  # sorting 
+    low_mean_vals=dict(sorted(low_mean_vals.items()))
 
     print("\nhigh_mean_vals::", high_mean_vals)
     print("\nlow_mean_vals::", low_mean_vals)
@@ -203,8 +197,8 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
             if i not in zero_percent_levels[col].keys():
                 zero_percent_levels[col][i]=[]
 
-        high_percent_levels[col]=OrderedDict(sorted(high_percent_levels[col].items()))  #sorting
-        zero_percent_levels[col]=OrderedDict(sorted(zero_percent_levels[col].items()))
+        high_percent_levels[col]=dict(sorted(high_percent_levels[col].items()))  #sorting
+        zero_percent_levels[col]=dict(sorted(zero_percent_levels[col].items()))
 
         print("\nhigh_percent_levels:::\n",high_percent_levels) 
         print("\nzero_percent_levels:::\n",zero_percent_levels) 
@@ -212,20 +206,21 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     return high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels
 
 def ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels):
+    cp_text={}
     print("\n\n\n\t\t_____________CLUSTER PROFILES_______________\n")
     for i in range(0,len(cluster_percentages)):
-        print("\033[1m\033[4m"+"\nCLUSTER {}:".format(i)+"\033[0m") 
-        print("\nCluster {} represents {}% of the Overall dataset.".format(i,cluster_percentages[i]))
+        cp_text[i]=str("\033[1m\033[4m"+"\nCLUSTER {}:".format(i)+"\033[0m")
+        cp_text[i]+=str("\nCluster {} represents {}% of the Overall dataset.".format(i,cluster_percentages[i]))
         
         if high_mean_vals[i]:
-            print("It contains relatively high values of the following numeric variables: {}".format(high_mean_vals[i]))
+            cp_text[i]+=str("\nIt contains relatively high values of the numeric variables- {}".format(str(high_mean_vals[i])[1:-1]))
             
         if low_mean_vals[i]:
-            print("It contains relatively low values of the following numeric variables: {}".format(low_mean_vals[i]))
+            cp_text[i]+=str("\nIt contains relatively low values of the numeric variables- {}".format(str(low_mean_vals[i])[1:-1]))
         
         for k in high_percent_levels.keys():
             if high_percent_levels[k][i]: 
-                print ("For the variable '{}', it contains more of categories- {}.".format(k, high_percent_levels[k][i]))
+                cp_text[i]+=str("\nFor the variable '{}', it contains more of categories- {}.".format(k, str(high_percent_levels[k][i])[1:-1]))
             if zero_percent_levels[k][i]:
-                    print("For the variable '{}', it does not contain categories- {}.".format(k, zero_percent_levels[k][i]))
-        
+                cp_text[i]+=str("\nFor the variable '{}', it does not contain categories- {}.".format(k, str(zero_percent_levels[k][i])[1:-1]))
+        print(cp_text[i])

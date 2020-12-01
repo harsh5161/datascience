@@ -9,6 +9,7 @@ import joblib
 from segmentation.seg_Viz import *
 from segmentation.seg_modelling import *
 from imblearn.over_sampling import RandomOverSampler
+import time
 
 def INIT(df,info):
     key = info['key']
@@ -385,14 +386,23 @@ def INIT(df,info):
     segdata= algo.clustering_algorithms(X_reduced,X_df)
     
     # Displaying Cluster magnitudes
+    start=time.time()
     cluster_percentages=ClusterMags(segdata)
+    end=time.time()
+    print("\n Time taken in ClusterMags: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
     
     
     # Cluster Profiling Tables
+    start=time.time()
     high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(segdata, num_df, disc_df)
+    end=time.time()
+    print("\n Time taken in ClusterProfiling_Tables: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
     
     # Cluster Profiling Text
+    start=time.time()
     ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels)
+    end=time.time()
+    print("\n Time taken in ClusterProfiling_Text: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
 
 
     ############# CLUSTERING ##################### 
