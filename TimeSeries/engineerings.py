@@ -237,27 +237,38 @@ def time_engineering(props):
             return 0
     
     df['Near Holiday'] = df[primaryDate].apply(nearHol)
-
+    
     # Removing columns that have absolutely one level
     print('\nRemoving columns with only one level')
     for column in df:
         if df[column].nunique() == 1:
             print('Column \'{}\' will be dropped since it has 1 level'.format(column))
             df.drop(column,axis=1,inplace=True)
-
+    
     print('\nPrinting DataFrame Head\n')
     print(df.head())
-
+    
     print('\n#### PACKING/UPDATING and RETURNING PROPS ####\n')
     props['df'] = df
     print('#### TIME ENGINEERING DONE ####')
     return props
-
+    
 def train_test_split(props):
     df = props['df']
     target = props['info']['Target']
+    primaryDate = props['info']['PrimaryDate']
     margin = props['Margin']
+    for col in props['EnglishCols']:
+        if col in df.columns:
+            df.drop(col,axis=1,inplace=True)
+    df.index = df[primaryDate]
+    df.drop(primaryDate,axis=1,inplace=True)
     X_train,y_train = df[:margin].drop(target,axis=1),df[:margin][target]
     X_test,y_test = df[margin:].drop(target,axis=1),df[margin:][target]
     return X_train,y_train,X_test,y_test
+    
+def interpolateTarget(props):
+    print('\nApplying Time Series Decomposition Plot')
+    props['df'].interpolate(inplace=True)
+    return props
     
