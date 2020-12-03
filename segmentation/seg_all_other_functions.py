@@ -145,9 +145,10 @@ def Segregation(df):
     print('\nPrinting Cardinality info of obj Discrete Columns!\n')
     print(obj_df.nunique())
     disc = pd.concat([cat_num,obj_df],axis=1)
-    if numeric.empty is False and len(numeric)<50000:
-        print("MissForest Imputation can be attempted")
-        numeric = ForestImputer(numeric,disc)
+    if numeric.empty is False:
+        if len(numeric)<50000 and len(df.columns)<100:
+            print("MissForest Imputation can be attempted")
+            numeric = ForestImputer(numeric,disc)
     else:
         print("Mean Imputation will be done")
         numeric.fillna(numeric.mean(),inplace=True)
