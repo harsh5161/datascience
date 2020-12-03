@@ -168,9 +168,10 @@ def getUserInput(df):
             df.drop(key,axis=1,inplace=True)
 
         # Remove User Specified ID Columns
-        df = removeUserSpecifiedIDs(df)
-
-        info = {'key':key,'cols':df.columns.to_list()}
+        cluster_list,profile_list = removeUserSpecifiedIDs(df)
+        print('Cluster List',cluster_list)
+        print('Profile List',profile_list)
+        info = {'key':key,'cols':cluster_list,'profile_cols':profile_list}
 
         return info
     else:
@@ -210,32 +211,40 @@ def findKey(column):
 ######################################
 ######## removeUserSpecifiedIDs Function #######
 ######################################
-
-def removeUserSpecifiedIDs(df):
-    removed_cols = set()
-    not_found_cols = set()
-    cols = input("Would you like to remove any columns that you dont want to be included in segmentation, if so enter the columns in this format separated by commas: col1,col2,col3 ")
+def Splitter(cols,full_list):
+    full_list = full_list[:]
+    removed_cols = []
+    not_found_cols = []
     if not cols:
         print('No Columns removed')
-        return df
+        return full_list
     else:
         try:
-            columns = cols.split(',')
+            columns  = cols.split(',')
             for column in columns:
-                if column in df.columns:
-                    df.drop(column,axis=1,inplace=True)
-                    removed_cols.add(column)
+                if column in full_list:
+                    full_list.remove(column)
+                    removed_cols.append(column)
                 else:
-                    not_found_cols.add(column)
+                    not_found_cols.append(column)
             if removed_cols:
                 print('\n{} columns are removed as entered by the user'.format(len(removed_cols)))
             if not_found_cols:
                 print('\n{}'.format(not_found_cols))
                 print('These columns were not found, hence not removed')
-            return df
+            return full_list
         except:
             print('Invalid Entry of columns! No Columns removed')
-            return df
+            return full_list
+def removeUserSpecifiedIDs(df):
+    full_list = df.columns.to_list()
+    cluster_list = []
+    profile_list = []
+    cols = input("Would you like to remove any columns that you dont want to be included in clustering, if so enter the columns in this format separated by commas: col1,col2,col3 ")
+    cluster_list = Splitter(cols,full_list)
+    cols = input("Would you like to remove any columns that you dont want to be included in the cluster profiling, if so enter the columns in this format separated by commas: col1,col2,col3 ")
+    profile_list = Splitter(cols,full_list)
+    return cluster_list,profile_list
 
 
 ######################################
