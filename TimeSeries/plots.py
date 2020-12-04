@@ -23,3 +23,9 @@ def fbprophet_plots(model,forecast):
     plt.show()
     model.plot_components(forecast)
     plt.show()
+    
+def neural_prophet_plots(model,forecasts):
+    model.plot_components(forecasts)
+    plt.show()
+    model.plot_parameters()
+    plt.show()
