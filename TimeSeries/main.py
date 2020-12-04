@@ -13,6 +13,7 @@ from pmdarima.metrics import smape
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 import matplotlib.pyplot as plt
 from fbprophet import Prophet
+# import holidays
 
 def main(test=False,props=None):
     print('This is Time Series Folder and All functions and files will be contained here')
@@ -71,6 +72,14 @@ def main(test=False,props=None):
     props['Margin'] = int(len(props['df'])*0.8)
     X_train,y_train,X_test,y_test = train_test_split(props)
     print('\nTrain_Test_Split (FIT SAMPLE / HOLD_OUT SAMPLE SPLIT DONE!)')
+    
+# =============================================================================
+#     print('\nGetting Holiday list and DataFrame specifically for FBProphet!')
+#     us_hols = holidays.UnitedStates(years=props['df'].index.year.to_list())
+#     us_hols_df = pd.DataFrame(us_hols.items(),columns=['ds','holiday'])
+#     us_hols_df['lower_window'] = -5
+#     us_hols_df['upper_window'] = 5
+# =============================================================================
     
     MODEL_COMPARISON = pd.DataFrame()
     mc_cols_index = 0
