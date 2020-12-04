@@ -5,7 +5,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 from userInputs import importFile,getInfo
 from engineerings import getDateColumns,time_engineering,train_test_split,interpolateTarget
-from plots import basicPlot,decompositionPlot,fbprophet_plots
+from plots import basicPlot,decompositionPlot,fbprophet_plots,neural_prophet_plots
 from init import INIT
 import joblib
 from pmdarima import auto_arima
@@ -13,6 +13,7 @@ from pmdarima.metrics import smape
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 import matplotlib.pyplot as plt
 from fbprophet import Prophet
+from neuralprophet import NeuralProphet
 import holidays
 
 def main(test=False,props=None):
@@ -153,6 +154,30 @@ def main(test=False,props=None):
 # NEURALPROPHET
 # =============================================================================
 
+    print('\n#### NEURAL PROPHET MODEL #### RUNNING WAIT ####')
+    neuralProphetModel = NeuralProphet(learning_rate=0.01,epochs=500,n_forecasts=10,loss_func='mse')
+    for col in X_train.columns:
+        neuralProphetModel.add_future_regressor(col)  
+    epoch_df_info = neuralProphetModel.fit(dsy,freq='D')
+    future = neuralProphetModel.make_future_dataframe(dsy,periods=len(y_test),regressors_df=X_test)
+    future.index = X_test.index
+    neuralProphetForecasts = neuralProphetModel.predict(future)
+    neuralProphetForecasts.index = y_test.index
+    print('\nThe mean squared error for Neural Prophet is') 
+    print(mean_squared_error(y_test,neuralProphetForecasts['yhat1']))
+    props['NeuralProphet'] = neuralProphetModel
+    MODEL_COMPARISON.loc[mc_cols_index,'Model'] = neuralProphetModel
+    MODEL_COMPARISON.loc[mc_cols_index,'Model Name'] = 'Neural Prophet'
+    MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Percentage Error'] = smape(y_test, neuralProphetForecasts['yhat1'])
+    MODEL_COMPARISON.loc[mc_cols_index,'Mean Squared Error'] = mean_squared_error(y_test,neuralProphetForecasts['yhat1'])
+    MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Error'] = mean_absolute_error(y_test,neuralProphetForecasts['yhat1'])
+    plt.plot(y_test,label='Actual Values')
+    plt.plot(neuralProphetForecasts['yhat1'],label='Neural Prophet Prediction')
+    plt.legend(loc=2)
+    plt.show()
+    neural_prophet_plots(neuralProphetModel,neuralProphetForecasts)
+    mc_cols_index += 1
+    
 # =============================================================================
 # NEURALPROPHET
 # =============================================================================
