@@ -340,3 +340,25 @@ def dimensionality_reduction(df,n,DISC_VAL):
         print(X)
     return X
 
+def profiler(segdata,req,num_df,disc_df):
+        temp = segdata.copy()
+        num_temp = num_df.copy()
+        disc_temp = disc_df.copy()
+        for column in segdata.columns:
+            if column != 'Segments (Clusters)' and column not in req:
+                temp.drop(column,axis=1,inplace=True)
+        for col in num_temp.columns:
+            if col != 'Segments (Clusters)' and col not in req:
+                try:
+                    num_temp.drop(col,axis=1,inplace=True)
+                except:
+                    pass
+        for col in disc_temp.columns:
+            if col != 'Segments (Clusters)' and col not in req:
+                try:
+                    disc_temp.drop(col,axis=1,inplace=True)
+                except:
+                    pass
+        # print("Num",num_temp)
+        # print("Disc",disc_temp)
+        return temp,num_temp,disc_temp

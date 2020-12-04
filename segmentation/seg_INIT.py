@@ -14,6 +14,7 @@ import time
 def INIT(df,info):
     key = info['key']
     cols = info['cols']
+    prof_cols = info['profile_cols']
     if key:
         cols.append(key)
     df = df[cols]
@@ -306,6 +307,9 @@ def INIT(df,info):
     concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF]
     X = pd.concat(concat_list,axis=1)
     
+    #Making a copy of the dataframe that will required in cluster profiling
+    X_df = X.copy()
+
     # print("This is what the data looks like before going into transformations and encoding",X)
     single_vals = drop_single_valued_features(X) #change this part to accomodate for the changes in num_df
     for single in single_vals:
@@ -325,10 +329,6 @@ def INIT(df,info):
             URL_DF.drop(single, axis=1, inplace=True)
         
         X.drop(single, axis=1, inplace=True)
-
-
-    #Making a copy of the dataframe that will required in cluster profiling
-    X_df = X.copy()
     ############# ENCODING ############
     if not disc_df.empty:
         print("\nEncoding categorical variables")
@@ -391,18 +391,33 @@ def INIT(df,info):
     end=time.time()
     print("\n Time taken in ClusterMags: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
     
-    
-    # Cluster Profiling Tables
+    ############# CLUSTER PROFILING ##################### 
+    for val in prof_cols[:]:
+        if val not in segdata.columns.to_list():
+            prof_cols.remove(val)
+            print(f'Removing {val} from profilable columns because it was removed in engineering')
+    print("List of profilable columns",prof_cols) 
+
     start=time.time()
-    high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(segdata, num_df, disc_df)
+    temp = profiler(segdata,prof_cols,num_df,disc_df)
+    high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(segdata, num_df, disc_df) #Cluster Profile Tables
+    ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
     end=time.time()
-    print("\n Time taken in ClusterProfiling_Tables: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
-    
-    # Cluster Profiling Text
-    start=time.time()
-    ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels)
-    end=time.time()
-    print("\n Time taken in ClusterProfiling_Text: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
+    print("\n Time taken in Cluster Profiling: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
+
+    inp = input('Do you want specific profiling?(yes/no)').lower()
+    while inp == 'yes':
+        print("List of profilable columns",prof_cols)
+        req = input('Enter the names of the columns that you want to profile on specifically [column1,column2,column3 etc]').split(',')
+        temp,num_temp,disc_temp = profiler(segdata,req,num_df,disc_df)
+        start=time.time()
+        high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(temp, num_temp, disc_temp) #Cluster Profile Tables
+        ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
+        end=time.time()
+        print("\n Time taken in Cluster Profiling: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
+        inp = input('Do you want specific profiling?(yes/no)').lower()
+                
+    ############# CLUSTER PROFILING #####################
 
 
     ############# CLUSTERING ##################### 
