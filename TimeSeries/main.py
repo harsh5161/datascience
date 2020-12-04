@@ -128,8 +128,11 @@ def main(test=False,props=None):
     plt.legend(loc=2)
     plt.show()
     fbprophet_plots(fbprophetModel,fbProphetForecasts)
-    
-    
+
+# =============================================================================
+# FBPROPHET
+# =============================================================================
+
     MODEL_COMPARISON.drop(['Model'],axis=1).to_csv('MC.csv')
 
     return 1,props['exceptionsHandled']
