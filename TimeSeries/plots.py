@@ -18,4 +18,8 @@ def decompositionPlot(props):
     resultPlot.plot()
     plt.show()
     
-        
+def fbprophet_plots(model,forecast):
+    model.plot(forecast)
+    plt.show()
+    model.plot_components(forecast)
+    plt.show()

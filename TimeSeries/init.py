@@ -7,7 +7,7 @@ def INIT(path,info):
     exceptionsHandled = 0 # For Future testing
     print('\nINIT STARTED!')
     print('IMPORTING NECESSARY FILES')
-    df,_ = importFile('./test/' + path)
+    df,_ = importFile(path)
     print(df.shape)
 
     df[info['PrimaryDate']] = pd.to_datetime(df[info['PrimaryDate']],infer_datetime_format=True)

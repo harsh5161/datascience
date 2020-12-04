@@ -123,7 +123,11 @@ def time_engineering(props):
     spaces = []
     for i in range(len(df)-1):
         # print('Checking index {}'.format(i))
-        spaces.append((df.loc[i+1][primaryDate]-df.loc[i][primaryDate]))
+        currentSpace = df.loc[i+1][primaryDate] - df.loc[i][primaryDate]
+        if currentSpace.days == 0:
+            continue
+        else:
+            spaces.append(currentSpace)
     uniqueSpaces = set(spaces)
     # print(uniqueSpaces)
     if len(uniqueSpaces) == 1:
@@ -144,19 +148,17 @@ def time_engineering(props):
         print('\nEqually Spacing Primary Date Column')
         
         primaryDateList = df[primaryDate].tolist()
-        # interpolationNeeded = 0
         
         i = 0 # for while loop
         while i < len(primaryDateList)-1:
             if primaryDateList[i+1] - primaryDateList[i] > bestSpace:
-                # interpolationNeeded += 1
                 primaryDateList.insert(i+1,primaryDateList[i]+bestSpace)
             elif primaryDateList[i+1] - primaryDateList[i] < bestSpace:
                 primaryDateList[i+1] = primaryDateList[i] + bestSpace
             i += 1
-
+        
         newSpaces = set() # Creating a set of all new spaces
-
+        
         for i in range(len(primaryDateList)-1):
             newSpaces.add(primaryDateList[i+1]-primaryDateList[i])
             
@@ -174,6 +176,19 @@ def time_engineering(props):
         df.drop([0],axis=1,inplace=True)
         df[primaryDate] = df.index
         df.reset_index(drop=True,inplace=True)
+        
+        if bestSpace.days == 1:
+            props['m'] = 7
+        elif bestSpace.days == 7:
+            props['m'] = 52
+        elif bestSpace.days == 30:
+            props['m'] = 12
+        elif bestSpace.days > 100 and bestSpace.days < 120:
+            props['m'] = 4
+        else:
+            props['m'] = 1
+            
+        print('\nm setting for Auto Arima is set to {}'.format(props['m']))
         
     # Exploiting Date Column
     print('\nCreating exogenous Date Variables from Primary Date Column')
@@ -271,4 +286,10 @@ def interpolateTarget(props):
     print('\nApplying Time Series Decomposition Plot')
     props['df'].interpolate(inplace=True)
     return props
-    
+
+def get_dsy(props):
+    primaryDate = props['info']['PrimaryDate']
+    target = props['info']['Target']
+    dsy = props['df'][[primaryDate,target]]
+    dsy.columns = ['ds','y']
+    return dsy.reset_index(drop=True)
