@@ -13,7 +13,7 @@ from pmdarima.metrics import smape
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 import matplotlib.pyplot as plt
 from fbprophet import Prophet
-# import holidays
+import holidays
 
 def main(test=False,props=None):
     print('This is Time Series Folder and All functions and files will be contained here')
@@ -74,12 +74,18 @@ def main(test=False,props=None):
     print('\nTrain_Test_Split (FIT SAMPLE / HOLD_OUT SAMPLE SPLIT DONE!)')
     
 # =============================================================================
-#     print('\nGetting Holiday list and DataFrame specifically for FBProphet!')
-#     us_hols = holidays.UnitedStates(years=props['df'].index.year.to_list())
-#     us_hols_df = pd.DataFrame(us_hols.items(),columns=['ds','holiday'])
-#     us_hols_df['lower_window'] = -5
-#     us_hols_df['upper_window'] = 5
+#     print('\nPower Transforming Exogenous Features!')
+#     PT = PowerTransformer()
+#     col_names = X_train.columns
+#     X_train = pd.DataFrame(PT.fit_transform(X_train),columns=col_names)
+#     X_test = pd.DataFrame(PT.fit_transform(X_test),columns=col_names)
 # =============================================================================
+    
+    print('\nPreparing Holiday list and DataFrame with -5 and 5 window')
+    us_hols = holidays.UnitedStates(years=props['df'].index.year.to_list())
+    us_hols_df = pd.DataFrame(us_hols.items(),columns=['ds','holiday'])
+    us_hols_df['lower_window'] = -5
+    us_hols_df['upper_window'] = 5
     
     MODEL_COMPARISON = pd.DataFrame()
     mc_cols_index = 0
@@ -92,8 +98,8 @@ def main(test=False,props=None):
     AutoArimaModel = auto_arima(y_train,exogenous=X_train,seasonal=True,suppress_warnings=True)
     AutoArimaForecasts = pd.Series(AutoArimaModel.predict(len(X_test),exogenous=X_test),index=y_test.index)
     
-    print('\nThe mean absolute percentage error for Auto Arima is')
-    print(smape(y_test,AutoArimaForecasts))
+    print('\nThe mean squared error for Auto Arima is')
+    print(mean_squared_error(y_test,AutoArimaForecasts))
     props['AutoArima'] = AutoArimaModel
     MODEL_COMPARISON.loc[mc_cols_index,'Model'] = AutoArimaModel
     MODEL_COMPARISON.loc[mc_cols_index,'Model Name'] = 'Auto Regressive Integrated Moving Average'
@@ -124,8 +130,8 @@ def main(test=False,props=None):
     future['ds'] = X_test.index
     fbProphetForecasts = fbprophetModel.fit(dsy).predict(future)
     fbProphetForecasts.index = y_test.index
-    print('\nThe mean absolute percentage error for FBProphet is') 
-    print(smape(y_test,fbProphetForecasts['yhat']))
+    print('\nThe mean squared error for FBProphet is') 
+    print(mean_squared_error(y_test,fbProphetForecasts['yhat']))
     props['FBProphet'] = fbprophetModel
     MODEL_COMPARISON.loc[mc_cols_index,'Model'] = fbprophetModel
     MODEL_COMPARISON.loc[mc_cols_index,'Model Name'] = 'Facebook Prophet'
@@ -137,9 +143,18 @@ def main(test=False,props=None):
     plt.legend(loc=2)
     plt.show()
     fbprophet_plots(fbprophetModel,fbProphetForecasts)
+    mc_cols_index += 1
 
 # =============================================================================
 # FBPROPHET
+# =============================================================================
+
+# =============================================================================
+# NEURALPROPHET
+# =============================================================================
+
+# =============================================================================
+# NEURALPROPHET
 # =============================================================================
 
     MODEL_COMPARISON.drop(['Model'],axis=1).to_csv('MC.csv')
