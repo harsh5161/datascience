@@ -63,22 +63,6 @@ def score(df,init_info,validation=False):
     else:
         DATE_DF = pd.DataFrame()
 
-    if len(init_info['NumericColumns'])!=0:
-        num_df = X_test[init_info['NumericColumns']]
-        num_df = num_df.swifter.apply(lambda x : pd.to_numeric(x,errors='coerce'))
-        num_df.fillna(init_info['NumericMean'],inplace=True)
-    else:
-        num_df = pd.DataFrame()
-
-    if len(init_info['DiscreteColumns'])!=0:
-        disc_df = X_test[init_info['DiscreteColumns']]
-        disc_cat = init_info['disc_cat']
-        for col in disc_df.columns:
-            disc_df[col] = disc_df[col].apply(lambda x: x if x in disc_cat[col] else 'others')
-        disc_df.fillna('missing',inplace=True)
-    else:
-        disc_df = pd.DataFrame()
-
     if  init_info['EMAIL_STATUS'] is False:   
         email_cols = init_info['email_cols']
         if len(email_cols)>0:
@@ -102,6 +86,24 @@ def score(df,init_info,validation=False):
     else:
         URL_DF =  pd.DataFrame()
 
+    concat_list = [X_test,EMAIL_DF,URL_DF]
+    X_test = pd.concat(concat_list,axis=1)
+
+    if len(init_info['NumericColumns'])!=0:
+        num_df = X_test[init_info['NumericColumns']]
+        num_df = num_df.swifter.apply(lambda x : pd.to_numeric(x,errors='coerce'))
+        num_df.fillna(init_info['NumericMean'],inplace=True)
+    else:
+        num_df = pd.DataFrame()
+
+    if len(init_info['DiscreteColumns'])!=0:
+        disc_df = X_test[init_info['DiscreteColumns']]
+        disc_cat = init_info['disc_cat']
+        for col in disc_df.columns:
+            disc_df[col] = disc_df[col].apply(lambda x: x if x in disc_cat[col] else 'others')
+        disc_df.fillna('missing',inplace=True)
+    else:
+        disc_df = pd.DataFrame()
 
     if init_info['remove_list'] is not None:
         X_test.drop(columns=init_info['remove_list'],axis=1,inplace=True)
@@ -150,7 +152,7 @@ def score(df,init_info,validation=False):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF],axis=1)
+    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF],axis=1)
     X_test = init_info['TargetEncoder'].transform(X_test)
     X_test = X_test[init_info['TrainingColumns']]
     X_test = X_test.fillna(X_test.mode())
