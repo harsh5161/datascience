@@ -406,13 +406,13 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
   count = 0
   for i in range(len(bow_corpus)):
     val = bow_corpus[i]
-    for i in range(len(val)):
-        print("Word {} (\"{}\") appears {} time.".format(val[i][0], dictionary[val[i][0]], val[i][1]))
-    count = count+1
+    # for i in range(len(val)):
+    #     print("Word {} (\"{}\") appears {} time.".format(val[i][0], dictionary[val[i][0]], val[i][1]))
+    # count = count+1
     for idx, topic in sorted(lda_model_tfidf[bow_corpus[i]], key= lambda tup: -1*tup[1]):
       append(idx)
       break
-    print("Loop ran for ",count)
+    # print("Loop ran for ",count)
   end = time.time()
   asf = pd.DataFrame(ser)
   print("Time for append", end-start)
@@ -658,32 +658,39 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
     
     start = time.time()
     
-    if email:
+    if email is True:
         print('\n########## EMAIL ENGINEERING RUNNING ##########')
-        # Get the first domain name, example: a@b.gov.edu.com, in this b alone is taken
-        def getDomainName(col):
+    else:
+        print('\n########## URL ENGINEERING RUNNING ##########')
+
+    def getEmailDomainName(col):
+            # Get the first domain name, example: a@b.gov.edu.com, in this b alone is taken
             try:
+                # print("Inside email")
+                # print(col[1].split('.')[0])
                 return col[1].split('.')[0]
             except:
                 return np.nan # Invalid Entry
-    else:
-        print('\n########## URL ENGINEERING RUNNING ##########')
-        def getDomainName(col):
+
+    def getUrlDomainName(col):
             try:
+                # print("Inside url")
+                # print(col.split('://')[1].split('/')[0].split('.')[0])
                 return col.split('://')[1].split('/')[0].split('.')[0]
             except:
                 return np.nan # Invalid Entry
+
     
     # Making a note of newly created columns
     newCols = []
     # For every column in email columns, get Domain Name, create a new column and check the missing percentage
     for column in df.columns:
         domain_name = column + '_domain'
-        if email:
+        if email is True:
             df[domain_name] = df[column].str.rsplit('@')
-            df[domain_name] = df[domain_name].apply(getDomainName)
+            df[domain_name] = df[domain_name].apply(getEmailDomainName)
         else:
-            df[domain_name] = df[column].apply(getDomainName)
+            df[domain_name] = df[column].apply(getUrlDomainName)
         # Checking percentage of missing values
         if df[domain_name].isnull().sum()/len(df) >= 0.5:
             print('The newly created \'{}\' column has 50% or more missing values!'.format(domain_name))
@@ -699,7 +706,7 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
                                                                 # With missing imputation done
         
     end = time.time()
-    if email:
+    if email is True:
         print('\nNew Columns created from Email engineering are: {}'.format(newCols))
         print('\nEmail Engineering time taken: {}'.format(end-start))
     else:

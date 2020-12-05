@@ -180,7 +180,7 @@ def INIT(df,info):
     email_cols = identifyEmailUrlColumns(short_obj_df,email=True)
     if len(email_cols)>0:
         try:
-            EMAIL_DF = emailUrlEngineering(X[email_cols])
+            EMAIL_DF = emailUrlEngineering(X[email_cols],email=True)
             X.drop(email_cols,axis=1,inplace=True) # If any email columns found, we drop it after engineering
             EMAIL_DF.reset_index(drop=True)
         except Exception as e:
@@ -197,7 +197,7 @@ def INIT(df,info):
     url_cols = identifyEmailUrlColumns(short_obj_df,email=False)
     if len(url_cols)>0:
         try:
-            URL_DF = emailUrlEngineering(X[url_cols])
+            URL_DF = emailUrlEngineering(X[url_cols],email=False)
             X.drop(url_cols,axis=1) # If any email columns found, we drop it post engineering
             URL_DF.reset_index(drop=True)
         except Exception as e:
@@ -220,6 +220,9 @@ def INIT(df,info):
         URL_STATUS = True
     else:
         URL_STATUS =  False
+
+    concat_list = [X,EMAIL_DF,URL_DF]
+    X = pd.concat(concat_list,axis=1)
 
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
@@ -362,7 +365,7 @@ def INIT(df,info):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF,EMAIL_DF,URL_DF]
+    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF]
     X = pd.concat(concat_list,axis=1)
     X_old = X.copy()# X_old is before Target Encoding
 
