@@ -309,8 +309,7 @@ def INIT(df,info):
     concat_list = [num_df,disc_df]
     X = pd.concat(concat_list,axis=1)
     
-    #Making a copy of the dataframe that will required in cluster profiling
-    X_df = X.copy()
+    
 
     # print("This is what the data looks like before going into transformations and encoding",X)
     single_vals = drop_single_valued_features(X) #change this part to accomodate for the changes in num_df
@@ -331,6 +330,9 @@ def INIT(df,info):
             URL_DF.drop(single, axis=1, inplace=True)
         
         X.drop(single, axis=1, inplace=True)
+
+    # #Making a copy of the dataframe that will required in cluster profiling   #Position 1
+    # X_df = X.copy()
     ############# ENCODING ############
     if not disc_df.empty:
         print("\nEncoding categorical variables")
@@ -348,7 +350,8 @@ def INIT(df,info):
         print("No categorical columns found, so no encoding required")
         LE = None
     ############# TRANSFORMATIONS ############
-
+    #Making a copy of the dataframe that will required in cluster profiling  #Position 2
+    X_df = X.copy()
     ############# NORMALISATION AND TRANSFORMATIONS #####################
     TrainingColumns = X.columns
     print('\n #### NORMALIZATION ####')
@@ -401,8 +404,8 @@ def INIT(df,info):
     print("List of profilable columns",prof_cols) 
 
     start=time.time()
-    temp = profiler(segdata,prof_cols,num_df,disc_df)
-    high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(segdata, num_df, disc_df) #Cluster Profile Tables
+    temp,num_temp,disc_temp= profiler(segdata,prof_cols,num_df,disc_df)
+    high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(temp, num_temp, disc_temp) #Cluster Profile Tables
     ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
     end=time.time()
     print("\n Time taken in Cluster Profiling: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))

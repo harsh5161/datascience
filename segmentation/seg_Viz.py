@@ -74,7 +74,13 @@ def ClusterMags(segdata):
     
     
 def ClusterProfiling_Tables(segdata, num_df, disc_df):
-    
+    # print("###################################################")
+    # print(segdata.head(20))
+    # print("###################################################")
+    # print(num_df.head(20))
+    # print("###################################################")
+    # print(disc_df.head(20))
+    # print("###################################################")
     ## for numeric variables
     high_mean_vals= defaultdict(list) # dictionary to store which cluster has high values of which numeric column
     low_mean_vals= defaultdict(list)  # dictionary to store which cluster has low values of which numeric column
@@ -167,8 +173,12 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
                             else ('background-color: #46abc2' if (v <= 150 and v >100) 
                                   else ('background-color: #bcbabe' if v==0 else '')) for v in x]
 
-            styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling       
-            dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image        
+            styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
+            try:       
+                dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image     
+            except UnicodeEncodeError:
+                val =   col.encode('utf-8')
+                dfi.export(styled_cat_cp, 'cluster profiles for '+str(val)+ '.png',max_cols=-1)# save as image
             display(styled_cat_cp)
 
             ## for text cluster profiles
