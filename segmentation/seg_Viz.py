@@ -76,132 +76,133 @@ def ClusterMags(segdata):
 def ClusterProfiling_Tables(segdata, num_df, disc_df):
     
     ## for numeric variables
-    num_cp=pd.DataFrame(segdata.groupby('Segments (Clusters)')[num_df.columns.to_list()].agg(np.mean))  #calculating means per cluster
-    num_cp=num_cp.reset_index()                                           # to rename columns
-    num_cp.columns= num_cp.columns[:1].tolist()+ ['Mean of ' + i for i in num_df.columns.to_list()]   # renaming columns
-
-    overall_means = segdata[num_df.columns.to_list()].mean(axis=0).to_list()  # calculating means in overall dataset
-    overall_row = ['Overall Dataset'] + overall_means
-    num_cp.loc[-1] = overall_row           # adding overall means row at the top of the table
-    num_cp.index = num_cp.index + 2 
-    num_cp.sort_index(inplace=True)
-    
-#     display(num_cp) #before scaling # can be used for testing
-    
-    for c in num_cp.columns[1:]:          # scaling overall dataset % to 100 for easy comparison
-            ov= num_cp[c].iloc[0]
-            num_cp[c]= (num_cp[c]/ov)*100
-
-    
-    def highlight(x):  # function for highlighting cells   
-        return ['background: #fffcb0' if v== x.iloc[0] 
-                else ('background-color: #0e7a8f' if v > 150 
-                else ('background-color: #a1d6e2' if v < 50
-                      else '' )) for v in x]
-    
-    styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
-    dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1)  # storing as image
-    print("\nCluster Profiles Using Numeric Variables...")
-    display(styled_num_cp)  # displaying df
-    
-    ## recording high and low mean values of numeric variables per cluster        
-    num_cp_copy=num_cp.set_index('Segments (Clusters)')
-
     high_mean_vals= defaultdict(list) # dictionary to store which cluster has high values of which numeric column
     low_mean_vals= defaultdict(list)  # dictionary to store which cluster has low values of which numeric column
-    hmv_T={}
-    lmv_T={}
-    for c in num_cp_copy.columns:
-        hmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]>150].index.to_list() 
-        lmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]<50].index.to_list()
+    if not num_df.empty:
+        num_cp=pd.DataFrame(segdata.groupby('Segments (Clusters)')[num_df.columns.to_list()].agg(np.mean))  #calculating means per cluster
+        num_cp=num_cp.reset_index()                                           # to rename columns
+        num_cp.columns= num_cp.columns[:1].tolist()+ ['Mean of ' + i for i in num_df.columns.to_list()]   # renaming columns
 
-    for node, neighbours in hmv_T.items():  # loop to invert hmv_T dictionary mapping 
-        for neighbour in neighbours:
-            high_mean_vals[neighbour].append(node)                  
+        overall_means = segdata[num_df.columns.to_list()].mean(axis=0).to_list()  # calculating means in overall dataset
+        overall_row = ['Overall Dataset'] + overall_means
+        num_cp.loc[-1] = overall_row           # adding overall means row at the top of the table
+        num_cp.index = num_cp.index + 2 
+        num_cp.sort_index(inplace=True)
 
-    for node, neighbours in lmv_T.items():  # loop to invert lmv_T dictionary mapping 
-        for neighbour in neighbours:
-            low_mean_vals[neighbour].append(node)                  
+    #     display(num_cp) #before scaling # can be used for testing
 
-    for i in num_cp_copy.index.values[1:]:  # adding missing cluster numbers in keys
-        if i not in high_mean_vals.keys():
-            high_mean_vals[i]=[]
+        for c in num_cp.columns[1:]:          # scaling overall dataset % to 100 for easy comparison
+                ov= num_cp[c].iloc[0]
+                num_cp[c]= (num_cp[c]/ov)*100
 
-        if i not in low_mean_vals.keys():
-            low_mean_vals[i]=[]
-        
-    high_mean_vals=dict(sorted(high_mean_vals.items()))  # sorting 
-    low_mean_vals=dict(sorted(low_mean_vals.items()))
 
-    print("\nhigh_mean_vals::", high_mean_vals)
-    print("\nlow_mean_vals::", low_mean_vals)
+        def highlight(x):  # function for highlighting cells   
+            return ['background: #fffcb0' if v== x.iloc[0] 
+                    else ('background-color: #0e7a8f' if v > 150 
+                    else ('background-color: #a1d6e2' if v < 50
+                          else '' )) for v in x]
+
+        styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
+        dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1)  # storing as image
+        print("\nCluster Profiles Using Numeric Variables...")
+        display(styled_num_cp)  # displaying df
+
+        ## recording high and low mean values of numeric variables per cluster        
+        num_cp_copy=num_cp.set_index('Segments (Clusters)')
+
+        hmv_T={}
+        lmv_T={}
+        for c in num_cp_copy.columns:
+            hmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]>150].index.to_list() 
+            lmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]<50].index.to_list()
+
+        for node, neighbours in hmv_T.items():  # loop to invert hmv_T dictionary mapping 
+            for neighbour in neighbours:
+                high_mean_vals[neighbour].append(node)                  
+
+        for node, neighbours in lmv_T.items():  # loop to invert lmv_T dictionary mapping 
+            for neighbour in neighbours:
+                low_mean_vals[neighbour].append(node)                  
+
+        for i in num_cp_copy.index.values[1:]:  # adding missing cluster numbers in keys
+            if i not in high_mean_vals.keys():
+                high_mean_vals[i]=[]
+
+            if i not in low_mean_vals.keys():
+                low_mean_vals[i]=[]
+
+        high_mean_vals=dict(sorted(high_mean_vals.items()))  # sorting 
+        low_mean_vals=dict(sorted(low_mean_vals.items()))
+
+        print("\nhigh_mean_vals::", high_mean_vals)
+        print("\nlow_mean_vals::", low_mean_vals)
     
     ## for categorical variables  
     high_percent_levels={} # dictionary to store which cluster has high percentage of a categorical column's level
     zero_percent_levels={} # dictionary to store which cluster has zero percentage of a categorical column's level
 
-    
-    print("\nCluster profiles for each categorical variable...")
-    for col in disc_df.columns:
-        cat_cp = pd.crosstab(index=segdata['Segments (Clusters)'], 
-                         columns=segdata[col],
-                         margins=True, margins_name ='Total')
+    if not disc_df.empty:
+        print("\nCluster profiles for each categorical variable...")
+        for col in disc_df.columns:
+            cat_cp = pd.crosstab(index=segdata['Segments (Clusters)'], 
+                             columns=segdata[col],
+                             margins=True, margins_name ='Total')
 
-    #     cat_cp.columns.name=cat_cp.index.name  
-        cat_cp.rename_axis(None, axis=1, inplace=True)    # removing cat_cp.columns.name
-        cat_cp.rename(columns = {'Total':'Row total'}, index= {'Total':'Overall Dataset'}, inplace = True) # renaming total column and index
-        cat_cp=(cat_cp.div(cat_cp["Row total"], axis=0)*100)  # dividing by row total and getting percentage of frequency
-        cat_cp = cat_cp.iloc[np.arange(-1, len(cat_cp)-1)]   #shifting the last row to first position
-        cat_cp.drop(['Row total'], axis= 1, inplace =True)   #dropping row total column
-        
-        for c in cat_cp.columns:          # scaling overall dataset % to 100 for easy comparison
-            ov= cat_cp[c].loc['Overall Dataset']
-            cat_cp[c]= (cat_cp[c]/ov)*100
+        #     cat_cp.columns.name=cat_cp.index.name  
+            cat_cp.rename_axis(None, axis=1, inplace=True)    # removing cat_cp.columns.name
+            cat_cp.rename(columns = {'Total':'Row total'}, index= {'Total':'Overall Dataset'}, inplace = True) # renaming total column and index
+            cat_cp=(cat_cp.div(cat_cp["Row total"], axis=0)*100)  # dividing by row total and getting percentage of frequency
+            cat_cp = cat_cp.iloc[np.arange(-1, len(cat_cp)-1)]   #shifting the last row to first position
+            cat_cp.drop(['Row total'], axis= 1, inplace =True)   #dropping row total column
 
-        def cat_highlight(x):
-            if x.name == "Overall Dataset":
-                return ['background: #fffcb0' for v in x]
-            else:
-                return ['background-color: #0e7a8f' if v > 150 
-                        else ('background-color: #46abc2' if (v <= 150 and v >100) 
-                              else ('background-color: #bcbabe' if v==0 else '')) for v in x]
+            for c in cat_cp.columns:          # scaling overall dataset % to 100 for easy comparison
+                ov= cat_cp[c].loc['Overall Dataset']
+                cat_cp[c]= (cat_cp[c]/ov)*100
 
-        styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling       
-        dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image        
-        display(styled_cat_cp)
-        
-        ## for text cluster profiles
-        cat_cp_copy=cat_cp.copy()
+            def cat_highlight(x):
+                if x.name == "Overall Dataset":
+                    return ['background: #fffcb0' for v in x]
+                else:
+                    return ['background-color: #0e7a8f' if v > 150 
+                            else ('background-color: #46abc2' if (v <= 150 and v >100) 
+                                  else ('background-color: #bcbabe' if v==0 else '')) for v in x]
 
-        hpl_T={}
-        zpl_T={}
+            styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling       
+            dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image        
+            display(styled_cat_cp)
 
-        for c in cat_cp_copy.columns: 
-            hpl_T[c]=cat_cp_copy[cat_cp_copy[c]>150].index.to_list()
-            zpl_T[c]=cat_cp_copy[cat_cp_copy[c]==0].index.to_list()
+            ## for text cluster profiles
+            cat_cp_copy=cat_cp.copy()
 
-        high_percent_levels[col] = defaultdict(list)
-        for node, neighbours in hpl_T.items():  # loop to invert hpl_T dictionary mapping 
-            for neighbour in neighbours:
-                high_percent_levels[col][neighbour].append(node)                  
+            hpl_T={}
+            zpl_T={}
 
-        zero_percent_levels[col] = defaultdict(list)        
-        for node, neighbours in zpl_T.items():  # loop to invert zpl_T dictionary mapping 
-            for neighbour in neighbours:
-                zero_percent_levels[col][neighbour].append(node)                  
+            for c in cat_cp_copy.columns: 
+                hpl_T[c]=cat_cp_copy[cat_cp_copy[c]>150].index.to_list()
+                zpl_T[c]=cat_cp_copy[cat_cp_copy[c]==0].index.to_list()
 
-        for i in cat_cp_copy.index.values[1:]:   #loop to add missing cluster numbers to keys
-            if i not in high_percent_levels[col].keys():
-                high_percent_levels[col][i]=[]
+            high_percent_levels[col] = defaultdict(list)
+            for node, neighbours in hpl_T.items():  # loop to invert hpl_T dictionary mapping 
+                for neighbour in neighbours:
+                    high_percent_levels[col][neighbour].append(node)                  
 
-            if i not in zero_percent_levels[col].keys():
-                zero_percent_levels[col][i]=[]
+            zero_percent_levels[col] = defaultdict(list)        
+            for node, neighbours in zpl_T.items():  # loop to invert zpl_T dictionary mapping 
+                for neighbour in neighbours:
+                    zero_percent_levels[col][neighbour].append(node)                  
 
-        high_percent_levels[col]=dict(sorted(high_percent_levels[col].items()))  #sorting
-        zero_percent_levels[col]=dict(sorted(zero_percent_levels[col].items()))
+            for i in cat_cp_copy.index.values[1:]:   #loop to add missing cluster numbers to keys
+                if i not in high_percent_levels[col].keys():
+                    high_percent_levels[col][i]=[]
 
-        print("\nhigh_percent_levels:::\n",high_percent_levels) 
-        print("\nzero_percent_levels:::\n",zero_percent_levels) 
+                if i not in zero_percent_levels[col].keys():
+                    zero_percent_levels[col][i]=[]
+
+            high_percent_levels[col]=dict(sorted(high_percent_levels[col].items()))  #sorting
+            zero_percent_levels[col]=dict(sorted(zero_percent_levels[col].items()))
+
+    #         print("\nhigh_percent_levels:::\n",high_percent_levels) 
+    #         print("\nzero_percent_levels:::\n",zero_percent_levels) 
      
     return high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels
 
