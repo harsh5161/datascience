@@ -157,7 +157,7 @@ def Segregation(df,y):
     if numeric.empty is False:
         if len(numeric)<50000 and len(df.columns)<100:
             print("MissForest Imputation can be attempted")
-            numeric = ForestImputer(numeric,disc)
+            numeric = ForestImputer(numeric,disc,y)
     else:
         print("Mean Imputation will be done")
         numeric.fillna(numeric.mean(),inplace=True)

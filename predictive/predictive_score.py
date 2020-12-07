@@ -85,7 +85,12 @@ def score(df,init_info,validation=False):
     else:
         URL_DF =  pd.DataFrame()
 
-    concat_list = [X_test,EMAIL_DF,URL_DF]
+    X_test.reset_index(drop=True,inplace=True)
+    DATE_DF.reset_index(drop=True, inplace=True)
+    LAT_LONG_DF.reset_index(drop=True, inplace=True)
+    EMAIL_DF.reset_index(drop=True, inplace=True)
+    URL_DF.reset_index(drop=True, inplace=True)
+    concat_list = [X_test,DATE_DF,LAT_LONG_DF,EMAIL_DF,URL_DF]
     X_test = pd.concat(concat_list,axis=1)
 
     if len(init_info['NumericColumns'])!=0:
@@ -135,15 +140,19 @@ def score(df,init_info,validation=False):
     else:
         TEXT_DF = pd.DataFrame()
 
+    disc_df.reset_index(drop=True,inplace=True)
+    num_df.reset_index(drop=True,inplace=True)
+    TEXT_DF.reset_index(drop=True, inplace=True)
+    if not TEXT_DF.empty:
+        for col in TEXT_DF.columns:
+            if col.find("_Topic")!=-1:
+                pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+            else:
+                pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
 
     print('\n #### TRANSFORMATION AND PREDICTION ####')
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
-    DATE_DF.reset_index(drop=True, inplace=True)
-    TEXT_DF.reset_index(drop=True, inplace=True)
-    LAT_LONG_DF.reset_index(drop=True, inplace=True)
-    EMAIL_DF.reset_index(drop=True,inplace=True)
-    URL_DF.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
@@ -151,7 +160,7 @@ def score(df,init_info,validation=False):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    X_test = pd.concat([num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF],axis=1)
+    X_test = pd.concat([num_df,disc_df],axis=1)
     X_test = init_info['TargetEncoder'].transform(X_test)
     X_test = X_test[init_info['TrainingColumns']]
     X_test = X_test.fillna(X_test.mode())
