@@ -227,7 +227,12 @@ def INIT(df,info):
     else:
         URL_STATUS =  False
 
-    concat_list = [X,EMAIL_DF,URL_DF]
+    X.reset_index(drop=True,inplace=True)
+    DATE_DF.reset_index(drop=True, inplace=True)
+    LAT_LONG_DF.reset_index(drop=True, inplace=True)
+    EMAIL_DF.reset_index(drop=True, inplace=True)
+    URL_DF.reset_index(drop=True, inplace=True)
+    concat_list = [X,DATE_DF,LAT_LONG_DF,EMAIL_DF,URL_DF]
     X = pd.concat(concat_list,axis=1)
 
     ######## COLUMN SEGREGATION ########
@@ -244,23 +249,6 @@ def INIT(df,info):
         disc_cat = {}
     print('Segregation Done!')
     print('Useless Columns are',useless_cols)
-    ############# OUTLIER WINSORIZING ###########
-    print('\n#### OUTLIER WINSORIZING ####')
-    num_df.clip(lower=num_df.quantile(0.1),upper=num_df.quantile(0.9),inplace=True,axis=1)
-    print(' #### DONE ####')
-    ############# OUTLIER WINSORIZING ###########
-
-    # ############# OUTLIER removal ###########
-    # print('\n#### OUTLIER REMOVAL ####')
-    # num_df.reset_index(drop=True, inplace=True)
-    # disc_df.reset_index(drop=True, inplace=True)
-    # y.reset_index(drop=True, inplace=True)
-    # ourlierRows = removeOutliers(num_df)
-    # num_df.drop(ourlierRows,inplace=True)
-    # disc_df.drop(ourlierRows,inplace=True)
-    # y.drop(ourlierRows,inplace=True)
-    # print(' #### DONE ####')
-    # ############# OUTLIER removal ###########
 
     ######## TEXT ENGINEERING #######
     start1 = time.time()
@@ -324,6 +312,23 @@ def INIT(df,info):
     #X contains the columns after Text imputation
 
     ########################### TEXT ENGINEERING #############################
+    disc_df.reset_index(drop=True,inplace=True)
+    num_df.reset_index(drop=True,inplace=True)
+    TEXT_DF.reset_index(drop=True, inplace=True)
+    if not TEXT_DF.empty:
+        for col in TEXT_DF.columns:
+            if col.find("_Topic")!=-1:
+                pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+            else:
+                pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+
+
+
+    ############# OUTLIER WINSORIZING ###########
+    print('\n#### OUTLIER WINSORIZING ####')
+    num_df.clip(lower=num_df.quantile(0.1),upper=num_df.quantile(0.9),inplace=True,axis=1)
+    print(' #### DONE ####')
+    ############# OUTLIER WINSORIZING ###########
 
     ############# PEARSON CORRELATION ############
     print('\n #### PEARSON CORRELATION ####')
@@ -360,11 +365,6 @@ def INIT(df,info):
     y.reset_index(drop=True, inplace=True)
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
-    DATE_DF.reset_index(drop=True, inplace=True)
-    TEXT_DF.reset_index(drop=True, inplace=True)
-    LAT_LONG_DF.reset_index(drop=True, inplace=True)
-    EMAIL_DF.reset_index(drop=True, inplace=True)
-    URL_DF.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
@@ -372,7 +372,7 @@ def INIT(df,info):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    concat_list = [num_df,disc_df,DATE_DF,TEXT_DF,LAT_LONG_DF]
+    concat_list = [num_df,disc_df]
     X = pd.concat(concat_list,axis=1)
     X_old = X.copy()# X_old is before Target Encoding
 
