@@ -10,7 +10,7 @@ from Viz import *
 from imblearn.over_sampling import RandomOverSampler
 
 def INIT(df,info):
-    print("Length of the dataframe is", df.shape[0])
+    print("Length of the dataframe entering INIT is: ", df.shape[0])
     target = info['target']
     key = info['key']
     cols = info['cols']
@@ -32,6 +32,7 @@ def INIT(df,info):
 
     # Find Classification or Regression
     class_or_Reg = None #INIT
+    print('Target Analysis')
     class_or_Reg = targetAnalysis(df[target])
     if not class_or_Reg:
         print('\nExecution stops as We cant deal with such a target')
@@ -181,6 +182,7 @@ def INIT(df,info):
     ######## DATE ENGINEERING #######
 
     ######## EMAIL URL ENGINEERING ########
+    print('\n#### EMAIL ENGINEERING RUNNING WAIT ####')
     obj_df  = X.select_dtypes('object') # Sending in only object dtype columns
     short_obj_df = obj_df.astype(str).sample(3000).dropna(how='all') if len(obj_df)>3000 else obj_df.astype(str).dropna(how='all')
     email_cols = identifyEmailUrlColumns(short_obj_df,email=True)
@@ -200,6 +202,7 @@ def INIT(df,info):
         EMAIL_DF = pd.DataFrame(None)
         email_cols = []
 
+    print('\n#### URL ENGINEERING RUNNING WAIT ####')
     url_cols = identifyEmailUrlColumns(short_obj_df,email=False)
     if len(url_cols)>0:
         try:
@@ -376,8 +379,7 @@ def INIT(df,info):
     X = pd.concat(concat_list,axis=1)
     X_old = X.copy()# X_old is before Target Encoding
 
-    ############# TRANSFORMATIONS ############
-    print('\n #### TRANSFORMATIONS ####')
+    ############# TARGET ENCODING ############
     TE = TargetEncoder(cols=disc_df.columns)
     print('\n #### TARGET ENCODING ####')
     te_start = time.time()
@@ -386,7 +388,7 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
-    ############# TRANSFORMATIONS ############
+    ############# TARGET ENCODING ############
 
     ############# FEATURE SELECTION AND PLOTS ############
     print('\n #### FEATURE SELECTION ####')
@@ -438,10 +440,10 @@ def INIT(df,info):
     ############# CART DECISION TREE VISUALIZATION #####################   
 
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
-    print('\n #### NORMALIZATION ####')
+    print('\n #### SCALING ####')
     MM = MinMaxScaler(feature_range=(1, 2))
     X = pd.DataFrame(MM.fit_transform(X),columns=TrainingColumns)
-    print(' #### DONE ####')
+    print(' #### SCALING DONE ####')
     print(X.shape)
     print(y.shape)
     print('\n #### POWER TRANSFORMATIONS ####')
@@ -449,7 +451,7 @@ def INIT(df,info):
     X = pd.DataFrame(PT.fit_transform(X),columns=TrainingColumns)
     new_mm = MinMaxScaler()
     X = pd.DataFrame(new_mm.fit_transform(X),columns=TrainingColumns)
-    print(' #### DONE ####')
+    print(' #### POWER TRANSFORMATIONS DONE ####')
     print(X.shape)
     print(y.shape)
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 

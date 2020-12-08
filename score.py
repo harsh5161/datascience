@@ -46,7 +46,7 @@ def score(df,init_info,validation=False):
     lon = init_info['lon']
     lat_lon_cols = init_info['lat_lon_cols']
     if (lat and lon) or lat_lon_cols:
-        print('Running Lat-Long on validation dataset')
+        print('Running Lat-Long Engineering on validation dataset')
         LAT_LONG_DF = latlongEngineering(X_test,lat,lon,lat_lon_cols)
         # LAT_LONG_DF.fillna(0.0,inplace=True)
         print(LAT_LONG_DF)
@@ -57,6 +57,7 @@ def score(df,init_info,validation=False):
     date_cols = init_info['DateColumns']
     possible_datecols= init_info['PossibleDateColumns']
     if date_cols:
+        print('Runnning Date Engineering on validation dataset')
         DATE_DF = date_engineering(X_test[date_cols], possible_datecols, validation=True)
         DATE_DF = DATE_DF[init_info['DateFinalColumns']]
         DATE_DF.fillna(init_info['DateMean'],inplace=True)
@@ -66,6 +67,7 @@ def score(df,init_info,validation=False):
     if  init_info['EMAIL_STATUS'] is False:   
         email_cols = init_info['email_cols']
         if len(email_cols)>0:
+            print('Runnning Email Engineering on validation dataset')
             EMAIL_DF = emailUrlEngineering(X_test[email_cols])
             EMAIL_DF.reset_index(drop=True)
             #EMAIL_DF.fillna('missing', inplace=True)
@@ -77,6 +79,7 @@ def score(df,init_info,validation=False):
     if init_info['URL_STATUS'] is False:
         url_cols = init_info['url_cols']
         if len(url_cols)>0:
+            print('Running URL Egnineering on validation dataset')
             URL_DF = emailUrlEngineering(X_test[url_cols], email=False)
             URL_DF.reset_index(drop=True)
             #URL_DF.fillna('missing',inplace=True)
@@ -150,7 +153,6 @@ def score(df,init_info,validation=False):
             else:
                 pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
 
-    print('\n #### TRANSFORMATION AND PREDICTION ####')
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
@@ -161,15 +163,19 @@ def score(df,init_info,validation=False):
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
     X_test = pd.concat([num_df,disc_df],axis=1)
+    print('Applying Target Encoding...')
     X_test = init_info['TargetEncoder'].transform(X_test)
+    print('Target Encoding completed')
     X_test = X_test[init_info['TrainingColumns']]
     X_test = X_test.fillna(X_test.mode())
+    print('Applying Scaling and Transformations on Validation Set...')
     mm = init_info['MinMaxScaler']
     X_test.clip(mm.data_min_,mm.data_max_,inplace=True,axis=1) #Clip the data with training min and max, important
     X_test = mm.transform(X_test)
     X_test = pd.DataFrame(init_info['PowerTransformer'].transform(X_test),columns=init_info['TrainingColumns'])
     new_mm = MinMaxScaler()
     X_test = pd.DataFrame(new_mm.fit_transform(X_test),columns=init_info['TrainingColumns'])
+    print('Scaling and Transformation completed')
     print('\nThis is final shape of X_test : {}'.format(X_test.shape))
 
     # joblib.dump(X_test,'Xt')
@@ -193,7 +199,9 @@ def score(df,init_info,validation=False):
         print('\n\n')
         start = time.time()
         ############# MODEL TRAINING #############
+        print('Modelling...')
         mod,model_info = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
+        print('Modelling completed')
         print('MODEL SAVED')
         ############# MODEL TRAINING #############
         end = time.time()
@@ -339,6 +347,7 @@ def score(df,init_info,validation=False):
         
         preview_vals = preview['Predicted Values'].value_counts()
         printer = ""
+        
         for k,v in preview_vals.iteritems():
             printer = printer + f"{k} is present in {v}% of the Testing Preview\n"
         print(printer)

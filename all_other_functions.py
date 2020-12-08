@@ -117,6 +117,7 @@ def Segregation(df):
     return numeric,disc,unique
 
 def DatasetSelection(X,Y):
+  print('Rows/Columns will get dropped')
   X1=X.copy()
   X2=X.copy()
   index=list(X.index)
