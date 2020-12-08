@@ -84,7 +84,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     ## for numeric variables
     high_mean_vals= defaultdict(list) # dictionary to store which cluster has high values of which numeric column
     low_mean_vals= defaultdict(list)  # dictionary to store which cluster has low values of which numeric column
-    if not num_df.empty:
+    if not num_df.empty:   # only runs if numerical varibales are present in list of columns used for profiling
         num_cp=pd.DataFrame(segdata.groupby('Segments (Clusters)')[num_df.columns.to_list()].agg(np.mean))  #calculating means per cluster
         num_cp=num_cp.reset_index()                                           # to rename columns
         num_cp.columns= num_cp.columns[:1].tolist()+ ['Mean of ' + i for i in num_df.columns.to_list()]   # renaming columns
@@ -97,7 +97,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
 
     #     display(num_cp) #before scaling # can be used for testing
 
-        for c in num_cp.columns[1:]:          # scaling overall dataset % to 100 for easy comparison
+        for c in num_cp.columns[1:]:          # scaling overall dataset row to 100 for easy comparison
                 ov= num_cp[c].iloc[0]
                 num_cp[c]= (num_cp[c]/ov)*100
 
@@ -118,15 +118,15 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
 
         hmv_T={}
         lmv_T={}
-        for c in num_cp_copy.columns:
+        for c in num_cp_copy.columns:          # getting which cluster numbers have high and low values for a numeric column       
             hmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]>150].index.to_list() 
             lmv_T[c[8:]]=num_cp_copy[num_cp_copy[c]<50].index.to_list()
 
-        for node, neighbours in hmv_T.items():  # loop to invert hmv_T dictionary mapping 
+        for node, neighbours in hmv_T.items():  # loop to invert hmv_T dictionary mapping so that cluster numbers become keys and column names become values
             for neighbour in neighbours:
                 high_mean_vals[neighbour].append(node)                  
 
-        for node, neighbours in lmv_T.items():  # loop to invert lmv_T dictionary mapping 
+        for node, neighbours in lmv_T.items():  # loop to invert lmv_T dictionary mapping
             for neighbour in neighbours:
                 low_mean_vals[neighbour].append(node)                  
 
@@ -147,10 +147,12 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     high_percent_levels={} # dictionary to store which cluster has high percentage of a categorical column's level
     zero_percent_levels={} # dictionary to store which cluster has zero percentage of a categorical column's level
 
-    if not disc_df.empty:
+    if not disc_df.empty:    # only runs if categorical varibales are present in list of columns used for profiling
         print("\nCluster profiles for each categorical variable...")
-        for col in disc_df.columns:
-            cat_cp = pd.crosstab(index=segdata['Segments (Clusters)'], 
+        
+    # generating one table for each variable in which column names are catgories present in the variable and indexes are the cluster numbers
+        for col in disc_df.columns:       
+            cat_cp = pd.crosstab(index=segdata['Segments (Clusters)'],  # gives frequency of each category in the variable for each cluster
                              columns=segdata[col],
                              margins=True, margins_name ='Total')
 
@@ -165,7 +167,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
                 ov= cat_cp[c].loc['Overall Dataset']
                 cat_cp[c]= (cat_cp[c]/ov)*100
 
-            def cat_highlight(x):
+            def cat_highlight(x):   # function to highlight cells 
                 if x.name == "Overall Dataset":
                     return ['background: #fffcb0' for v in x]
                 else:
@@ -173,12 +175,15 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
                             else ('background-color: #46abc2' if (v <= 150 and v >100) 
                                   else ('background-color: #bcbabe' if v==0 else '')) for v in x]
 
-            styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
-            try:       
+            # if column names in cat_cp contain special characters(which throw a unicodeerror) then they are encoded
+            try:  
+                styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
                 dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image     
             except UnicodeEncodeError:
-                val =   col.encode('utf-8')
-                dfi.export(styled_cat_cp, 'cluster profiles for '+str(val)+ '.png',max_cols=-1)# save as image
+                cat_cp.columns=pd.Series(cat_cp.columns).apply(lambda x: str(x.encode('utf-8'))[2:-1] if type(x)==str else x)
+                styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
+                dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image
+           
             display(styled_cat_cp)
 
             ## for text cluster profiles
@@ -187,7 +192,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
             hpl_T={}
             zpl_T={}
 
-            for c in cat_cp_copy.columns: 
+            for c in cat_cp_copy.columns: # getting which cluster numbers have high and low values for a category in the variable 
                 hpl_T[c]=cat_cp_copy[cat_cp_copy[c]>150].index.to_list()
                 zpl_T[c]=cat_cp_copy[cat_cp_copy[c]==0].index.to_list()
 
