@@ -191,6 +191,8 @@ def INIT(df,info):
             EMAIL_DF = emailUrlEngineering(X[email_cols],email=True)
             X.drop(email_cols,axis=1,inplace=True) # If any email columns found, we drop it after engineering
             EMAIL_DF.reset_index(drop=True)
+            print(EMAIL_DF)
+            print(EMAIL_DF.shape)
         except Exception as e:
             print('### EMAIL ENGINEERING HAD ERRORS ###')
             print(f'The Exception message is {e}')
@@ -209,6 +211,8 @@ def INIT(df,info):
             URL_DF = emailUrlEngineering(X[url_cols],email=False)
             X.drop(url_cols,axis=1) # If any email columns found, we drop it post engineering
             URL_DF.reset_index(drop=True)
+            print(URL_DF)
+            print(URL_DF.shape)
         except Exception as e:
             print('### URL ENGINEERING HAD ERRORS ###')
             print(f'The Exception is as {e}')
