@@ -276,6 +276,7 @@ def getDF(df,model):
         print('Kindly Check for spelling, upper/lower cases and missing columns if any!')
         return None
 def drop_single_valued_features(df):
+    print("Dropping columns that only contain one value")
     req_list = []
     for col in df.columns:
         if df[col].nunique() ==1 :

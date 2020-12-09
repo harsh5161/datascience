@@ -187,6 +187,7 @@ def INIT(df,info):
 
 
     ######## TEXT ENGINEERING #######
+    print('\n ### TEXT ENGINEERING RUNNING  ### \n')
     start1 = time.time()
     start = time.time()
     some_list, remove_list = findReviewColumns(X[useless_cols])  #list1 contains list of usable comment columns, list2 contains list of unusable comment columns
@@ -331,8 +332,8 @@ def INIT(df,info):
         
         X.drop(single, axis=1, inplace=True)
 
-    # #Making a copy of the dataframe that will required in cluster profiling   #Position 1
-    # X_df = X.copy()
+    #Making a copy of the dataframe that will required in cluster profiling   #Position 1
+    X_df = X.copy()
     ############# ENCODING ############
     if not disc_df.empty:
         print("\nEncoding categorical variables")
@@ -350,8 +351,8 @@ def INIT(df,info):
         print("No categorical columns found, so no encoding required")
         LE = None
     ############# TRANSFORMATIONS ############
-    #Making a copy of the dataframe that will required in cluster profiling  #Position 2
-    X_df = X.copy()
+    # #Making a copy of the dataframe that will required in cluster profiling  #Position 2
+    # X_df = X.copy()
     ############# NORMALISATION AND TRANSFORMATIONS #####################
     TrainingColumns = X.columns
     print('\n #### NORMALIZATION ####')
@@ -364,12 +365,13 @@ def INIT(df,info):
     X = pd.DataFrame(PT.fit_transform(X),columns=TrainingColumns)
     new_mm = MinMaxScaler()
     X = pd.DataFrame(new_mm.fit_transform(X),columns=TrainingColumns)
+    for col in X.columns:
+        X[col].fillna(X[col].mode()[0],inplace=True)
     print(' #### DONE ####')
     print(X.shape)
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
 
     print(f'The columns that are going into the dimensionality reduction are as follows {X.columns}')
-
     ############# DIMENSIONALITY REDUCTION ##################### 
     n_comp = calculate_n_components(X)
     if n_comp == 1:
