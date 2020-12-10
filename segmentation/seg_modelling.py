@@ -7,12 +7,14 @@ import matplotlib.style as style
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.datasets import make_blobs
 import time
+from scipy.signal import find_peaks
+
 ###### End Imports #######
 
 class Segmentation:
     def silplots(X):
         range_n_clusters = [i for i in range(2,11)]
-        silhouette_avg_n_clusters = []
+        silhouette_avg_n_clusters = []         # to store all avg silhoutte scores generated for number of clusters= 2 to 10
         
         sil_score_max = -1 #this is the minimum possible score
 
@@ -39,11 +41,11 @@ class Segmentation:
             # clusters
             silhouette_avg = silhouette_score(X, cluster_labels)
             print("For n_clusters =", n_clusters,
-                  "The average silhouette_score is : %0.2f" %silhouette_avg)
+                  "The average silhouette_score is : %0.4f" %silhouette_avg)
             
-            if silhouette_avg > sil_score_max:   #selecting optimal number of clusters where silhoutte score is highest
-                sil_score_max = silhouette_avg
-                best_n_clusters = n_clusters
+#             if silhouette_avg > sil_score_max:   #selecting optimal number of clusters where silhoutte score is highest
+#                 sil_score_max = silhouette_avg
+#                 best_n_clusters = n_clusters
 
             silhouette_avg_n_clusters.append(silhouette_avg)
             # Compute the silhouette scores for each sample
@@ -107,12 +109,25 @@ class Segmentation:
 
         plt.show()
 
-
         style.use("fivethirtyeight")
         plt.plot(range_n_clusters, silhouette_avg_n_clusters)
         plt.xlabel("Number of Clusters (k)")
         plt.ylabel("silhouette score")
         plt.show() 
+        
+        # Selecting optimal number of clusters
+        # making this array so that the first and last peak values are also considered
+        arr=np.concatenate(([min(silhouette_avg_n_clusters)],silhouette_avg_n_clusters,[min(silhouette_avg_n_clusters)]))
+        peak_indices, _ = find_peaks(arr, height=0)  #finding all the peaks in silhouette_avg_n_clusters
+        sorted_peaks=sorted(_['peak_heights'], reverse= True)  #sorting all peak values in descending order
+        selected_peak=sorted_peaks[0] # selected peak is by default the highest silhoutte score
+        for i in range(1, len(sorted_peaks)): # looping through all peak silhoutte scores except the highest
+            # if the silhoutte score is less than the max silhoutte score by only 0.1 or less and it is for less number of clusters
+            if sorted_peaks[0]-sorted_peaks[i]<=0.1 and silhouette_avg_n_clusters.index(sorted_peaks[i])<silhouette_avg_n_clusters.index(selected_peak):   
+                selected_peak=sorted_peaks[i]  # then we select that silhoutte score
+        
+        # selecting the best number of clusters corresponding to the selected silhoutte score, here we have used+2 because index is from 0 to 9 and no of clusters is from 2 to 11
+        best_n_clusters=silhouette_avg_n_clusters.index(selected_peak)+2 
         
         return best_n_clusters
 
