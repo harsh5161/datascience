@@ -1,4 +1,4 @@
-from sklearn.cluster import KMeans 
+from sklearn.cluster import KMeans, DBSCAN
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt 
@@ -8,6 +8,7 @@ from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.datasets import make_blobs
 import time
 from scipy.signal import find_peaks
+from sklearn.neighbors import NearestNeighbors
 
 ###### End Imports #######
 
@@ -131,61 +132,108 @@ class Segmentation:
         
         return best_n_clusters
 
-    
-      
-    def clustering_algorithms(self,pca_components,df):
-        #Creating 10 K-Mean models while varying the number of clusters (k)
-        #Generating the inertials for 10 clusters 
-        print("\nGenerating the inertias for 10 clusters...")
-        st=time.time()
-        inertias = []
-        for k in range(1,11):
-            model = KMeans(n_clusters= k, init = 'k-means++',max_iter=100, random_state = 42)
+    def Kmeans(pca_components,df,c=None,STATUS=False):
+        if STATUS is False:
+            #Creating 10 K-Mean models while varying the number of clusters (k)
+            #Generating the inertials for 10 clusters 
+            print("\nGenerating the inertias for 10 clusters...")
+            st=time.time()
+            inertias = []
+            for k in range(1,11):
+                model = KMeans(n_clusters= k, init = 'k-means++',max_iter=100, random_state = 42)
+                model.fit(pca_components)
+                inertias.append(model.inertia_)
+            
+            et= time.time()    
+            print("\n ..........Done........")
+            print("Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st))) 
+
+            #Generating Elbow Plot for user to see how the cluster intertias are
+            print("\nGenerating the elbow plot...")
+            plt.figure(figsize=(10,8))
+            fig1 = plt.plot(range(1,11),inertias,marker = 'o', linestyle='--')
+            fig1= plt.xlabel('Number of Clusters')
+            fig1 = plt.ylabel('Inertias')
+            fig1 = plt.title('K-Means with Elbow Method')
+            fig1.figure.savefig("Elbow.png")
+            plt.show()
+
+        
+            # Generating avg silhoutte scores and plots
+            print("\nGenerating silhoutte plots...")
+            st=time.time()
+            best_n_clusters= Segmentation.silplots(pca_components)
+            et=time.time()
+            print("..........Done..........")
+            print("Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st)))
+            
+            print("\033[1m" + "\nNumber of clusters being generated: ", best_n_clusters)
+            print ('\033[0m')  #to remove bold
+            
+
+            ### This is where this process ends and you return best_n_clusters
+            return best_n_clusters
+        else:
+            print("\nPerforming clustering...")
+            #Actually generating the clusters
+            st=time.time()
+            model = KMeans(n_clusters= c, init = 'k-means++', random_state = 42)
             model.fit(pca_components)
-            inertias.append(model.inertia_)
-        
-        et= time.time()    
-        print("\n ..........Done........")
-        print("Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st))) 
+            et=time.time()
+            print("\n Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st))) 
 
-        #Generating Elbow Plot for user to see how the cluster intertias are
-        print("\nGenerating the elbow plot...")
-        plt.figure(figsize=(10,8))
-        fig1 = plt.plot(range(1,11),inertias,marker = 'o', linestyle='--')
-        fig1= plt.xlabel('Number of Clusters')
-        fig1 = plt.ylabel('Inertias')
-        fig1 = plt.title('K-Means with Elbow Method')
-        fig1.figure.savefig("Elbow.png")
-        plt.show()
+    #         df_new = pd.concat([df.reset_index(drop =True),pd.DataFrame(pca_components)], axis =1)
+            df_new = df.reset_index(drop =True)
+    #         pca_list = df_new.columns.values[-14:].tolist()
+    #         num = pca_components.shape[1]
+    #         df_new.columns.values[-num:] = [f'Principal-Component {i}' for i in range(0,num)]
+            df_new['Segments (Clusters)'] = model.labels_
+    #         df_new.to_csv("Segmentation.csv")
+            return df_new  
+    def Dbscan(pca_components,df,req=None,STATUS=False):
 
-       
-        # Generating avg silhoutte scores and plots
-        print("\nGenerating silhoutte plots...")
-        st=time.time()
-        best_n_clusters= Segmentation.silplots(pca_components)
-        et=time.time()
-        print("..........Done..........")
-        print("Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st)))
-        
-        print("\033[1m" + "\nNumber of clusters being generated: ", best_n_clusters)
-        print ('\033[0m')  #to remove bold
-        
-        print("\nPerforming clustering...")
-        #Actually generating the clusters
-        st=time.time()
-        model = KMeans(n_clusters= best_n_clusters, init = 'k-means++', random_state = 42)
-        model.fit(pca_components)
-        et=time.time()
-        print("\n Time taken: ", time.strftime("%H:%M:%S", time.gmtime(et-st))) 
+        if STATUS is False:
+            #Neighhbours plot to find the optimal value of 'eps'
+            print('Nearest Neighbours Plot for EPS')
+            neigh = NearestNeighbors(n_neighbors=2)
+            nbrs = neigh.fit(pca_components)
+            distances, indices = nbrs.kneighbors(pca_components)
+            distances = np.sort(distances, axis=0)
+            distances = distances[:,1]
+            plt.plot(distances)
+            plt.show() 
+            model = DBSCAN (eps=0.5,min_samples=5) #Need to find a way to find optimal eps and min_samples
+            model.fit(pca_components)
+            
+            clusters = model.labels_
+            print('Printing DBSCAN CLUSTER')
+            colors = ['royalblue', 'maroon', 'forestgreen', 'mediumorchid', 'tan', 'deeppink', 'olive', 'goldenrod', 'lightcyan', 'navy']
+            vectorizer = np.vectorize(lambda x: colors[x % len(colors)])
+            plt.scatter(pca_components.iloc[:,0], pca_components.iloc[:,1], c=vectorizer(clusters))
+            return clusters 
+        else:
+            df_new = df.reset_index(drop=True)
+            df_new['Segments (Clusters)'] = req
+            return df_new
 
-#         df_new = pd.concat([df.reset_index(drop =True),pd.DataFrame(pca_components)], axis =1)
-        df_new = df.reset_index(drop =True)
-#         pca_list = df_new.columns.values[-14:].tolist()
-#         num = pca_components.shape[1]
-#         df_new.columns.values[-num:] = [f'Principal-Component {i}' for i in range(0,num)]
-        df_new['Segments (Clusters)'] = model.labels_
-#         df_new.to_csv("Segmentation.csv")
-        return df_new
+    def clustering_algorithms(self,pca_components,df):
+        clustering_algos = {}
+        #Performing KMeans and printing silhouette score plots
+        print('Performing KMeans visualisation...')
+        clustering_algos['KMEANS'] = Segmentation.Kmeans(pca_components,df) #returns the optimal value of K
+        #Performing DBSCAN and printing sihouette score plots
+        print('Performing DBSCAN visualisation...')
+        clustering_algos['DBSCAN'] = Segmentation.Dbscan(pca_components,df) #returns a DBSCAN object containing the labels
+
+        val = int(input('Enter 1 to select KMeans, 2 for DBSCAN'))
+
+        if val == 1 :
+            df_req = Segmentation.Kmeans(pca_components,df,clustering_algos['KMEANS'],STATUS=True)
+        elif val ==2:
+            df_req = Segmentation.Dbscan(pca_components,df,clustering_algos['DBSCAN'],STATUS=True)
+
+        return df_req 
+
 
         
         
