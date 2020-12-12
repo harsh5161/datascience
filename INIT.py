@@ -193,7 +193,7 @@ def INIT(df,info):
             EMAIL_DF.reset_index(drop=True)
             print(EMAIL_DF)
             print(EMAIL_DF.shape)
-            short_obj_df.drop(EMAIL_DF.columns.to_list(),axis=1,inplace=True)
+            short_obj_df.drop(email_cols,axis=1,inplace=True)
         except Exception as e:
             print('### EMAIL ENGINEERING HAD ERRORS ###')
             print(f'The Exception message is {e}')
