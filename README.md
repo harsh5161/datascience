@@ -72,7 +72,7 @@ If there are more than  50% missing values found, then the newly created column 
 Null values are imputed with 'missing'.<br />
 <br />
 
-#URL Engineering
+# URL Engineering
 <br />
 Presence of Top Level Domain is checked in strings to check if a particular may or may not contain a url.<br />
 The list of TLD's are updated once in every seven days.<br />
@@ -80,7 +80,7 @@ If more than 75% of the rows present in the data may contain a URL, then we extr
 Null values are imputed with 'missing'.<br />
 <br />
 
-#LAT-LONG Engineering 
+# LAT-LONG Engineering 
 <br />
 Only floatiing point columns with more than 3 decimal places are considered for this process.<br />
 If the float is between +- 90 then it is a Lat <br />
