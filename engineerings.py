@@ -5,6 +5,8 @@ import numpy as np
 import time
 import itertools
 from math import sin,cos,sqrt,pow
+from urlextract import URLExtract
+from urllib.parse import urlparse,urlsplit
 import holidays
 import swifter
 import spacy
@@ -404,7 +406,7 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
 
 
 ############################################
-############## EMAIL URL ENGINEERING ##############
+############## EMAIL ENGINEERING ##############
 ############################################
 
 ################### EMAIL AND URL IDENTIFICATION FUNCTIONS ###################
@@ -482,7 +484,7 @@ def identifyEmailUrlColumns(df,email=True): # Default email parameter is true fo
         return url_cols
 
 
-################### EMAIL AND URL ENGINEERINGS ###################
+################### EMAIL ENGINEERINGS ###################
 def emailUrlEngineering(df,email=True): # Default email parameter is true for email engineering
                                         # Email parameter is false for URL engineering
     ############################## EMAIL ENGINEERING ##############################
@@ -545,11 +547,75 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
         print('\nURL Engineering time taken: {}'.format(end-start)) 
     
     return return_df 
+############################################
+############## EMAIL ENGINEERING ##############
+############################################
+
 
 
 
 ############################################
-############## EMAIL URL ENGINEERING ##############
+############## URL ENGINEERING ##############
+############################################
+
+def urlCheck(x,extractor):
+    try:
+        if extractor.has_urls(x):
+            return True
+        else:
+            return False
+    except TypeError:
+        return False
+
+def findURLS(df):
+    extractor = URLExtract()
+    extractor.update()
+    url_cols = []
+    for col in df.columns:
+        a = df[col].apply(lambda x: urlCheck(x,extractor)).to_list()
+        if a.count(True)>0.75*len(df):
+            url_cols.append(col)
+    if url_cols:
+        print("The URL Columnns found are",url_cols)
+    return url_cols 
+
+def getDomain(x):
+    if x.split('.')[0].lower() == 'www':
+        return x.split('.')[1].split('.')[0].lower()
+    else:
+        return x.split('.')[0].lower() 
+
+def urlparser(x,extractor):
+    try:
+        for url in extractor.gen_urls(x):
+            url_obj = urlparse(url)
+            if len(url_obj.scheme)> 0:
+                return getDomain(url_obj.netloc)
+            else:
+                return getDomain(url_obj.path)  
+    except:
+        return 'missing'
+def URlEngineering(df):
+    urls = {}
+    extractor = URLExtract()
+    # extractor.update()
+    print("Updating if extractor TLD's haven't been updated in seven days")
+    extractor.update_when_older(7) #updates when list is older than 7 days 
+    for col in df.columns:
+        ser = df[col].apply(lambda x: urlparser(x,extractor))
+        urls[f'{col}_domain'] = ser 
+    if urls:
+        return pd.DataFrame.from_dict(urls)
+    else:
+        return None
+
+
+
+
+
+
+############################################
+############## URL ENGINEERING ##############
 ############################################
 
 ############################################

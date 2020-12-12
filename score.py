@@ -76,18 +76,17 @@ def score(df,init_info,validation=False):
             EMAIL_DF = pd.DataFrame()
     else:
         EMAIL_DF = pd.DataFrame()
-    if init_info['URL_STATUS'] is False:
-        url_cols = init_info['url_cols']
-        if len(url_cols)>0:
-            print('Running URL Egnineering on validation dataset')
-            URL_DF = emailUrlEngineering(X_test[url_cols], email=False)
-            URL_DF.reset_index(drop=True)
-            #URL_DF.fillna('missing',inplace=True)
-            print(URL_DF)
-        else:
-            URL_DF = pd.DataFrame()
+
+    url_cols = init_info['url_cols']
+    if len(url_cols)>0:
+        print('Running URL Egnineering on validation dataset')
+        URL_DF = URlEngineering(X_test[url_cols])
+        URL_DF.reset_index(drop=True)
+        #URL_DF.fillna('missing',inplace=True)
+        print(URL_DF)
     else:
-        URL_DF =  pd.DataFrame()
+        URL_DF = pd.DataFrame()
+
 
     X_test.reset_index(drop=True,inplace=True)
     DATE_DF.reset_index(drop=True, inplace=True)
