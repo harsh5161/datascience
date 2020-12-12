@@ -63,6 +63,34 @@ Columns created are - difference of all date columns, date_month, date_year, dat
 <br />
 <br />
 
+# Email Engineering
+<br />
+If the words 'mail', 'url' or 'link' is present in the column name, then the probability of the column being an email column  is increased by 10%. <br />
+If the values present contain exactly one '@' and '.' symbol then the probability of it being an email column is increased greatly.<br />
+If an email column is found then the email's domain name is extracted and created as a new column.<br />
+If there are more than  50% missing values found, then the newly created column is dropped. <br />
+Null values are imputed with 'missing'.<br />
+<br />
+
+#URL Engineering
+<br />
+Presence of Top Level Domain is checked in strings to check if a particular may or may not contain a url.<br />
+The list of TLD's are updated once in every seven days.<br />
+If more than 75% of the rows present in the data may contain a URL, then we extract the URL from the string and then create a new column out of the domain names. <br />
+Null values are imputed with 'missing'.<br />
+<br />
+
+#LAT-LONG Engineering 
+<br />
+Only floatiing point columns with more than 3 decimal places are considered for this process.<br />
+If the float is between +- 90 then it is a Lat <br />
+If the float is between +- 180 then it is a Long <br />
+The columns can be separate like 'Lat', 'Long' separate columns or even be 'Lat-Long' in the same column separated by a comma.<br />
+The corresponding Lat and Long values are converted into their cartesian forms and then the distance from the origin is calculated and created as a new column.<br />
+Missing values are considered to be equivalent to the origin so the distance from the origin is 0.0<br />
+<br />
+
+
 # Segregation() and Outlier Winsorizing-<br />
 Numeric columns are separated into numeric or categorical numeric. Numeric variables with less than 8 levels are considered categorical numeric.<br />
 <br />
