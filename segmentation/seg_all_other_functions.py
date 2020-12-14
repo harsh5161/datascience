@@ -155,7 +155,6 @@ def Segregation(df):
             print("Mean Imputation will be done")
             numeric.fillna(numeric.mean(),inplace=True)
     else:
-    	print(40*'#')
         print("Mean Imputation will be done")
         numeric.fillna(numeric.mean(),inplace=True)
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')

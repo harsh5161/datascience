@@ -183,6 +183,9 @@ def INIT(df,info):
             EMAIL_DF = emailUrlEngineering(X[email_cols],email=True)
             X.drop(email_cols,axis=1,inplace=True) # If any email columns found, we drop it after engineering
             EMAIL_DF.reset_index(drop=True)
+            short_obj_df.drop(email_cols,axis=1,inplace=True)
+            print(EMAIL_DF)
+            print(EMAIL_DF.shape)
         except Exception as e:
             print('### EMAIL ENGINEERING HAD ERRORS ###')
             print(f'The Exception message is {e}')
@@ -194,16 +197,19 @@ def INIT(df,info):
         EMAIL_DF = pd.DataFrame(None)
         email_cols = []
 
-    url_cols = identifyEmailUrlColumns(short_obj_df,email=False)
+    print('\n#### URL ENGINEERING RUNNING WAIT ####')
+    url_cols = findURLS(short_obj_df)
     if len(url_cols)>0:
         try:
-            URL_DF = emailUrlEngineering(X[url_cols],email=False)
-            X.drop(url_cols,axis=1) # If any email columns found, we drop it post engineering
+            URL_DF = URlEngineering(X[url_cols])
+            X.drop(url_cols,axis=1,inplace=True) # If any email columns found, we drop it post engineering
             URL_DF.reset_index(drop=True)
+            print(URL_DF)
+            print(URL_DF.shape)
         except Exception as e:
             print('### URL ENGINEERING HAD ERRORS ###')
             print(f'The Exception is as {e}')
-            X.drop(url_cols,axis=1)
+            X.drop(url_cols,axis=1,inplace=True)
             URL_DF = pd.DataFrame(None)
             url_cols  = []
     else:
@@ -216,10 +222,6 @@ def INIT(df,info):
         EMAIL_STATUS = True
     else:
         EMAIL_STATUS = False
-    if URL_DF.empty:
-        URL_STATUS = True
-    else:
-        URL_STATUS =  False
 
     X.reset_index(drop=True,inplace=True)
     DATE_DF.reset_index(drop=True, inplace=True)
@@ -492,6 +494,6 @@ def INIT(df,info):
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
-                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'URL_STATUS':URL_STATUS}
+                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS}
     print(' #### DONE ####')
     return init_info,validation

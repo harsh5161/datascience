@@ -5,6 +5,8 @@ import numpy as np
 import time
 import itertools
 from math import sin,cos,sqrt,pow
+from urlextract import URLExtract
+from urllib.parse import urlparse,urlsplit
 import decimal
 import holidays
 import swifter
@@ -28,7 +30,11 @@ stemmer = SnowballStemmer('english')
 ############################################
 ############## NUMERIC ENGINEERING #########
 ############################################
-
+def formatter(x):
+    try:
+        return x.astype(str).str.strip(' %$€£¥+').str.lower()
+    except:
+        return x 
 def numeric_engineering(df):
     start = time.time()
 
@@ -42,14 +48,17 @@ def numeric_engineering(df):
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     # print(f'object type columns are {obj_columns}')
     print(f'\t\t stripping spaces, symbols, and lower casing all entries')
-    df[obj_columns]=df[obj_columns].apply(lambda x: x.astype(str).str.strip(' %$€£¥+').str.lower())
+    for col in obj_columns:
+        df[col]=df[col].apply(lambda x: formatter(x))
     print('done ...')
     print(f'\t\t Replacing empty and invalid strings')
     possible_empties = ['-','n/a','na','nan','nil',np.inf,-np.inf,'']
-    df[obj_columns]=df[obj_columns].replace(possible_empties,np.nan)
+    for col in obj_columns:
+        df[col]=df[col].replace(possible_empties,np.nan)
     print('done ...')
     print(f'\t\t Replacing commas if present in Currencies')
-    df[obj_columns]=df[obj_columns].apply(lambda x:returnMoney(x))
+    for col in obj_columns:
+        df[col]=df[col].apply(lambda x:returnMoney(x))
     print('done ...')
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     df1 = df[obj_columns].copy()
@@ -573,10 +582,10 @@ def latlongEngineering(df,lat_cols,long_cols,lat_long_cols):
 ############################################
 
 ############################################
-############## EMAIL URL ENGINEERING ##############
+############## EMAIL ENGINEERING ##############
 ############################################
 
-################### EMAIL AND URL IDENTIFICATION FUNCTIONS ###################
+################### EMAIL  IDENTIFICATION FUNCTIONS ###################
 def identifyEmailUrlColumns(df,email=True): # Default email parameter is true for email identification
                                             # Email parameter is false for URL identification
     # Identification of columns having email addresses
@@ -718,5 +727,69 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
 
 
 ############################################
-############## EMAIL URL ENGINEERING ##############
+############## EMAIL ENGINEERING ##############
+############################################
+
+############################################
+############## URL ENGINEERING ##############
+############################################
+
+def urlCheck(x,extractor):
+    try:
+        if extractor.has_urls(x):
+            return True
+        else:
+            return False
+    except TypeError:
+        return False
+
+def findURLS(df):
+    extractor = URLExtract()
+    extractor.update()
+    url_cols = []
+    for col in df.columns:
+        a = df[col].apply(lambda x: urlCheck(x,extractor)).to_list()
+        if a.count(True)>0.75*len(df):
+            url_cols.append(col)
+    if url_cols:
+        print("The URL Columnns found are",url_cols)
+    return url_cols 
+
+def getDomain(x):
+    if x.split('.')[0].lower() == 'www':
+        return x.split('.')[1].split('.')[0].lower()
+    else:
+        return x.split('.')[0].lower() 
+
+def urlparser(x,extractor):
+    try:
+        for url in extractor.gen_urls(x):
+            url_obj = urlparse(url)
+            if len(url_obj.scheme)> 0:
+                return getDomain(url_obj.netloc)
+            else:
+                return getDomain(url_obj.path)  
+    except:
+        return 'missing'
+def URlEngineering(df):
+    urls = {}
+    extractor = URLExtract()
+    # extractor.update()
+    print("Updating if extractor TLD's haven't been updated in seven days")
+    extractor.update_when_older(7) #updates when list is older than 7 days 
+    for col in df.columns:
+        ser = df[col].apply(lambda x: urlparser(x,extractor))
+        urls[f'{col}_domain'] = ser 
+    if urls:
+        return pd.DataFrame.from_dict(urls)
+    else:
+        return None
+
+
+
+
+
+
+############################################
+############## URL ENGINEERING ##############
 ############################################
