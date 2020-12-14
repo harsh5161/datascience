@@ -246,7 +246,7 @@ def INIT(df,info):
     ######## COLUMN SEGREGATION ########
     print('\n ### Entering Segregation Zone ### \n')
 
-    num_df, disc_df, useless_cols = Segregation(X)
+    num_df, disc_df, useless_cols = Segregation(X,y)
     if not disc_df.empty:
         disc_df = disc_df.astype('category')
         disc_cat = {}
