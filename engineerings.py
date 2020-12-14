@@ -27,7 +27,11 @@ stemmer = SnowballStemmer('english')
 ############################################
 ############## NUMERIC ENGINEERING #########
 ############################################
-
+def formatter(x):
+    try:
+        return x.astype(str).str.strip(' %$€£¥+').str.lower()
+    except:
+        return x
 def numeric_engineering(df):
     start = time.time()
 
@@ -41,14 +45,17 @@ def numeric_engineering(df):
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     # print(f'object type columns are {obj_columns}')
     print(f'\t\t stripping spaces, symbols, and lower casing all entries')
-    df[obj_columns]=df[obj_columns].apply(lambda x: x.astype(str).str.strip(' %$€£¥+').str.lower())
+    for col in obj_columns:
+        df[col]=df[col].apply(lambda x: formatter(x))
     print('done ...')
     print(f'\t\t Replacing empty and invalid strings')
     possible_empties = ['-','n/a','na','nan','nil',np.inf,-np.inf,'']
-    df[obj_columns]=df[obj_columns].replace(possible_empties,np.nan)
+    for col in obj_columns:
+        df[col]=df[col].replace(possible_empties,np.nan)
     print('done ...')
     print(f'\t\t Replacing commas if present in Currencies')
-    df[obj_columns]=df[obj_columns].apply(lambda x:returnMoney(x))
+    for col in obj_columns:
+        df[col]=df[col].apply(lambda x:returnMoney(x))
     print('done ...')
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     df1 = df[obj_columns].copy()
