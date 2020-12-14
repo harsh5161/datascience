@@ -48,7 +48,7 @@ def ForestImputer(num_df,disc_df,target):
         forester = 0 # Mean imputation will be done
         print("Dataframe has too many columns with null values, hence mean imputation will be done")
         df.fillna(value=df.mean(),inplace=True)
-        print("Printing the missing values after mean imputation logic",df.isna().any().sum())
+        print("Printing the missing values after mean imputation",df.isna().any().sum())
 
     TE = TargetEncoder(cols=cat_list) #target encoding t=categorical variables
     df1 = TE.fit_transform(df,target)
@@ -156,9 +156,15 @@ def Segregation(df,y):
     disc = pd.concat([cat_num,obj_df],axis=1)
     if numeric.empty is False:
         if len(numeric)<50000 and len(df.columns)<100:
+            print(40*'#')
             print("MissForest Imputation can be attempted")
             numeric = ForestImputer(numeric,disc,y)
+        else:
+            print(40*'#')
+            print("Mean Imputation will be done")
+            numeric.fillna(numeric.mean(),inplace=True)
     else:
+        print(40*'#')
         print("Mean Imputation will be done")
         numeric.fillna(numeric.mean(),inplace=True)
     print('\nPrinting Cardinality info of all Discrete Columns! That is categorical numerical + obj type discrete!\n')

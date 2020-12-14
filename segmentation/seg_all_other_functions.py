@@ -32,7 +32,7 @@ def ForestImputer(num_df,disc_df):
         forester = 0 # Mean imputation will be done
         print("Dataframe has too many columns with null values, hence mean imputation will be done")
         df.fillna(value=df.mean(),inplace=True)
-        print("Printing the missing values after mean imputation logic",df.isna().any().sum())
+        print("Printing the missing values after mean imputation",df.isna().any().sum())
 
     # print("Before Label Encoding")
     # print(df)
@@ -147,8 +147,13 @@ def Segregation(df):
     disc = pd.concat([cat_num,obj_df],axis=1)
     if numeric.empty is False:
         if len(numeric)<50000 and len(df.columns)<100:
+            print(40*'#')
             print("MissForest Imputation can be attempted")
             numeric = ForestImputer(numeric,disc)
+        else:
+            print(40*'#')
+            print("Mean Imputation will be done")
+            numeric.fillna(numeric.mean(),inplace=True)
     else:
         print("Mean Imputation will be done")
         numeric.fillna(numeric.mean(),inplace=True)
