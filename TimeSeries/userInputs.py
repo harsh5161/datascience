@@ -148,8 +148,15 @@ def importFile(path,nrows=None):
         return None,None
 
 def getForecastPeriod():
-    inp = input('Enter the forecast period in the format years,months,days : ').strip().split(',')
-    return (int(inp[0]) * 365 + int(inp[1]) * 30 + int(inp[2]))
+    print('Select a forecast period: ')
+    print('1. Daily')
+    print('2. Weekly')
+    print('3. Monthly')
+    print('4. Quarterly')
+    print('5. Semi-Annual')
+    print('6. Annual')
+    inp = int(input('Enter the number: ').strip())
+    return inp
 
 def getInfo(cols,datecols,test=False):
     if not test:
@@ -160,15 +167,17 @@ def getInfo(cols,datecols,test=False):
         print(datecols)
         primaryDate = input('Enter the primary date column : ')
         forecastPeriod = getForecastPeriod()
-        print('The forecast period is : {} days'.format(forecastPeriod))
-        if target =='' or primaryDate == '' or forecastPeriod == None:
+        num_of_periods = int(input('Enter the number of periods of forecast: ').strip())
+        # print('The forecast period is : {} days'.format(forecastPeriod))
+        if target =='' or primaryDate == '':
             print('Empty entries')
             return None
         elif (target not in cols) or (primaryDate not in datecols):
             print('Entry not found in respective columns')
             return None
         else:
-            info = {'Target':target,'PrimaryDate':primaryDate,'ForecastPeriod':forecastPeriod}
+            info = {'Target':target,'PrimaryDate':primaryDate,'ForecastPeriod':forecastPeriod,
+                    'NumOfPeriods':num_of_periods}
             return info
     else:
         # Pass all test parameters into info

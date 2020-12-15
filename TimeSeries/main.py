@@ -9,16 +9,19 @@ from plots import basicPlot,decompositionPlot,fbprophet_plots,neural_prophet_plo
 from init import INIT
 import joblib
 from pmdarima import auto_arima
-from pmdarima.arima import ndiffs
 from pmdarima.metrics import smape
 from sklearn.metrics import mean_squared_error,mean_absolute_error
-from sklearn.naive_bayes import GaussianNB
 import matplotlib.pyplot as plt
 plt.style.use('Solarize_Light2')
 from fbprophet import Prophet
+from fbprophet.diagnostics import cross_validation as fcv
+from fbprophet.diagnostics import performance_metrics
 from neuralprophet import NeuralProphet
 import holidays
+import itertools
 import pdb
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+# from arch import arch_model
 
 def main(test=False,props=None):
     print('This is Time Series Folder and All functions and files will be contained here')
@@ -42,6 +45,8 @@ def main(test=False,props=None):
         return None,None
 
     info = getInfo(df.columns,datecols) # Get Target and Primary Date Column
+    
+    print('INFO COLLECTED! FORECAST PERIOD NOT APPLIED IN THE CODE!')
 
     if not info:
         print('QUITTING!')
@@ -99,41 +104,68 @@ def main(test=False,props=None):
 #     AUTO ARIMA
 # =============================================================================
 
-    print('\n#### FITTING AUTO-ARIMA MODEL #### RUNNING WAIT ####')
-    AutoArimaModel = auto_arima(y_train,exogenous=X_train,seasonal=True,suppress_warnings=True)
-    AutoArimaForecasts = pd.Series(AutoArimaModel.predict(len(X_test),exogenous=X_test),index=y_test.index)
-    
-    print('\nThe mean squared error for Auto Arima is')
-    print(mean_squared_error(y_test,AutoArimaForecasts))
-    props['AutoArima'] = AutoArimaModel
-    MODEL_COMPARISON.loc[mc_cols_index,'Model'] = AutoArimaModel
-    MODEL_COMPARISON.loc[mc_cols_index,'Model Name'] = 'Auto Regressive Integrated Moving Average'
-    MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Percentage Error'] = smape(y_test, AutoArimaForecasts)
-    MODEL_COMPARISON.loc[mc_cols_index,'Mean Squared Error'] = mean_squared_error(y_test,AutoArimaForecasts)
-    MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Error'] = mean_absolute_error(y_test,AutoArimaForecasts)
-    plt.plot(y_test,label='Actual Values')
-    plt.plot(AutoArimaForecasts,label='Auto Arima Prediction')
-    plt.legend(loc=2)
-    plt.show()
-    mc_cols_index += 1
+# =============================================================================
+#     print('\n#### FITTING AUTO-ARIMA MODEL #### RUNNING WAIT ####')
+#     AutoArimaModel = auto_arima(y_train,exogenous=X_train,seasonal=True,suppress_warnings=True)
+#     AutoArimaForecasts = pd.Series(AutoArimaModel.predict(len(X_test),exogenous=X_test),index=y_test.index)
+#     
+#     print('\nThe mean squared error for Auto Arima is')
+#     print(mean_squared_error(y_test,AutoArimaForecasts))
+#     props['AutoArima'] = AutoArimaModel
+#     MODEL_COMPARISON.loc[mc_cols_index,'Model'] = AutoArimaModel
+#     MODEL_COMPARISON.loc[mc_cols_index,'Model Name'] = 'Auto Regressive Integrated Moving Average'
+#     MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Percentage Error'] = smape(y_test, AutoArimaForecasts)
+#     MODEL_COMPARISON.loc[mc_cols_index,'Mean Squared Error'] = mean_squared_error(y_test,AutoArimaForecasts)
+#     MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Error'] = mean_absolute_error(y_test,AutoArimaForecasts)
+#     plt.plot(y_test,label='Actual Values')
+#     plt.plot(AutoArimaForecasts,label='Auto Arima Prediction')
+#     plt.legend(loc=2)
+#     plt.show()
+#     mc_cols_index += 1
+# =============================================================================
     
 # =============================================================================
 #     AUTO ARIMA
 # =============================================================================
 
 # =============================================================================
-# # =============================================================================
-# # FBPROPHET
-# # =============================================================================
-# 
+# FBPROPHET
+# =============================================================================
+
+    dsy = pd.concat([X_train,y_train.rename('y')],axis=1)
+    dsy['ds'] = dsy.index
+       
+    future = X_test
+    future['ds'] = X_test.index
+
+    fbspace = {  
+    'changepoint_prior_scale': [0.001, 0.01, 0.1, 0.5],
+    'seasonality_prior_scale': [0.01, 0.1, 1.0, 10.0],
+    'seasonality_mode':['additive','multiplicative']
+}
+    
+    all_params = [dict(zip(fbspace.keys(), v)) for v in itertools.product(*fbspace.values())]
+    rmses = []  # Store the RMSEs for each params here
+    
+    # Use cross validation to evaluate all parameters
+    for params in all_params:
+        m = Prophet(**params)  # Fit model with given params
+        for col in X_train.columns:
+            m.add_regressor(col) 
+        m = m.fit(dsy)
+        df_cv = fcv(m, horizon='30 days')
+        df_p = performance_metrics(df_cv, rolling_window=1)
+        rmses.append(df_p['rmse'].values[0])
+    
+    # Find the best parameters
+    tuning_results = pd.DataFrame(all_params)
+    tuning_results['rmse'] = rmses
+    print(tuning_results)
+        
+# =============================================================================
 #     print('\n#### FBPROPHET MODEL #### RUNNING WAIT ####')
 #     fbprophetModel = Prophet()
-#     dsy = pd.concat([X_train,y_train.rename('y')],axis=1)
-#     dsy['ds'] = dsy.index
-#     for col in X_train.columns:
-#         fbprophetModel.add_regressor(col)    
-#     future = X_test
-#     future['ds'] = X_test.index
+
 #     fbProphetForecasts = fbprophetModel.fit(dsy).predict(future)
 #     fbProphetForecasts.index = y_test.index
 #     print('\nThe mean squared error for FBProphet is') 
@@ -150,15 +182,17 @@ def main(test=False,props=None):
 #     plt.show()
 #     fbprophet_plots(fbprophetModel,fbProphetForecasts)
 #     mc_cols_index += 1
-# 
-# # =============================================================================
-# # FBPROPHET
-# # =============================================================================
-# 
-# # =============================================================================
-# # NEURALPROPHET
-# # =============================================================================
-# 
+# =============================================================================
+
+# =============================================================================
+# FBPROPHET
+# =============================================================================
+
+# =============================================================================
+# NEURALPROPHET
+# =============================================================================
+
+# =============================================================================
 #     print('\n#### NEURAL PROPHET MODEL #### RUNNING WAIT ####')
 #     neuralProphetModel = NeuralProphet(learning_rate=0.01,epochs=500,n_forecasts=10,loss_func='mse')
 #     for col in X_train.columns:
@@ -182,45 +216,20 @@ def main(test=False,props=None):
 #     plt.show()
 #     neural_prophet_plots(neuralProphetModel,neuralProphetForecasts)
 #     mc_cols_index += 1
-#     
-# # =============================================================================
-# # NEURALPROPHET
-# # =============================================================================
 # =============================================================================
 
 # =============================================================================
-# NAIVE BAYES
+# NEURALPROPHET
 # =============================================================================
 
-    pdb.set_trace()
-    
-    print('\n#### GAUSSIAN NAIVE BAYES MODEL #### RUNNING WAIT ####')
-    naiveBayesModel = GaussianNB()
-    print('\nEstimating difference term d using AutoArima - ADF test(without exogenous variables)!')
-    d_term = ndiffs(x=y_train,test='adf') 
-    print('\nThe d_term found for stationarity is {}'.format(d_term))
-    print('\nDifferencing Time Series using d_term!')
-    y_train_diff = pd.Series(y_train - y_train.shift(d_term),index=y_train.index)
-    drop_indices = y_train[y_train.isnull()].index
-    X_train_gnb = X_train.drop(drop_indices)
-    naiveBayesModel.fit(X_train_gnb,y_train_diff)
-    NaiveBayesPredictions = pd.Series(naiveBayesModel.predict(X_test),index=y_test.index)
-    print('\nThe mean squared error for Gaussian Naive Bayes is')
-    print(mean_squared_error(y_test, NaiveBayesPredictions))
-    props['NaiveBayes'] = naiveBayesModel
-    MODEL_COMPARISON.loc[mc_cols_index,'Model'] = naiveBayesModel
-    MODEL_COMPARISON.loc[mc_cols_index,'Model Name'] = 'Gaussian Naive Bayes'
-    MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Percentage Error'] = smape(y_test, NaiveBayesPredictions)
-    MODEL_COMPARISON.loc[mc_cols_index,'Mean Squared Error'] = mean_squared_error(y_test, NaiveBayesPredictions)
-    MODEL_COMPARISON.loc[mc_cols_index,'Mean Absolute Error'] = mean_absolute_error(y_test, NaiveBayesPredictions)
-    plt.plot(y_test,label='Actual Values')
-    plt.plot(NaiveBayesPredictions,label='Gaussian Naive Bayes Prediction')
-    plt.legend(loc=2)
-    plt.show()
-    mc_cols_index += 1    
+# =============================================================================
+# GARCH MODEL
+# =============================================================================
+
+    print('\nGARCH MODEL - EXOGENOUS INCLUSION LEFT')
 
 # =============================================================================
-# NAIVE BAYES
+# GARCH MODEL
 # =============================================================================
 
     MODEL_COMPARISON.drop(['Model'],axis=1).to_csv('MC.csv')
