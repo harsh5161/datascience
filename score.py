@@ -68,7 +68,7 @@ def score(df,init_info,validation=False):
         email_cols = init_info['email_cols']
         if len(email_cols)>0:
             print('Runnning Email Engineering on validation dataset')
-            EMAIL_DF = emailUrlEngineering(X_test[email_cols])
+            EMAIL_DF = emailUrlEngineering(X_test[email_cols],email=True,validation=True)
             EMAIL_DF.reset_index(drop=True)
             #EMAIL_DF.fillna('missing', inplace=True)
             print(EMAIL_DF)

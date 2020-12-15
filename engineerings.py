@@ -417,82 +417,30 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
 ############################################
 
 ################### EMAIL AND URL IDENTIFICATION FUNCTIONS ###################
-def identifyEmailUrlColumns(df,email=True): # Default email parameter is true for email identification
-                                            # Email parameter is false for URL identification
-    # Identification of columns having email addresses
-    start = time.time()
-    
-    
-    # Creating a dictionary with column names as keys and possibilities of that column
-    # being an email/url as values    
-    possibilities = {}
-    
-    if email:
-        print('\nIdentifying Email Columns\n')
-        # Initializing possibilities dictionary 
-        for column in df:
-            if ('mail' in column):          # If the string 'mail' is found in column names, initialize with 10% possibility
-                possibilities[column] = 0.1
-            else:                           # Else initialize with 0 possibility
-                possibilities[column] = 0            
-                
-    else:
-        print('\nIdentifying URL Columns\n')
-        # Initializing possibilities dictionary 
-        for column in df:
-            if ('url' in column) or ('link' in column): # If the string 'url or link' is found in column names
-                possibilities[column] = 0.1
-            else:                           # Else initialize with 0 possibility
-                possibilities[column] = 0     
+def identifier(x):
+    try:
+        if x.split('@'):
+            if x.split('@')[1].split('.'):
+                return True
+            else:
+                return False
+        else:
+               return False
+    except:
+        return False 
+def identifyEmailColumns(df): 
+    email_cols = []
+    for col in df.columns:
+        a = df[col].apply(lambda x: identifier(x)).to_list()
+        if a.count(True)>0.50*len(df):
+            email_cols.append(col)
         
-    if email:
-        # For every column in df, for every entry in a column, if the entry has @ and . in it, increase possibility 
-        # by a fraction calculated by the length of the dataframe
-        for column in df:
-            for entry in df[column]:
-                if ('@' in entry) and ('.' in entry) and (' ' not in entry):
-                    possibilities[column] += 100/len(df)
-                elif entry == '': # If we found empty string, do nothing
-                    pass
-                else:
-                    possibilities[column] -= 100/len(df)      
-    else:
-        # For every column in df, for every entry in column, if the entry has https:// or http:// in it, increase possibility 
-        # by a fraction calculated by the length of the dataframe
-        for column in df:
-            for entry in df[column]:
-                if (('https://' in entry) or ('http://' in entry)) and (entry.count('.')>0):
-                    possibilities[column] += 100/len(df)
-                elif entry == '': # If we found empty string, do nothing
-                    pass
-                else:
-                    possibilities[column] -= 100/len(df)
-                    
-    # Converting dictionary to series, the possibility series - poss_series               
-    poss_series = pd.Series(possibilities)
+    return email_cols 
     
-    if email:
-        print('The possibilities of columns being email_address are as below:\n')
-        print(poss_series)
-        # If possibility of a columns is greater than -45, then we consider it
-        email_cols = poss_series[poss_series>-45].index    
-        print('\nThe email columns found are: {}'.format(email_cols)) 
-        end = time.time()
-        print('Email Address identification time taken : {}'.format(end-start))
-        return email_cols
-    else:
-        print('The possibilities of columns being url are as below:\n')
-        print(poss_series)
-        # If possibility of a columns is greater than -45, then we consider it
-        url_cols = poss_series[poss_series>-45].index    
-        print('\nThe url columns found are: {}'.format(url_cols)) 
-        end = time.time()
-        print('URL identification time taken : {}'.format(end-start))
-        return url_cols
 
 
 ################### EMAIL ENGINEERINGS ###################
-def emailUrlEngineering(df,email=True): # Default email parameter is true for email engineering
+def emailUrlEngineering(df,email=True,validation=False): # Default email parameter is true for email engineering
                                         # Email parameter is false for URL engineering
     ############################## EMAIL ENGINEERING ##############################
     
@@ -520,6 +468,11 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
             except:
                 return np.nan # Invalid Entry
 
+    def rformatter(x):
+        try:
+            return x.rsplit('@')
+        except:
+            return np.nan
     
     # Making a note of newly created columns
     newCols = []
@@ -527,15 +480,19 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
     for column in df.columns:
         domain_name = column + '_domain'
         if email is True:
-            df[domain_name] = df[column].str.rsplit('@')
-            df[domain_name] = df[domain_name].apply(getEmailDomainName)
+            ser = df[column].apply(lambda x: rformatter(x))
+            ser.reset_index(drop=True,inplace=True)
+            df[domain_name] = ser.apply(getEmailDomainName)
         else:
             df[domain_name] = df[column].apply(getUrlDomainName)
         # Checking percentage of missing values
-        if df[domain_name].isnull().sum()/len(df) >= 0.5:
-            print('The newly created \'{}\' column has 50% or more missing values!'.format(domain_name))
-            print('And hence will be dropped!')
-            df.drop(domain_name,axis=1)
+        if validation == False:
+            if df[domain_name].isnull().sum()/len(df) >= 0.5:
+                print('The newly created \'{}\' column has 50% or more missing values!'.format(domain_name))
+                print('And hence will be dropped!')
+                df.drop(domain_name,axis=1)
+            else:
+                newCols.append(domain_name)
         else:
             newCols.append(domain_name)
             
@@ -567,7 +524,7 @@ def emailUrlEngineering(df,email=True): # Default email parameter is true for em
 
 def urlCheck(x,extractor):
     try:
-        if extractor.has_urls(x):
+        if extractor.has_urls(str(x)):
             return True
         else:
             return False
@@ -582,6 +539,7 @@ def findURLS(df):
         a = df[col].apply(lambda x: urlCheck(x,extractor)).to_list()
         if a.count(True)>0.75*len(df):
             url_cols.append(col)
+        # print(f"Trying column {col} and the percentage of urls are {a.count(True)}")
     if url_cols:
         print("The URL Columnns found are",url_cols)
     return url_cols 
@@ -711,12 +669,23 @@ def findLatLong(df):
         print("Columns that are are of the form Lat-Long are as follows",lat_long_cols)
     columns = Floater(df,"returnFloat")  #List of float columns that could be lat or long
     print(f"The columns that could be Lat/Long are as follows {columns}")
+    for ex in columns[:]:
+        if "lat" in ex.lower() or "latitude" in ex.lower():
+            lat_cols.append(ex)
+            columns.remove(ex)
+        elif "long" in ex.lower() or "longitude" in ex.lower():
+            long_cols.append(ex)
+            columns.remove(ex)
     desired = [] 
+    # print(f"lat-cols are {lat_cols}")
+    # print(f"long-cols are {long_cols}")
+    # print(f"columns are {columns}")
     requisites = ["Lat","Long","Latitude","Longitude"]
-    for val in itertools.product(columns,requisites):
-        if val[0].lower().find(val[1].lower()) != -1 and val[0] not in desired:
-            desired.append(val[0])
-            columns.remove(val[0])
+    if len(columns)>1:
+        for val in itertools.product(columns,requisites):
+            if val[0].lower().find(val[1].lower()) != -1 and val[0] not in desired:
+                desired.append(val[0])
+                columns.remove(val[0])
     #Removing columns with low nunique()
     for col in columns[:]: 
         if df[col].nunique() <100:
@@ -729,6 +698,7 @@ def findLatLong(df):
 
     if desired:
         lat_cols, long_cols = segregator(df[desired])
+
 
 
     
