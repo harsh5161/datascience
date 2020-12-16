@@ -140,7 +140,11 @@ def time_engineering(props):
         print(spacesDictionary)
         keys = list(spacesDictionary.keys())
         values = list(spacesDictionary.values())
-        bestSpace = keys[values.index(max(values))]
+        try:
+            bestSpace = keys[values.index(max(values))]
+        except ValueError:
+            print('\nThe Date Column has all same dates')
+            return dict()
         print('\nThe best space found is : {}'.format(bestSpace))    
         print('\nSetting index to Primary Date!')
         df.index = df[primaryDate]

@@ -1,9 +1,12 @@
-2020-12-16 13:55:34,462; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
-2020-12-16 13:55:34,504; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
-2020-12-16 13:55:34,505; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
-2020-12-16 13:56:48,576; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
-2020-12-16 13:56:48,612; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
-2020-12-16 13:56:48,614; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
-2020-12-16 13:59:32,025; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
-2020-12-16 13:59:32,064; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
-2020-12-16 13:59:32,066; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
+2020-12-16 15:06:25,665; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
+2020-12-16 15:06:25,680; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
+2020-12-16 15:06:25,682; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
+2020-12-16 15:09:05,662; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
+2020-12-16 15:09:05,694; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
+2020-12-16 15:09:05,694; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
+2020-12-16 15:15:24,942; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
+2020-12-16 15:15:24,976; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
+2020-12-16 15:15:24,980; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
+2020-12-16 15:18:17,709; WARNING; nprophet; __init__; Changing n_forecasts to 1. Without lags, the forecast can be computed for any future time, independent of present values
+2020-12-16 15:18:17,741; INFO; nprophet.utils; set_auto_seasonalities; Disabling yearly seasonality. Run NeuralProphet with yearly_seasonality=True to override this.
+2020-12-16 15:18:17,743; INFO; nprophet.utils; set_auto_seasonalities; Disabling daily seasonality. Run NeuralProphet with daily_seasonality=True to override this.
