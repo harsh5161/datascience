@@ -1,10 +1,11 @@
 from sklearn.cluster import KMeans, DBSCAN
+import hdbscan
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 import matplotlib.style as style
-from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.metrics import silhouette_samples, silhouette_score, davies_bouldin_score
 from sklearn.datasets import make_blobs
 import time
 from scipy.signal import find_peaks
@@ -41,8 +42,10 @@ class Segmentation:
             # This gives a perspective into the density and separation of the formed
             # clusters
             silhouette_avg = silhouette_score(X, cluster_labels)
+            dbs=davies_bouldin_score(X, cluster_labels)
             print("For n_clusters =", n_clusters,
                   "The average silhouette_score is : %0.4f" %silhouette_avg)
+            print("The Davies Bouldin score is: %0.4f"%dbs)
             
 #             if silhouette_avg > sil_score_max:   #selecting optimal number of clusters where silhoutte score is highest
 #                 sil_score_max = silhouette_avg
@@ -189,27 +192,42 @@ class Segmentation:
     #         df_new.columns.values[-num:] = [f'Principal-Component {i}' for i in range(0,num)]
             df_new['Segments (Clusters)'] = model.labels_
     #         df_new.to_csv("Segmentation.csv")
-            return df_new  
-    def Dbscan(pca_components,df,req=None,STATUS=False):
+            return df_new 
+    
+    def HDbscan(pca_components,df,req=None,STATUS=False):
 
         if STATUS is False:
-            #Neighhbours plot to find the optimal value of 'eps'
-            print('Nearest Neighbours Plot for EPS')
-            neigh = NearestNeighbors(n_neighbors=2)
-            nbrs = neigh.fit(pca_components)
-            distances, indices = nbrs.kneighbors(pca_components)
-            distances = np.sort(distances, axis=0)
-            distances = distances[:,1]
-            plt.plot(distances)
-            plt.show() 
-            model = DBSCAN (eps=0.5,min_samples=5) #Need to find a way to find optimal eps and min_samples
+#             #Neighhbours plot to find the optimal value of 'eps' in dbscan
+#             print('Nearest Neighbours Plot for EPS')
+#             neigh = NearestNeighbors(n_neighbors=int(0.015*pca_components.shape[0]))
+#             nbrs = neigh.fit(pca_components)
+#             distances, indices = nbrs.kneighbors(pca_components)
+#             distances = np.sort(distances, axis=0)
+#             distances = distances[:,1]
+#             plt.plot(distances)
+#             plt.show() 
+            
+#             # to automatically get the elbow/knee point for dbscan
+#             d = range(1, len(distances)+1)
+#             from kneed import KneeLocator
+#             kn = KneeLocator(d, distances, curve='convex', direction='increasing')
+#             print("\nkneee::: ", kn.knee_y)
+            
+#             model = DBSCAN (eps=round(kn.knee_y,1), min_samples=int(0.015*pca_components.shape[0])) #Need to find a way to find optimal eps and min_samples
+            model= hdbscan.HDBSCAN(min_cluster_size=int(0.015*pca_components.shape[0]))
             model.fit(pca_components)
             
             clusters = model.labels_
-            print('Printing DBSCAN CLUSTER')
+            print('Printing HDBSCAN CLUSTER')
             colors = ['royalblue', 'maroon', 'forestgreen', 'mediumorchid', 'tan', 'deeppink', 'olive', 'goldenrod', 'lightcyan', 'navy']
             vectorizer = np.vectorize(lambda x: colors[x % len(colors)])
-            plt.scatter(pca_components.iloc[:,0], pca_components.iloc[:,1], c=vectorizer(clusters))
+            plt.scatter(pca_components.iloc[:,0], pca_components.iloc[:,1], c=vectorizer(clusters), s=5)
+            plt.show()
+            
+            silhouette_avg= silhouette_score(pca_components, clusters)
+            print("\nSilhoutte score for hdbscan: ", silhouette_avg) 
+            print("Davies Bouldin score for hdbscan(smaller the better): ", davies_bouldin_score(pca_components, clusters))  
+            print("**warning: Silhoutte score and Davies Bouldin score only work well when the clusters are shaped round")    
             return clusters 
         else:
             df_new = df.reset_index(drop=True)
@@ -221,16 +239,19 @@ class Segmentation:
         #Performing KMeans and printing silhouette score plots
         print('Performing KMeans visualisation...')
         clustering_algos['KMEANS'] = Segmentation.Kmeans(pca_components,df) #returns the optimal value of K
-        #Performing DBSCAN and printing sihouette score plots
-        print('Performing DBSCAN visualisation...')
-        clustering_algos['DBSCAN'] = Segmentation.Dbscan(pca_components,df) #returns a DBSCAN object containing the labels
+        #Performing HDBSCAN and printing scatter plot
+        print('Performing HDBSCAN visualisation...')
+        clustering_algos['HDBSCAN'] = Segmentation.HDbscan(pca_components,df) #returns a HDBSCAN object containing the labels
 
-        val = int(input('Enter 1 to select KMeans, 2 for DBSCAN'))
+        val = int(input('Enter 1 to select KMeans, 2 for HDBSCAN'))
 
         if val == 1 :
             df_req = Segmentation.Kmeans(pca_components,df,clustering_algos['KMEANS'],STATUS=True)
         elif val ==2:
-            df_req = Segmentation.Dbscan(pca_components,df,clustering_algos['DBSCAN'],STATUS=True)
+            df_req = Segmentation.HDbscan(pca_components,df,clustering_algos['HDBSCAN'],STATUS=True)
+            noise= df_req[df_req['Segments (Clusters)']==-1]  
+            df_req= df_req[df_req['Segments (Clusters)']!=-1]  # removing noise (where cluster number is -1)
+            print("\nThese rows were removed as they were classified as noise: \n", noise)
 
         return df_req 
 
