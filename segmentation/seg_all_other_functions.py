@@ -315,15 +315,24 @@ def calculate_n_components(df): #Dont delete the comments in this functions
                 if var_exp[current] - var_exp[current+1] < 1.0:
                     n_components = current+1
                     trigger = 'Triggered'
+                    retained = current
                     break
         print(f"Try block {trigger}")
     except:
         for i in cum_var_exp:
             if i>90.0:
-                trigger = 'Trigger'
+                trigger = 'Triggered'
                 n_components = cum_var_exp.index(i)+1
+                retained = cum_var_exp.index(i)
                 break
         print(f"Except block {trigger}")
+    
+    if cum_var_exp[retained] <60.0:  #In case the PCs do not explain at least 60% of the cumulative variance then we take PCs that explain at least that much variance
+        for i in cum_var_exp:
+            if i >60.0:
+                n_components = cum_var_exp.index(i)+1
+                break 
+        print("Initial PCs could not explain a lot of variance so PCs that account for at least 60% of the cumulative variance is taken")
     return n_components
 def dimensionality_reduction(df,n,DISC_VAL):
     if DISC_VAL:
