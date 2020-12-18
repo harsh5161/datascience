@@ -119,81 +119,83 @@ def time_engineering(props):
     print('\nDropping rows with empty Date')
     df.dropna(subset=[primaryDate],inplace=True)
     
-    print('\nFinding a set of all spaces present in the primary Date Column\n')
-    spaces = []
-    for i in range(len(df)-1):
-        # print('Checking index {}'.format(i))
-        currentSpace = df.loc[i+1][primaryDate] - df.loc[i][primaryDate]
-        if currentSpace.days == 0:
-            continue
-        else:
-            spaces.append(currentSpace)
-    uniqueSpaces = set(spaces)
-    # print(uniqueSpaces)
-    if len(uniqueSpaces) == 1:
-        print('The Data is equally spaced!')
-    else:
-        spacesDictionary = {}
-        for space in uniqueSpaces:
-            spacesDictionary[space] = spaces.count(space)
-        print('The spaces found are (space:frequency format): ')
-        print(spacesDictionary)
-        keys = list(spacesDictionary.keys())
-        values = list(spacesDictionary.values())
-        try:
-            bestSpace = keys[values.index(max(values))]
-        except ValueError:
-            print('\nThe Date Column has all same dates')
-            return dict()
-        print('\nThe best space found is : {}'.format(bestSpace))    
-        print('\nSetting index to Primary Date!')
-        df.index = df[primaryDate]
+#     print('\nFinding a set of all spaces present in the primary Date Column\n')
+#     spaces = []
+#     for i in range(len(df)-1):
+#         # print('Checking index {}'.format(i))
+#         currentSpace = df.loc[i+1][primaryDate] - df.loc[i][primaryDate]
+#         if currentSpace.days == 0:
+#             continue
+#         else:
+#             spaces.append(currentSpace)
+#     uniqueSpaces = set(spaces)
+#     # print(uniqueSpaces)
+#     if len(uniqueSpaces) == 1:
+#         print('The Data is equally spaced!')
+#     else:
+#         spacesDictionary = {}
+#         for space in uniqueSpaces:
+#             spacesDictionary[space] = spaces.count(space)
+#         print('The spaces found are (space:frequency format): ')
+#         print(spacesDictionary)
+#         keys = list(spacesDictionary.keys())
+#         values = list(spacesDictionary.values())
+#         try:
+#             bestSpace = keys[values.index(max(values))]
+#         except ValueError:
+#             print('\nThe Date Column has all same dates')
+#             return dict()
+#         print('\nThe best space found is : {}'.format(bestSpace))    
+#         print('\nSetting index to Primary Date!')
+#         df.index = df[primaryDate]
         
-        print('\nEqually Spacing Primary Date Column')
+#         print('\nEqually Spacing Primary Date Column')
         
-        primaryDateList = df[primaryDate].tolist()
+#         primaryDateList = df[primaryDate].tolist()
         
-        i = 0 # for while loop
-        while i < len(primaryDateList)-1:
-            if primaryDateList[i+1] - primaryDateList[i] > bestSpace:
-                primaryDateList.insert(i+1,primaryDateList[i]+bestSpace)
-            elif primaryDateList[i+1] - primaryDateList[i] < bestSpace:
-                primaryDateList[i+1] = primaryDateList[i] + bestSpace
-            i += 1
+#         i = 0 # for while loop
+#         while i < len(primaryDateList)-1:
+#             if primaryDateList[i+1] - primaryDateList[i] > bestSpace:
+#                 primaryDateList.insert(i+1,primaryDateList[i]+bestSpace)
+#             elif primaryDateList[i+1] - primaryDateList[i] < bestSpace:
+#                 primaryDateList[i+1] = primaryDateList[i] + bestSpace
+#             i += 1
         
-        newSpaces = set() # Creating a set of all new spaces
+#         newSpaces = set() # Creating a set of all new spaces
         
-        for i in range(len(primaryDateList)-1):
-            newSpaces.add(primaryDateList[i+1]-primaryDateList[i])
+#         for i in range(len(primaryDateList)-1):
+#             newSpaces.add(primaryDateList[i+1]-primaryDateList[i])
             
-        print('\nPrining new space')
-        print(newSpaces)
-        print('The total number new of unique spaces found is {}'.format(len(newSpaces)))
-        if len(newSpaces) == 1:
-            print('#### THE DATE IS EQUALLY SPACED! ####')
-        else:
-            print('THE DATA IS NOT EQUALLY SPACED!')
-            return dict()
+#         print('\nPrining new space')
+#         print(newSpaces)
+#         print('The total number new of unique spaces found is {}'.format(len(newSpaces)))
+#         if len(newSpaces) == 1:
+#             print('#### THE DATE IS EQUALLY SPACED! ####')
+#         else:
+#             print('THE DATA IS NOT EQUALLY SPACED!')
+#             return dict()
         
-        primaryDateColumn = pd.Series(None,index=primaryDateList)
-        df = pd.concat([df,primaryDateColumn],axis=1)
-        df.drop([0],axis=1,inplace=True)
-        df[primaryDate] = df.index
-        df.reset_index(drop=True,inplace=True)
+#         primaryDateColumn = pd.Series(None,index=primaryDateList)
+#         df = pd.concat([df,primaryDateColumn],axis=1)
+#         df.drop([0],axis=1,inplace=True)
+#         df[primaryDate] = df.index
+#         df.reset_index(drop=True,inplace=True)
         
-        if bestSpace.days == 1:
-            props['m'] = 7
-        elif bestSpace.days == 7:
-            props['m'] = 52
-        elif bestSpace.days == 30:
-            props['m'] = 12
-        elif bestSpace.days > 100 and bestSpace.days < 120:
-            props['m'] = 4
-        else:
-            props['m'] = 1
+#         if bestSpace.days == 1:
+#             props['m'] = 7
+#         elif bestSpace.days == 7:
+#             props['m'] = 52
+#         elif bestSpace.days == 30:
+#             props['m'] = 12
+#         elif bestSpace.days > 100 and bestSpace.days < 120:
+#             props['m'] = 4
+#         else:
+#             props['m'] = 1
             
-        print('\nm setting for Auto Arima is set to {}'.format(props['m']))
-        
+#         print('\nm setting for Auto Arima is set to {}'.format(props['m']))
+    
+    df.index = df[primaryDate]
+    
     # Exploiting Date Column
     print('\nCreating exogenous Date Variables from Primary Date Column')
     print('Obtaining Year,Quarter,Month,Week,Day of Week,Day,Hour,Minute,Seconds,Weekend or not')
@@ -263,7 +265,7 @@ def time_engineering(props):
         if df[column].nunique() == 1:
             print('Column \'{}\' will be dropped since it has 1 level'.format(column))
             df.drop(column,axis=1,inplace=True)
-    
+ 
     print('\nPrinting DataFrame Head\n')
     print(df.head())
     
@@ -288,7 +290,7 @@ def train_test_split(props):
     
 def interpolateTarget(props):
     print('\nApplying Time Series Decomposition Plot')
-    props['df'].interpolate(inplace=True)
+    props['df'].ffill(inplace=True)
     return props
 
 def get_dsy(props):
