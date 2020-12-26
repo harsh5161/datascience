@@ -43,10 +43,16 @@ styls = [ dict(props = [('border-collapse','collapse'), ('border-spacing','0px')
 
 ##########################################################################
 
+def clusters_scatter_plot(pca_components, cluster_labels):  # function to plot scatter plot showing clusters
+    colors = ['royalblue', 'maroon', 'forestgreen', 'mediumorchid', 'tan', 'deeppink', 'olive', 'goldenrod', 'lightcyan', 'navy', 'coral', 'olive', 'turquoise']
+    vectorizer = np.vectorize(lambda x: colors[x % len(colors)])
+    plt.scatter(pca_components.iloc[:,0], pca_components.iloc[:,1], c=vectorizer(cluster_labels), s=5)
+    plt.show()
+
 def ClusterMags(segdata):
     
     ## table
-    print("\nThe following table shows cluster magnitudes...")
+#     print("\nThe following table shows cluster magnitudes...")
     cmags = segdata['Segments (Clusters)'].value_counts().to_frame()
     cmags= cmags.reset_index()                               # to rename columns
     cmags.columns= ['Cluster numbers', 'Frequency']           # renaming columns
@@ -69,7 +75,6 @@ def ClusterMags(segdata):
     clp.set_index('Cluster numbers', inplace= True)
     cluster_percentages=clp.to_dict()
     cluster_percentages=cluster_percentages['Percent']
-    print(cluster_percentages)
     return cluster_percentages
     
     
