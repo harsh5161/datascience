@@ -267,9 +267,11 @@ class Segmentation:
         print("**Validity index only is used in density-based clustering, works well with arbitrarily shaped clusters")
         print("**Silhoutte score does not work well with arbitrarily shaped clusters.")
         if not clustering_algos['HDBSCAN']['noise'].empty:
-            print("\nThe following rows were dropped because they were classified as noise:\n\n",clustering_algos['HDBSCAN']['noise'])
+            print("\nThe following "+ str(clustering_algos['HDBSCAN']['noise'].shape[0])+" rows were dropped because they were classified as noise:\n\n",clustering_algos['HDBSCAN']['noise'])
         print("\n\033[1m---------------- END OF HDBSCAN RESULTS -------------------\033[0m")
         
+        print("\n\033[1mTips for choosing algorithm:\033[0m\n1) Good clusters are well seperated and do not overlap much. If the scatter plot shows two or more distinct clusters that means the algorithm has successfully classified all data points into distinct clusters which have different characteristics. If the clusters are overlapping then the data points in those clusters may not have very different characteristics and therefore may not be very useful. \n2) Look at the validation metrics to see how well that clustering algorithm has performed. Validation metrics are useful in giving a basic idea about how well seperated the clusters are. But we should remember that a validation metric alone is not the sole determinant of good clustering.\n3) Sometimes all the data points maybe very close together(densely packed) or may have uniform density throughout and may not form very distinguishable clusters. In such cases density-based clustering algorithms like HDBSCAN may classify almost all data points into one big cluster and other clusters(if formed) may contain a very small amount of data points. In this case centroid based algorithms like K-MEANS may give a better result. However it should be kept in mind that it depends on the dataset as well. Some datasets just dont have any clusters or may only have one big cluster and one very small cluster.\n4) In some cases HDBSCAN may only detect small clusters and classify a majority of data points as noise. This again depends on the dataset. If this is not the type of result expected, then K-MEANS may be more useful.\n5) Validation metrics, Scatter plots, Cluster magnitudes, and the dataset, all should be kept in mind while selecting the algorithm." ) 
+              
         return clustering_algos
 
         
