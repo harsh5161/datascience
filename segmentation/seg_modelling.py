@@ -1,5 +1,5 @@
 from sklearn.cluster import KMeans, DBSCAN
-import faiss
+# import faiss
 import hdbscan
 import pandas as pd 
 import numpy as np
@@ -196,10 +196,12 @@ class Segmentation:
     
     def HDbscan(pca_components,df):
         hdbscan_dict={} # keys: ['no_of_clusters','val_index_score','cluster_labels','segdata','noise','cluster_percentages']
-        
+        s=time.time()        
         model= hdbscan.HDBSCAN(min_cluster_size=int(0.05*pca_components.shape[0]), min_samples=1 )
         model.fit(pca_components)
         clusters = model.labels_ 
+        e=time.time()
+        print("\n  Time taken to perform hdbscan ", time.strftime("%H:%M:%S", time.gmtime(e-s)))
         s=time.time()        
         val_index= hdbscan.validity_index(np.array(pca_components), clusters)
         e=time.time()
@@ -248,21 +250,22 @@ class Segmentation:
         print("\n\033[1m---------------- RESULTS FOR KMEANS -------------------\033[0m")
         print("Number of clusters being generated: ", clustering_algos['KMEANS']['no_of_clusters'])
         print("Cluster magnitudes: ")
-        clustering_algos['KMEANS']['cluster_percentages']=ClusterMags(clustering_algos['KMEANS']['segdata'])
+        clustering_algos['KMEANS']['cluster_percentages']=ClusterMags(clustering_algos['KMEANS']['segdata'],'KMEANS')
         print('Scatter plot showing the formed clusters: ')
         clusters_scatter_plot(pca_components, clustering_algos['KMEANS']['cluster_labels'])
         print("Silhouette score(higher the better, ranges from -1 to 1): ",clustering_algos['KMEANS']['sil_score'])
-        print("**Silhoutte score only works well when the clusters are shaped round")  
+#         print("**Silhoutte score only works well when the clusters are shaped round")  
         print("\n\033[1m---------------- END OF KMEANS RESULTS -------------------\033[0m")
         
         print("\n\033[1m---------------- RESULTS FOR HDBSCAN -------------------\033[0m")
         print("Number of clusters being generated: ", clustering_algos['HDBSCAN']['no_of_clusters'])
         print("Cluster magnitudes: ")
-        clustering_algos['HDBSCAN']['cluster_percentages']=ClusterMags(clustering_algos['HDBSCAN']['segdata'])
+        clustering_algos['HDBSCAN']['cluster_percentages']=ClusterMags(clustering_algos['HDBSCAN']['segdata'],'HDBSCAN')
         print('Scatter plot showing the formed clusters: ')
         clusters_scatter_plot(pca_components, clustering_algos['HDBSCAN']['cluster_labels'])
         print("\nValidity index(higher the better, ranges from -1 to 1): ",clustering_algos['HDBSCAN']['val_index_score'])
         print("**Validity index only is used in density-based clustering, works well with arbitrarily shaped clusters")
+        print("**Silhoutte score does not work well with arbitrarily shaped clusters.")
         if not clustering_algos['HDBSCAN']['noise'].empty:
             print("\nThe following rows were dropped because they were classified as noise:\n\n",clustering_algos['HDBSCAN']['noise'])
         print("\n\033[1m---------------- END OF HDBSCAN RESULTS -------------------\033[0m")

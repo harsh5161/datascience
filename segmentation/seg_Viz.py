@@ -49,7 +49,7 @@ def clusters_scatter_plot(pca_components, cluster_labels):  # function to plot s
     plt.scatter(pca_components.iloc[:,0], pca_components.iloc[:,1], c=vectorizer(cluster_labels), s=5)
     plt.show()
 
-def ClusterMags(segdata):
+def ClusterMags(segdata,algo):
     
     ## table
 #     print("\nThe following table shows cluster magnitudes...")
@@ -61,13 +61,13 @@ def ClusterMags(segdata):
     cmags['Cummulative Frequency'] = cmags['Frequency'].cumsum()
     cmags['Cummulative Percent'] = round(((cmags['Frequency']/cmags['Frequency'].sum())* 100).cumsum(),2)
     styled_cmags =cmags.style.set_table_styles(styls).set_precision(2).hide_index() #styling
-    dfi.export(styled_cmags,'Cmags_table.png')  # storing as image
+    dfi.export(styled_cmags,'Cmags_table_'+str(algo)+'.png')  # storing as image
     display(styled_cmags)
     
     ## bar chart
     sns_plot = sns.barplot(x=cmags['Cluster numbers'], y = cmags['Frequency'],  
             data = cmags, palette="husl").set_title('Cluster Magnitudes')
-    sns_plot.figure.savefig('Cmags_barchart.png')
+    sns_plot.figure.savefig('Cmags_barchart_'+str(algo)+'.png')
     plt.show()
     
     ## creating a dict to store cluster numbers and their respective percentages

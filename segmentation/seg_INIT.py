@@ -400,6 +400,8 @@ def INIT(df,info):
             chosen_algo= clustering_algos['KMEANS']
         elif val ==2:
             chosen_algo= clustering_algos['HDBSCAN']
+        else:
+            print("invalid input!!")
 
         ############# CLUSTER PROFILING ##################### 
         for val in prof_cols[:]:
