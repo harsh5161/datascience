@@ -43,10 +43,16 @@ styls = [ dict(props = [('border-collapse','collapse'), ('border-spacing','0px')
 
 ##########################################################################
 
-def ClusterMags(segdata):
+def clusters_scatter_plot(pca_components, cluster_labels):  # function to plot scatter plot showing clusters
+    colors = ['royalblue', 'maroon', 'forestgreen', 'mediumorchid', 'tan', 'deeppink', 'olive', 'goldenrod', 'lightcyan', 'navy', 'coral', 'olive', 'turquoise']
+    vectorizer = np.vectorize(lambda x: colors[x % len(colors)])
+    plt.scatter(pca_components.iloc[:,0], pca_components.iloc[:,1], c=vectorizer(cluster_labels), s=5)
+    plt.show()
+
+def ClusterMags(segdata,algo):
     
     ## table
-    print("\nThe following table shows cluster magnitudes...")
+#     print("\nThe following table shows cluster magnitudes...")
     cmags = segdata['Segments (Clusters)'].value_counts().to_frame()
     cmags= cmags.reset_index()                               # to rename columns
     cmags.columns= ['Cluster numbers', 'Frequency']           # renaming columns
@@ -55,13 +61,13 @@ def ClusterMags(segdata):
     cmags['Cummulative Frequency'] = cmags['Frequency'].cumsum()
     cmags['Cummulative Percent'] = round(((cmags['Frequency']/cmags['Frequency'].sum())* 100).cumsum(),2)
     styled_cmags =cmags.style.set_table_styles(styls).set_precision(2).hide_index() #styling
-    dfi.export(styled_cmags,'Cmags_table.png')  # storing as image
+    dfi.export(styled_cmags,'Cmags_table_'+str(algo)+'.png')  # storing as image
     display(styled_cmags)
     
     ## bar chart
     sns_plot = sns.barplot(x=cmags['Cluster numbers'], y = cmags['Frequency'],  
             data = cmags, palette="husl").set_title('Cluster Magnitudes')
-    sns_plot.figure.savefig('Cmags_barchart.png')
+    sns_plot.figure.savefig('Cmags_barchart_'+str(algo)+'.png')
     plt.show()
     
     ## creating a dict to store cluster numbers and their respective percentages
@@ -69,7 +75,6 @@ def ClusterMags(segdata):
     clp.set_index('Cluster numbers', inplace= True)
     cluster_percentages=clp.to_dict()
     cluster_percentages=cluster_percentages['Percent']
-    print(cluster_percentages)
     return cluster_percentages
     
     
@@ -94,8 +99,10 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
         num_cp.loc[-1] = overall_row           # adding overall means row at the top of the table
         num_cp.index = num_cp.index + 2 
         num_cp.sort_index(inplace=True)
-
-    #     display(num_cp) #before scaling # can be used for testing
+        
+        print("\n\033[1mCluster Profiles Using Numeric Variables...\033[0m")
+        print("\nThe following table shows the mean of each numeric variable in the overall dataset as well as in the formed clusters. If the mean of a variable is significantly higher in a cluster than the overall dataset, then it indicates that, that cluster has more percentage of high values for that variable as compared to the overall dataset.")
+        display(num_cp.style.set_table_styles(styls).set_precision(2)) #before scaling # can be used for testing
 
         for c in num_cp.columns[1:]:          # scaling overall dataset row to 100 for easy comparison
                 ov= num_cp[c].iloc[0]
@@ -110,7 +117,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
 
         styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
         dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1)  # storing as image
-        print("\nCluster Profiles Using Numeric Variables...")
+        print("\nFor easier comparison the overall dataset row is scaled to 100 and all other values are scaled accordingly in the table below. This table can be interpreted like so: For example, if the value of mean of a variable in a cluster is 150, that means, in that particular cluster the mean of said variable is 50% higher than its mean in the overall dataset. ")
         display(styled_num_cp)  # displaying df
 
         ## recording high and low mean values of numeric variables per cluster        
@@ -148,7 +155,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
     zero_percent_levels={} # dictionary to store which cluster has zero percentage of a categorical column's level
 
     if not disc_df.empty:    # only runs if categorical varibales are present in list of columns used for profiling
-        print("\nCluster profiles for each categorical variable...")
+        print("\n\033[1mCluster profiles for each categorical variable...\033[0m")
         
     # generating one table for each variable in which column names are catgories present in the variable and indexes are the cluster numbers
         for col in disc_df.columns:       
@@ -161,6 +168,10 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
             cat_cp.rename(columns = {'Total':'Row total'}, index= {'Total':'Overall Dataset'}, inplace = True) # renaming total column and index
             cat_cp=(cat_cp.div(cat_cp["Row total"], axis=0)*100)  # dividing by row total and getting percentage of frequency
             cat_cp = cat_cp.iloc[np.arange(-1, len(cat_cp)-1)]   #shifting the last row to first position
+            
+            print("\nThe following table shows the share of each category of the variable \033[1m"+ str(col) + "\033[0m in a cluster. It also shows the percentage of each category present in the overall dataset. For example, if there is variable 'Grade' which contains the categories 'A', 'B' and 'C', and for cluster 0 the value of category 'A' is 40 that means 40% of all the data points in cluster 0 belong to catgery 'A'. If the percentage of category 'A' in the overall dataset is 20% then that means cluster 0 has disproportionately larger share of category 'A'.")
+            display(cat_cp.style.set_table_styles(styls).set_caption(str(col)+" (%)").set_precision(2))  #before scaling # can be used for testing
+            
             cat_cp.drop(['Row total'], axis= 1, inplace =True)   #dropping row total column
 
             for c in cat_cp.columns:          # scaling overall dataset % to 100 for easy comparison
@@ -184,6 +195,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
                 styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
                 dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image
            
+            print("\nFor easier comparison the overall dataset row is scaled to 100 and all other values are scaled accordingly in the table below. This table can be interpreted like so: For example, if the value of a category in a cluster is 150, that means, in that particular cluster the share of that category is 50 times more than its share in the overall dataset.")
             display(styled_cat_cp)
 
             ## for text cluster profiles

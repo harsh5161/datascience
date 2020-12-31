@@ -390,40 +390,47 @@ def INIT(df,info):
     ############# CLUSTERING ##################### 
 
     algo = Segmentation()
-    segdata= algo.clustering_algorithms(X_reduced,X_df)
+    clustering_algos= algo.clustering_algorithms(X_reduced,X_df)  #returns a dict with details of all algos
     
-    # Displaying Cluster magnitudes
-    start=time.time()
-    cluster_percentages=ClusterMags(segdata)
-    end=time.time()
-    print("\n Time taken in ClusterMags: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
-    
-    ############# CLUSTER PROFILING ##################### 
-    for val in prof_cols[:]:
-        if val not in segdata.columns.to_list():
-            prof_cols.remove(val)
-            print(f'Removing {val} from profilable columns because it was removed in engineering')
-    print("List of profilable columns",prof_cols) 
+    ip='y'
+    while ip=='y':
+        print("\nPick an algorithm of your choice for cluster profiling:")
+        val = int(input('Enter 1 to select KMeans, 2 for HDBSCAN'))
+        if val == 1 :
+            chosen_algo= clustering_algos['KMEANS']
+        elif val ==2:
+            chosen_algo= clustering_algos['HDBSCAN']
+        else:
+            print("invalid input!!")
 
-    start=time.time()
-    temp,num_temp,disc_temp= profiler(segdata,prof_cols,num_df,disc_df)
-    high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(temp, num_temp, disc_temp) #Cluster Profile Tables
-    ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
-    end=time.time()
-    print("\n Time taken in Cluster Profiling: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
+        ############# CLUSTER PROFILING ##################### 
+        for val in prof_cols[:]:
+            if val not in chosen_algo['segdata'].columns.to_list():
+                prof_cols.remove(val)
+                print(f'Removing {val} from profilable columns because it was removed in engineering')
+        print("List of profilable columns",prof_cols) 
 
-    inp = input('Do you want specific profiling?(yes/no)').lower()
-    while inp == 'yes':
-        print("List of profilable columns",prof_cols)
-        req = input('Enter the names of the columns that you want to profile on specifically [column1,column2,column3 etc]').split(',')
-        temp,num_temp,disc_temp = profiler(segdata,req,num_df,disc_df)
         start=time.time()
+        temp,num_temp,disc_temp= profiler(chosen_algo['segdata'],prof_cols,num_df,disc_df)
         high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(temp, num_temp, disc_temp) #Cluster Profile Tables
-        ClusterProfiling_Text(cluster_percentages, high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
+        ClusterProfiling_Text(chosen_algo['cluster_percentages'], high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
         end=time.time()
         print("\n Time taken in Cluster Profiling: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
+
         inp = input('Do you want specific profiling?(yes/no)').lower()
-                
+        while inp == 'yes':
+            print("List of profilable columns",prof_cols)
+            req = input('Enter the names of the columns that you want to profile on specifically [column1,column2,column3 etc]').split(',')
+            temp,num_temp,disc_temp = profiler(chosen_algo['segdata'],req,num_df,disc_df)
+            start=time.time()
+            high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels= ClusterProfiling_Tables(temp, num_temp, disc_temp) #Cluster Profile Tables
+            ClusterProfiling_Text(chosen_algo['cluster_percentages'], high_mean_vals, low_mean_vals, high_percent_levels, zero_percent_levels) #Cluster Profile Text
+            end=time.time()
+            print("\n Time taken in Cluster Profiling: ", time.strftime("%H:%M:%S", time.gmtime(end-start)))
+            inp = input('Do you want specific profiling?(yes/no)').lower()
+
+        ip=input("\nDo you wish to see cluster profiles of other algorithms?(y/n)").lower()
+    
     ############# CLUSTER PROFILING #####################
 
 
