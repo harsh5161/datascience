@@ -302,11 +302,13 @@ def calculate_n_components(df): #Dont delete the comments in this functions
 
     tot = sum(eigen_vals)
     var_exp = [(i/tot)*100 for i in sorted(eigen_vals,reverse=True)]
-    cum_var_exp = []
+    var_exp_new = []
     print(type(var_exp))
     if np.iscomplex(var_exp).tolist().count(True) == len(var_exp):
         for i in range(len(var_exp)):
-            cum_var_exp[i] = var_exp[i].real 
+            var_exp_new[i] = var_exp[i].real 
+        var_exp = var_exp_new
+        cum_var_exp = np.cumsum(var_exp_new).tolist()   
     else:
         cum_var_exp = np.cumsum(var_exp).tolist()
     print(type(cum_var_exp))
