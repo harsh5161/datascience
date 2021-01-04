@@ -302,8 +302,13 @@ def calculate_n_components(df): #Dont delete the comments in this functions
 
     tot = sum(eigen_vals)
     var_exp = [(i/tot)*100 for i in sorted(eigen_vals,reverse=True)]
+    cum_var_exp = []
     print(type(var_exp))
-    cum_var_exp = np.cumsum(var_exp).tolist()
+    if np.iscomplex(var_exp).tolist().count(True) == len(var_exp):
+        for i in range(len(var_exp)):
+            cum_var_exp[i] = var_exp[i].real 
+    else:
+        cum_var_exp = np.cumsum(var_exp).tolist()
     print(type(cum_var_exp))
     print(f"The variance captured by each component is \n {var_exp}")
     print(40* "-")
@@ -326,7 +331,7 @@ def calculate_n_components(df): #Dont delete the comments in this functions
                 retained = cum_var_exp.index(i)
                 break
         print(f"Except block {trigger}")
-    
+
     if cum_var_exp[retained] <60.0:  #In case the PCs do not explain at least 60% of the cumulative variance then we take PCs that explain at least that much variance
         for i in cum_var_exp:
             if i >60.0:
