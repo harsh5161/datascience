@@ -164,7 +164,7 @@ class Segmentation:
 #             plt.show()
 
         #finding possible optimal no of clusters(K) using 3 gap methods then sending these 3 Ks through silplots() to get best_n_clusters
-        optimalK = gap_statistic.OptimalK(n_jobs=4, parallel_backend='joblib')
+        optimalK = gap_statistic.OptimalK() #n_jobs=4, parallel_backend='joblib'
         n_clusters = optimalK(pca_components, cluster_array=np.arange(2, 11))
 #         print(optimalK.gap_df)
         optimalK.plot_results()         
