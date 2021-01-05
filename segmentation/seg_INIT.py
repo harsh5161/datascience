@@ -126,12 +126,15 @@ def INIT(df,info):
     ######## EMAIL URL ENGINEERING ########
     obj_df  = X.select_dtypes('object') # Sending in only object dtype columns
     short_obj_df = obj_df.astype(str).sample(3000).dropna(how='all') if len(obj_df)>3000 else obj_df.astype(str).dropna(how='all')
-    email_cols = identifyEmailUrlColumns(short_obj_df,email=True)
+    email_cols = identifyEmailColumns(short_obj_df)
     if len(email_cols)>0:
         try:
             EMAIL_DF = emailUrlEngineering(X[email_cols],email=True)
             X.drop(email_cols,axis=1,inplace=True) # If any email columns found, we drop it after engineering
             EMAIL_DF.reset_index(drop=True)
+            print(EMAIL_DF)
+            print(EMAIL_DF.shape)
+            short_obj_df.drop(email_cols,axis=1,inplace=True)
         except Exception as e:
             print('### EMAIL ENGINEERING HAD ERRORS ###')
             print(f'The Exception message is {e}')
@@ -143,12 +146,14 @@ def INIT(df,info):
         EMAIL_DF = pd.DataFrame(None)
         email_cols = []
 
-    url_cols = identifyEmailUrlColumns(short_obj_df,email=False)
+    url_cols = findURLS(short_obj_df)
     if len(url_cols)>0:
         try:
-            URL_DF = emailUrlEngineering(X[url_cols],email=False)
+            URL_DF = URlEngineering(X[url_cols])
             X.drop(url_cols,axis=1) # If any email columns found, we drop it post engineering
             URL_DF.reset_index(drop=True)
+            print(URL_DF)
+            print(URL_DF.shape)
         except Exception as e:
             print('### URL ENGINEERING HAD ERRORS ###')
             print(f'The Exception is as {e}')
