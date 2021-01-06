@@ -272,34 +272,27 @@ def INIT(df,info):
     ############# OUTLIER WINSORIZING ###########
 
     ############# PEARSON CORRELATION ############
+    print(f"The shape before Pearson's {num_df.shape}")
     print('\n #### PEARSON CORRELATION ####')
     corr = num_df.corr(method='pearson')
-    # If correlation is found to be greater than 85 or equal to 85%, both positive and negative
-    corr = corr[(corr >= 0.85)|(corr <= -0.85)]
-    for column in corr.columns:
-        corr.loc[column][column] = np.nan
-    corr.dropna(axis=1,how='all',inplace=True)
-    corr.dropna(axis=0,how='all',inplace=True)
-    removed_cols = []
-    if corr.shape!=(0,0):
+    # print("Initial correlation matrix",corr)
+    corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
+    # print("The Lower Triangular matrix is \n",corr)
+    col_counter = {}
+    for col in corr.columns:
+        ser =  corr[col].apply(lambda x: findDefaulters(x)).to_list()
+        # print(f"{col} : {ser.count(True)}")
+        if ser.count(True) >0:
+            col_counter[col] = ser.count(True)
+    print("List of columns and how many columns they are corelated to",col_counter)
+    if not col_counter:
+        print("No columns are correlated")
+    else:
+        while col_counter:
+            # print(f"Len of the col_counter",len(col_counter))
+            num_df,col_counter = pearsonmaker(num_df,col_counter)
 
-        while corr.shape != (0,0):
-            corr_dict = {}
-            for column in corr.columns:
-                corr_dict[corr[column].max()] = column
-            try:
-                val = max(corr_dict)
-                corr.drop(corr_dict[val],inplace=True)
-                corr.drop(corr_dict[val],axis=1,inplace=True)
-                corr.dropna(axis=1,how='all',inplace=True)
-                corr.dropna(axis=0,how='all',inplace=True)
-                removed_cols.append(corr_dict[val])
-                del corr_dict[val]
-            except ValueError:
-                break
-    num_df.drop(removed_cols,axis=1,inplace=True)
-    print('\n{} columns removed which were highly correlated'.format(len(removed_cols)))
-    print('The columns removed are {}'.format(removed_cols))
+    print(f"The shape after Pearson's {num_df.shape}")
     print(' #### DONE ####')
     ############# PEARSON CORRELATION ############
 

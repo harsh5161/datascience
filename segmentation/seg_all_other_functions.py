@@ -13,6 +13,7 @@ import pydotplus
 from category_encoders import TargetEncoder
 from missingpy import MissForest
 import prince
+import operator 
 def ForestImputer(num_df,disc_df):
     print("Check",disc_df)
     num_df.reset_index(drop=True,inplace=True)
@@ -384,3 +385,48 @@ def profiler(segdata,req,num_df,disc_df):
         # print("Num",num_temp)
         # print("Disc",disc_temp)
         return temp,num_temp,disc_temp
+
+def findDefaulters(x):
+    if np.isnan(x):
+        return False
+    else:
+        if abs(float(x)) >= 0.85:
+            return True
+        else:
+            return False
+
+
+def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary with related columns, the column with the maximum value
+    req_cols = []
+    high = 0.85
+    corr = numeric_df.corr(method='pearson')
+    # print("Initial correlation matrix",corr)
+    corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
+
+    if column_counter is False:
+        print("No columns are correlated")
+        return numeric_df, {}
+    else:
+        maxi_col = max(column_counter.items(), key=operator.itemgetter(1))[0]
+
+
+    val = column_counter[maxi_col]
+    count = sum(x == val for x in column_counter.values())
+
+    if count == 1 :
+        # Logic when only one column has the highest 
+        drop_col = maxi_col 
+
+    elif count > 1:
+        #Logic when more than one column has equal number of highly correlated columns
+        for k,v in column_counter.items():
+            if v == val:
+                req_cols.append(k)
+        for col in corr.columns:
+            if col in req_cols and corr[col].max() > high:
+                    high = corr[col].abs().max()
+                    drop_col = col 
+    print(f"Dropping {drop_col} due to high correlation")
+    numeric_df.drop(drop_col,axis=1,inplace=True)
+    del column_counter[drop_col]
+    return numeric_df,column_counter
