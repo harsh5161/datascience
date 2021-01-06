@@ -157,10 +157,12 @@ def date_engineering(df, possible_datecols, validation=False):
     print('\nPrinting Missing % of date columns')
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
-    
+    before = df.columns.to_list()
     if validation==False:   # dropping columns with missing greater than 35% only in training not scoring
         print('Dropping Columns with missing greater than 35% of total number of entries')
         df.dropna(thresh=len(df)*0.65,axis=1,inplace=True)
+        after = df.columns.to_list()
+        dropped_cols = list(list(set(before)-set(after)) + list(set(after)-set(before)))
     try:     
         for c in df.columns:
             df[c].fillna(df[c].mode()[0],inplace=True)    # replacing null values with mode 
@@ -218,7 +220,10 @@ def date_engineering(df, possible_datecols, validation=False):
     end = time.time()
     print('\nDate Engineering Time Taken : {}'.format(end-start))
     print('\n\t #### DONE ####')
-    return df.drop(date_cols,axis=1)
+    if validation==False: 
+        return df.drop(date_cols,axis=1),dropped_cols
+    else:
+        return df.drop(date_cols,axis=1)
 
 
 ############################################

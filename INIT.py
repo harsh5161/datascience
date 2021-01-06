@@ -165,7 +165,13 @@ def INIT(df,info):
         print('Respective columns will undergo date engineering and will be imputed in the function itself')
         print('\n#### DATE ENGINEERING RUNNING WAIT ####')
         try:
-            DATE_DF = date_engineering(X[date_cols],possible_datecols)
+            DATE_DF,dropped_cols = date_engineering(X[date_cols],possible_datecols)
+            if dropped_cols:
+                for val in dropped_cols :
+                    if val in date_cols[:]:
+                        date_cols.remove(val)
+                    elif val in possible_datecols[:]:
+                        possible_datecols.remove(val)
             print(DATE_DF.shape)
             DATE_DF.index = X.index
             X.drop(date_cols,axis=1,inplace=True)
