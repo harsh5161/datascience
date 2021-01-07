@@ -1,6 +1,7 @@
 import pandas as pd
 import xlrd
 import csv
+import collections 
 
 def importFile(path,nrows=None):
 
@@ -134,15 +135,18 @@ def importFile(path,nrows=None):
         print('extension is {}'.format(ext))
         if ext == 'csv' or ext == 'tsv':
             df = importCsv(path)
+            df = duplicateHandler(df)
             return df,None
         elif ext == 'json':
             df = importJSON(path)
+            df = duplicateHandler(df)
             return df,None
         elif 'xl' in ext:
             df = importExcel(path)
             return df,'SheetSheetSheet.csv'
         elif ext == 'data':
             df = importTable(path)
+            df = duplicateHandler(df)
             return df,None
         else:
             print('File format not supported\n')
@@ -279,3 +283,23 @@ def dataHandler(dx):
             new_column_names=pd.DataFrame(new_column_names)
             null_value_sum=new_column_names.isnull().sum()[0]
         return dx
+
+
+######################################
+######## duplicateHandler Function #######
+######################################
+
+def duplicateHandler(df):
+    actual = df.columns.to_list()
+    a = [x.strip().lower() for x in df.columns.to_list()]
+    dups = [item for item, count in collections.Counter(a).items() if count > 1]
+
+    for i in range(len(a)):
+        if a[i] in dups:
+            actual[i] = f'{actual[i].strip()}_{i}'
+    
+    df.columns = actual 
+    return df 
+######################################
+######## duplicateHandler Function #######
+######################################
