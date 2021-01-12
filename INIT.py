@@ -170,7 +170,7 @@ def INIT(df,info):
                 for val in dropped_cols :
                     if val in date_cols[:]:
                         date_cols.remove(val)
-                    elif val in possible_datecols[:]:
+                    if val in possible_datecols[:]:
                         possible_datecols.remove(val)
             print(DATE_DF.shape)
             DATE_DF.index = X.index
