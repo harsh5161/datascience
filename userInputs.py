@@ -12,7 +12,7 @@ def importFile(path,nrows=None):
 
         print('We have a csv file')
         try:
-            df = pd.read_csv(path,low_memory=False,nrows=nrows)
+            df = pd.read_csv(path,low_memory=False,nrows=nrows,error_bad_lines=False)
             if df.shape[1] == 1:
                 df = pd.read_csv(path,low_memory=False,sep=';',nrows=nrows)
             print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
@@ -26,14 +26,14 @@ def importFile(path,nrows=None):
         except UnicodeDecodeError:
             try:
                 enc = 'unicode_escape'
-                df = pd.read_csv(path,encoding=enc,low_memory=False,nrows=nrows)
+                df = pd.read_csv(path,encoding=enc,low_memory=False,nrows=nrows,error_bad_lines=False)
                 print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                 return df
 
             except UnicodeDecodeError:
                 try:
                     enc = 'ISO-8859-1'
-                    df = pd.read_csv(path,encoding=enc,low_memory=False,nrows=nrows)
+                    df = pd.read_csv(path,encoding=enc,low_memory=False,nrows=nrows,error_bad_lines=False)
                     print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                     return df
                 except:
@@ -41,7 +41,7 @@ def importFile(path,nrows=None):
 
         except:
             try:
-                df= pd.read_csv(path,nrows=nrows)
+                df= pd.read_csv(path,nrows=nrows,error_bad_lines=False)
                 separators= ["~","!","@","#","$","%","^","&","*",":","|","/",";"]     # all possible separators
                 if len(df.columns)<=3 :                                               # if separator was "," we would have more than 1 columns
                     cols = df.columns[0]
@@ -51,14 +51,14 @@ def importFile(path,nrows=None):
                             possibleSep.append(i)
 
                     for j in possibleSep:                                   # iterate through possible seprators till we get the correct one
-                        df_sep = pd.read_csv(path,sep=j,nrows=nrows)
+                        df_sep = pd.read_csv(path,sep=j,nrows=nrows,error_bad_lines=False)
                         if len(df_sep.columns)>3:
                             print('This file has {} columns and {} rows'.format(df_sep.shape[1],df_sep.shape[0]))
                             return df_sep
             except:
                 try:
-                    if len(pd.read_csv(path,sep=None).columns,nrows=nrows)>3  :                   # for tab ie "\" tsv files
-                        df = pd.read_csv(path,sep=None,nrows=nrows)
+                    if len(pd.read_csv(path,sep=None).columns,nrows=nrows,error_bad_lines=False)>3  :                   # for tab ie "\" tsv files
+                        df = pd.read_csv(path,sep=None,nrows=nrows,error_bad_lines=False)
                         print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                         return df
                 except:
