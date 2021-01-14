@@ -599,7 +599,7 @@ def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary 
 
     val = column_counter[maxi_col]
     count = sum(x == val for x in column_counter.values())
-
+    # print(f"Value of count {count}")
     if count == 1 :
         # Logic when only one column has the highest 
         drop_col = maxi_col 
@@ -610,10 +610,17 @@ def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary 
             if v == val:
                 req_cols.append(k)
         for col in corr.columns:
+            # if col in req_cols:
+            #     print(f"Max value of the column {col} :{corr[col].max()}")
             if col in req_cols and corr[col].max() > high:
                     high = corr[col].abs().max()
                     drop_col = col 
-    print(f"Dropping {drop_col} due to high correlation")
+
+    # print(f"Column counter is {column_counter}")
+    try:
+        print(f"Dropping {drop_col} due to high correlation")
+    except UnboundLocalError:
+        return numeric_df, {}
     numeric_df.drop(drop_col,axis=1,inplace=True)
     del column_counter[drop_col]
     return numeric_df,column_counter
