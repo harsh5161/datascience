@@ -369,7 +369,7 @@ def FeatureSelection(X,y,class_or_Reg):
             selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss')
     else :
 #         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
-        selector = lgb.LGBMRegressor(n_estimators=100,random_state=1)
+        selector = lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
         print('runnning regressor selector')
 
     for i in tqdm(range(10)):
@@ -382,6 +382,7 @@ def FeatureSelection(X,y,class_or_Reg):
     k = selector.feature_importances_
     k = k.reshape(X.shape[1],1)
     k = pd.DataFrame(k)
+    print("k",k)
 
     # threshold one(This thres is able to select only top best features which are very few)
     thresh1 = k.mean(); l = k>thresh1
