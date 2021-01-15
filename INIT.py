@@ -395,26 +395,30 @@ def INIT(df,info):
     ############# TARGET ENCODING ############
 
     ############# FEATURE SELECTION AND PLOTS ############
-    print('\n #### FEATURE SELECTION ####')
-    fe_s = time.time()
-    rem,feat_df = FeatureSelection(X,y,class_or_Reg)
-    fe_e = time.time()
-    print(X.shape)
-    print(y.shape)
-    print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
-    X.drop(rem,axis=1,inplace=True)
-    X_old.drop(rem,axis=1,inplace=True)  # removing columns through feature selection without target encoding
-    TrainingColumns = X.columns
-    fe_s = time.time()
+    if (len(X.columns)>=10):
+        print('\n #### FEATURE SELECTION ####')
+        fe_s = time.time()
+        rem,feat_df = FeatureSelection(X,y,class_or_Reg)
+        fe_e = time.time()
+        print(X.shape)
+        print(y.shape)
+        print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
+        X.drop(rem,axis=1,inplace=True)
+        X_old.drop(rem,axis=1,inplace=True)  # removing columns through feature selection without target encoding
+        TrainingColumns = X.columns
+        fe_s = time.time()
 
-    try:
-        featureSelectionPlot(feat_df[:15])
-    except:
-        print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
-    fe_e = time.time()
-    print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
-    print(X.shape)
-    print(y.shape)
+        try:
+            featureSelectionPlot(feat_df[:15])
+        except:
+            print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
+        fe_e = time.time()
+        print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
+        print(X.shape)
+        print(y.shape)
+    else:
+        print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
+        TrainingColumns = X.columns
     ############# FEATURE SELECTION AND PLOTS #####################
 
     ############# CART DECISION TREE VISUALIZATION #####################
@@ -490,3 +494,4 @@ def INIT(df,info):
                 'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS}
     print(' #### DONE ####')
     return init_info,validation
+    
