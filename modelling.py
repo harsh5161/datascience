@@ -36,7 +36,6 @@ from sklearn import svm
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.svm import LinearSVC
-
 #Hyperopt
 import hyperopt
 from hyperopt import *
@@ -66,7 +65,7 @@ from imblearn.ensemble import EasyEnsembleClassifier
 
 import xgboost as xgb
 from scipy.stats import ks_2samp
-
+import joblib 
 #TerminalPush Test
 class classification:
 
@@ -119,17 +118,19 @@ class classification:
             #######################################################################
             df.loc[ind,'Machine Learning Model']='XGBoost'
             if check == 1:
-                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
+                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss',n_jobs=4)
             elif check ==0:
-                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList))
+                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList),n_jobs=4)
 
             df.loc[ind,'param']=str(best)
             Start=time.time()
             eval_set = [(X_test, y_test)]
             if check ==1:
-                df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set,verbose=False)
             elif check==0:
-                df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
 
             xgb_pred = df.loc[ind,'model'].predict(X_test)
             xgb_probas = df.loc[ind,'model'].predict_proba(X_test)
@@ -160,7 +161,8 @@ class classification:
                 df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass')
             df.loc[ind,'param']=str(best)
             Start=time.time()
-            df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
             catboost_pred = np.array(df.loc[ind,'model'].predict(X_test)).reshape(-1)
             catboost_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -186,15 +188,17 @@ class classification:
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
             if check==1:
-                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='binary')
+                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='binary',n_jobs=4)
             elif check==0:
-                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
+                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='multiclass',num_class=len(priorList),metric='multi_logloss',n_jobs=4)
             df.loc[ind,'param']= str(best)
             Start=time.time()
             if check==1:
-                df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             elif check==0:
-                df.loc[ind,'model'].fit(X_train, y_train,eval_metric="multi_logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train,eval_metric="multi_logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             lightgbm_pred = df.loc[ind,'model'].predict(X_test)
             lightgbm_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -278,10 +282,11 @@ class classification:
             if(flag == 1):
                 best = {'priors': priorList}
                 df.loc[ind,'Machine Learning Model']='Naive Bayes(Bayesisan Statistics)'
-                df.loc[ind,'model']=GaussianNB(priors = priorList)
+                df.loc[ind,'model']=GaussianNB(priors = priorList,n_jobs=4)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
-                df.loc[ind,'model'].fit(X_train, y_train)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train)
                 naive_pred = df.loc[ind,'model'].predict(X_test)
                 naive_probas = df.loc[ind,'model'].predict_proba(X_test)
                 End=time.time()
@@ -306,10 +311,11 @@ class classification:
             ##########################################################################################################
 
             df.loc[ind,'Machine Learning Model']='Logistic Regression'
-            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
+            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto',n_jobs=4)
             df.loc[ind,'param']=""
             Start=time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             log_pred = df.loc[ind,'model'].predict(X_test)
             log_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -337,11 +343,12 @@ class classification:
 
             if(flag == 1):
                 df.loc[ind,'Machine Learning Model']='Neural Network'
-                best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
+                best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_jobs':4}
                 df.loc[ind,'model']=MLPClassifier(**best)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
-                df.loc[ind,'model'].fit(X_train, y_train)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train)
                 neural_pred = df.loc[ind,'model'].predict(X_test)
                 neural_probas = df.loc[ind,'model'].predict_proba(X_test)
                 End=time.time()
@@ -369,7 +376,8 @@ class classification:
             df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
             df.loc[ind,'param']= str(best)
             Start=time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             support_pred = df.loc[ind,'model'].predict(X_test)
             support_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -524,7 +532,8 @@ class classification:
             def objective(params):
                 print(params)
                 xg = xgb.XGBClassifier(**params)
-                result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
+                with joblib.parallel_backend('dask'):
+                    result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
                 print("XGB train done")
                 print(result.min()*100)
                 return (1-result.min())
@@ -587,9 +596,11 @@ class classification:
             df.loc[ind,'param']=str(best)
             eval_set = [(X_test, y_test)]
             if check ==1:
-                df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss",early_stopping_rounds=30, eval_set=eval_set,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train, eval_metric="logloss",early_stopping_rounds=30, eval_set=eval_set,verbose=False)
             elif check==0:
-                df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array,early_stopping_rounds=30, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train,sample_weight = w_array,early_stopping_rounds=30, eval_metric="mlogloss", eval_set=eval_set,verbose=False)
 
             xgb_pred = df.loc[ind,'model'].predict(X_test)
             xgb_probas = df.loc[ind,'model'].predict_proba(X_test)
@@ -621,7 +632,8 @@ class classification:
 
             df.loc[ind,'param']=str(best)
             Start=time.time()
-            df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
             catboost_pred = np.array(df.loc[ind,'model'].predict(X_test)).reshape(-1)
             catboost_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -650,7 +662,8 @@ class classification:
             def objective(params):
                 print('\n',params)
                 lb = lgb.LGBMClassifier(**params)
-                result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
+                with joblib.parallel_backend('dask'):
+                    result = cross_val_score(lb,X=X_train,y=y_train,cv=CV,scoring='f1_weighted',error_score=np.nan)
                 print("LGBM train done")
                 print("\n",result.min()*100)
                 return (1-result.min())
@@ -706,9 +719,11 @@ class classification:
             df['model'][ind]=lgb.LGBMClassifier(**best)
             df.loc[ind,'param']= str(best)
             if check==1:
-                df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             elif check==0:
-                df.loc[ind,'model'].fit(X_train, y_train,eval_metric="multi_logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train,eval_metric="multi_logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             lightgbm_pred = df.loc[ind,'model'].predict(X_test)
             lightgbm_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -845,7 +860,8 @@ class classification:
                 df.loc[ind,'model']=GaussianNB(priors = priorList)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
-                df.loc[ind,'model'].fit(X_train, y_train)
+                with joblib.parallel_backend('dask'):
+                    df.loc[ind,'model'].fit(X_train, y_train)
                 naive_pred = df.loc[ind,'model'].predict(X_test)
                 naive_probas = df.loc[ind,'model'].predict_proba(X_test)
                 End=time.time()
@@ -872,7 +888,8 @@ class classification:
             df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
             df.loc[ind,'param']=""
             Start=time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             log_pred = df.loc[ind,'model'].predict(X_test)
             log_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -902,7 +919,8 @@ class classification:
                     df.loc[ind,'model']=MLPClassifier(**best)
                     df.loc[ind,'param']=str(best)
                     Start=time.time()
-                    df.loc[ind,'model'].fit(X_train, y_train)
+                    with joblib.parallel_backend('dask'):
+                        df.loc[ind,'model'].fit(X_train, y_train)
                     neural_pred = df.loc[ind,'model'].predict(X_test)
                     neural_probas = df.loc[ind,'model'].predict_proba(X_test)
                     End=time.time()
@@ -929,7 +947,8 @@ class classification:
             df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
             df.loc[ind,'param']= str(best)
             Start=time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             support_pred = df.loc[ind,'model'].predict(X_test)
             support_probas = df.loc[ind,'model'].predict_proba(X_test)
             End=time.time()
@@ -1127,6 +1146,7 @@ class classification:
                   max_seq=seq
 
       print("this is what you are printing",max_seq)
+      print(type(max_seq))
       ########################################################################################################
 
       ##Ensemble(2) List of the best combination from the above method
@@ -1146,10 +1166,11 @@ class classification:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
+      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft')
       df.loc[ind,'param']="Default"
       Start=time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
+      with joblib.parallel_backend('dask'):
+        df.loc[ind,'model'].fit(X_train, y_train)
       ensemble_pred = df.loc[ind,'model'].predict(X_test)
       ensemble_probas = df.loc[ind,'model'].predict_proba(X_test)
       End=time.time()
