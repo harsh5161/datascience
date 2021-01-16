@@ -161,7 +161,7 @@ class classification:
                 df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass')
             df.loc[ind,'param']=str(best)
             Start=time.time()
-            with joblib.parallel_backend('dask'):
+            with joblib.parallel_backend('dask'): 
                 df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
             catboost_pred = np.array(df.loc[ind,'model'].predict(X_test)).reshape(-1)
             catboost_probas = df.loc[ind,'model'].predict_proba(X_test)
@@ -222,6 +222,12 @@ class classification:
 
             ##Random forest
             ########################################################################################################
+
+            #This is probably going to work since it's based on sklearn, but it will result in memory crash because it has parrallel processing internally.
+
+
+
+
             df.loc[ind,'Machine Learning Model']='Random Forest'
             df['model'][ind]=RandomForestClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
             df.loc[ind,'param']= str(best)
@@ -1166,7 +1172,7 @@ class classification:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft')
+      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=2)
       df.loc[ind,'param']="Default"
       Start=time.time()
       with joblib.parallel_backend('dask'):
