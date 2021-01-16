@@ -354,7 +354,7 @@ def FeatureSelection(X,y,class_or_Reg):
 #             if k[0]>k[1]: impact_ratio = k[0]/k[1]
 #             else: impact_ratio = k[1]/k[0]
 #             selector = XGBClassifier(n_estimators =100, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
-            with joblib.parallel_backend('dask',scheduler_host='tcp://a1fe51153afbf426a8a09f90f8e64996-368448313.us-east-2.elb.amazonaws.com:8786'):
+            with joblib.parallel_backend('dask'):
                 selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='binary',n_jobs=4)
         else:
             print("\nMulticlass Classification")
@@ -367,10 +367,12 @@ def FeatureSelection(X,y,class_or_Reg):
 #               w_array[i] = class_w[val]
 
 #             selector = XGBClassifier(n_estimators =100, sample_weight = w_array, max_depth= 5, n_jobs=-1);
-            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss',n_jobs=4)
+            with joblib.parallel_backend('dask'):
+                selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss',n_jobs=4)
     else :
 #         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
-        selector = lgb.LGBMRegressor(n_estimators=100,random_state=1,n_jobs=4)
+        with joblib.parallel_backend('dask'):
+            selector = lgb.LGBMRegressor(n_estimators=100,random_state=1,n_jobs=4)
         print('runnning regressor selector')
 
     for i in tqdm(range(10)):
