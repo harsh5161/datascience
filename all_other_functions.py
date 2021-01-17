@@ -406,35 +406,6 @@ def FeatureSelection(X,y,class_or_Reg):
     print('\n{} columns are eliminated during Feature Selection which are:\n{}' .format(len(rejected_cols), rejected_cols))
     return list(rejected_cols),new_2.drop(['t/f'],axis=1)
 
-def dataHandler(dx):
-        for col in dx.columns:
-            if 'Unnamed' in col:
-                if len(dx[col].value_counts())<0.5*dx.shape[0]:
-                    dx.drop(col,axis=1,inplace=True)
-        # to handel cases when some blank rows or other information above the data table gets assumed to be column name
-        if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
-            colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
-            dx.columns = colNew                          #Making values stored in colNew as the new column names
-            dx = dx.drop(labels=[0])                     #dropping the row whose values we made as the column names
-            dx.reset_index(drop=True, inplace=True)      #resetting index to the normal pattern 0,1,2,3...
-        else:
-            return dx
-
-        new_column_names=dx.columns.values.tolist() # Following three lines of code are for counting the number of null values in our new set of column names
-        new_column_names=pd.DataFrame(new_column_names)
-        null_value_sum=new_column_names.isnull().sum()[0]
-        if null_value_sum<0.5*dx.shape[1]: # if count of null values are less than a certain ratio of total no of columns
-            return dx
-        while(null_value_sum>=0.5*dx.shape[1]):
-            colNew = dx.loc[0].values.tolist()
-            dx.columns = colNew
-            dx = dx.drop(labels=[0])
-            dx.reset_index(drop=True, inplace=True)
-            new_column_names=dx.columns.values.tolist()
-            new_column_names=pd.DataFrame(new_column_names)
-            null_value_sum=new_column_names.isnull().sum()[0]
-        return dx
-
 def removeLowClass(df,target):
     if df[target].nunique() == 2:
         print('\nTarget has 2 Levels! No classes will be removed')
