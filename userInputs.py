@@ -308,11 +308,12 @@ def disable_graphs():
 ######## disable_graphs Function #######
 ######################################
 
-def dataHandler(dx):
+def dataHandler(dx,update=False):
         for col in dx.columns:
             if 'Unnamed' in col:
                 if len(dx[col].value_counts())<0.5*dx.shape[0]:
                     dx.drop(col,axis=1,inplace=True)
+                    update = True
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
         if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
             colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
@@ -320,13 +321,13 @@ def dataHandler(dx):
             dx = dx.drop(labels=[0])                     #dropping the row whose values we made as the column names
             dx.reset_index(drop=True, inplace=True)      #resetting index to the normal pattern 0,1,2,3...
         else:
-            return dx
+            return dx,update
 
         new_column_names=dx.columns.values.tolist() # Following three lines of code are for counting the number of null values in our new set of column names
         new_column_names=pd.DataFrame(new_column_names)
         null_value_sum=new_column_names.isnull().sum()[0]
         if null_value_sum<0.5*dx.shape[1]: # if count of null values are less than a certain ratio of total no of columns
-            return dx
+            return dx,update
         while(null_value_sum>=0.5*dx.shape[1]):
             colNew = dx.loc[0].values.tolist()
             dx.columns = colNew
@@ -335,7 +336,7 @@ def dataHandler(dx):
             new_column_names=dx.columns.values.tolist()
             new_column_names=pd.DataFrame(new_column_names)
             null_value_sum=new_column_names.isnull().sum()[0]
-        return dx
+        return dx,update
 
 ######################################
 ######## duplicateHandler Function #######
