@@ -405,7 +405,6 @@ def INIT(df,info):
         print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
         X.drop(rem,axis=1,inplace=True)
         X_old.drop(rem,axis=1,inplace=True)  # removing columns through feature selection without target encoding
-        TrainingColumns = X.columns
         fe_s = time.time()
 
         try:
@@ -418,8 +417,19 @@ def INIT(df,info):
         print(y.shape)
     else:
         print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
-        TrainingColumns = X.columns
     ############# FEATURE SELECTION AND PLOTS #####################
+
+    ##################### Checking for constant columns ###################
+
+    for col in X.columns:
+        if X[col].nunique() == 1:
+            X.drop(col,axis=1,inplace=True)
+            print(f"Dropping column {col} because it only contains one value throughout the column")
+
+    TrainingColumns = X.columns
+
+
+    ##################### Checking for constant columns ###################
 
     ############# CART DECISION TREE VISUALIZATION #####################
     if not info['graph']:
