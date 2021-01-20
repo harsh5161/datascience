@@ -1146,7 +1146,7 @@ class classification:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=-1)
+      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft')
       df.loc[ind,'param']="Default"
       Start=time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
@@ -1350,7 +1350,7 @@ class Regression:
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='Random Forest'
-        df['model'][ind]=RandomForestRegressor(n_estimators=1000,max_depth=16)
+        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=16,verbose=1)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1373,7 +1373,7 @@ class Regression:
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
-        df['model'][ind]=ExtraTreesRegressor(n_estimators=1000,max_depth=16)
+        df['model'][ind]=ExtraTreesRegressor(n_estimators=100,max_depth=16)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1435,32 +1435,32 @@ class Regression:
         print("ridge reg done")
         ind=ind+1
 
-        #Neural network
-        ########################################################################################################
+        # #Neural network
+        # ########################################################################################################
 
-        best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-        df.loc[ind,'Machine Learning Model']='Neural Network'
-        df.loc[ind,'model']=MLPRegressor(**best)
-        df.loc[ind,'param']=str(best)
-        Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
-        mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-        End = time.time()
-        try:
-            df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
-        except:
-            print("Neural Net threw an error")
-        else:
-            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
-            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
-            df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
-            df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
-            #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
-            df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
+        # best={'hidden_layer_sizes':(25,),'solver':'sgd','learning_rate':'adaptive','max_iter':10}
+        # df.loc[ind,'Machine Learning Model']='Neural Network'
+        # df.loc[ind,'model']=MLPRegressor(**best)
+        # df.loc[ind,'param']=str(best)
+        # Start = time.time()
+        # df.loc[ind,'model'].fit(X_train, y_train)
+        # mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        # End = time.time()
+        # try:
+        #     df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
+        # except:
+        #     print("Neural Net threw an error")
+        # else:
+        #     df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
+        #     df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
+        #     df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
+        #     df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
+        #     #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
+        #     df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
+        #     df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
-            print("neural net done")
-            ind=ind+1
+        #     print("neural net done")
+        #     ind=ind+1
 
         #SVC
         #########################################################################################################
@@ -1767,31 +1767,31 @@ class Regression:
             print("linear reg done")
             ind=ind+1
 
-            #Neural net
-            ########################################################################################################
-            best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-            df.loc[ind,'Machine Learning Model']='Neural Network'
-            df.loc[ind,'model']=MLPRegressor(**best)
-            df.loc[ind,'param']=str(best)
-            Start = time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
-            mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-            End = time.time()
-            try:
-                df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
-            except:
-                print("Neural Net threw an error")
-            else:
-                df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
-                df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
-                df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
-                df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
-                #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
-                df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-                df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
+            # #Neural net
+            # ########################################################################################################
+            # best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
+            # df.loc[ind,'Machine Learning Model']='Neural Network'
+            # df.loc[ind,'model']=MLPRegressor(**best)
+            # df.loc[ind,'param']=str(best)
+            # Start = time.time()
+            # df.loc[ind,'model'].fit(X_train, y_train)
+            # mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            # End = time.time()
+            # try:
+            #     df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
+            # except:
+            #     print("Neural Net threw an error")
+            # else:
+            #     df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
+            #     df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
+            #     df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
+            #     df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
+            #     #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
+            #     df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
+            #     df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
-                print("neural net done")
-                ind=ind+1
+            #     print("neural net done")
+            #     ind=ind+1
 
 
             #Support Vector Machine
@@ -1862,7 +1862,7 @@ class Regression:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
+      df.loc[ind,'model']=VotingRegressor(df_en.values)
       df.loc[ind,'param']="Default"
       Start = time.time()
       df.loc[ind,'model'].fit(X_train, y_train)
