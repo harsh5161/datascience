@@ -1350,7 +1350,7 @@ class Regression:
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='Random Forest'
-        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=16,verbose=1)
+        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=16)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
