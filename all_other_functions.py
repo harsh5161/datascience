@@ -21,13 +21,13 @@ def targetAnalysis(df):
     print('Printing % occurence of each class in target Column')
     print(df.value_counts(normalize=True))
     if ('int' in Type) or ('float' in Type):
-        if df.nunique() < 5:
+        if df.nunique() <= 5:
             return 'Classification'
         else:
             return 'Regression'
 
     else:
-        if df.nunique() < 5:
+        if df.nunique() <= 5:
             return 'Classification'
         else:
             return None
