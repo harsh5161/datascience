@@ -365,6 +365,7 @@ def INIT(df,info):
             # print(f"Len of the col_counter",len(col_counter))
             num_df,col_counter = pearsonmaker(num_df,col_counter)
 
+    # print(f'Pearsons Matrix \n {pd.DataFrame(num_df.corr())}')
     print(f"The shape after Pearson's {num_df.shape}")
     print(' #### DONE ####')
     ############# PEARSON CORRELATION ############
@@ -427,7 +428,9 @@ def INIT(df,info):
             print(f"Dropping column {col} because it only contains one value throughout the column")
 
     TrainingColumns = X.columns
-
+    if TrainingColumns.empty:
+        print("Error : There are no informative columns present in the dataset. Please collect more information.")
+        return None, None 
 
     ##################### Checking for constant columns ###################
 
@@ -456,6 +459,11 @@ def INIT(df,info):
             print(e)
             print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     ############# CART DECISION TREE VISUALIZATION #####################   
+
+    # for col in X.columns:
+    #     X[col].hist()
+    
+    # y.hist()
 
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
     print('\n #### SCALING ####')
