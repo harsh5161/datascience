@@ -343,6 +343,8 @@ def dataHandler(dx,update=False):
 ######################################
 
 def duplicateHandler(df):
+
+    df.rename(columns = {"" : 'Unnamed'}, inplace = True) #dealing with column names that are empty strings
     actual = df.columns.to_list()
     a = [x.strip().lower() for x in df.columns.to_list()]
     dups = [item for item, count in collections.Counter(a).items() if count > 1]
@@ -352,6 +354,7 @@ def duplicateHandler(df):
             actual[i] = f'{actual[i].strip()}_{i}'
     
     df.columns = actual 
+    
     return df 
 ######################################
 ######## duplicateHandler Function #######
