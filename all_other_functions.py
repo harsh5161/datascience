@@ -13,6 +13,7 @@ import pydotplus
 from category_encoders import TargetEncoder
 from missingpy import MissForest
 import operator
+import json
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -315,6 +316,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                     from tabulate import tabulate
                     pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql', showindex = False)
                     print(pdtabulate(dum3))
+                    json_var = dum3.to_json() # Json variable to show the tables in a new format in the front end
+                    # print(json_var)
 
 #     from IPython.display import display,HTML
 #     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
