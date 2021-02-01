@@ -220,7 +220,10 @@ def score(df,init_info,validation=False):
         y_probas = mod.predict_proba(X_test)
         y_pred = pd.Series(init_info['TargetLabelEncoder'].inverse_transform(y_pred))
         if validation:
-            y_test = pd.Series(init_info['TargetLabelEncoder'].inverse_transform(y_test))
+            try:
+                y_test = pd.Series(init_info['TargetLabelEncoder'].inverse_transform(y_test))
+            except IndexError:
+                y_test = pd.Series(init_info['TargetLabelEncoder'].inverse_transform(y_test.astype(int)))
             y_probs_cols = ['Class ' + str(x) +' Probabilities' for x in y_pred.unique()]
             init_info['y_probs_cols'] = y_probs_cols
         else:
