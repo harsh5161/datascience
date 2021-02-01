@@ -34,6 +34,13 @@ def formatter(x):
         return x.astype(str).str.strip(' %$€£¥+').str.lower()
     except:
         return x
+def list_or_dict(x):
+    if isinstance(x,list):
+        return "List"
+    elif isinstance(x,dict):
+        return "Dict"
+    else:
+        return np.nan
 def numeric_engineering(df):
     start = time.time()
 
@@ -59,6 +66,18 @@ def numeric_engineering(df):
     for col in obj_columns:
         df[col]=df[col].apply(lambda x:returnMoney(x))
     print('done ...')
+
+    
+    drop_list = []
+    sampled_df = df.sample(100).dropna(how='all')
+    for col in sampled_df.columns:
+        counter = sampled_df[col].apply(lambda x: list_or_dict(x)).to_list()
+        if counter.count("List") > 0.50*len(sampled_df) or counter.count("Dict") > 0.50*len(sampled_df):
+            drop_list.append(col)
+    if drop_list:
+        print(f"Dropping columns {drop_list} because they either contain lists or dicts")
+        df.drop(drop_list,axis=1,inplace=True)
+
     obj_columns= list(df.dtypes[df.dtypes == np.object].index)
     df1 = df[obj_columns].copy()
     print(f'\t\t Finding Numeric Columns')
@@ -632,6 +651,17 @@ def checkLatLong(x):
         return np.nan
 
 def checkCondition(x):
+    if isinstance(x,list): #Sometimes if we have columns with values that have [] around them then they are considered as lists, this will help it out.
+        if len(x) == 2:
+            return True
+        else:
+            return False
+
+    # if isinstance(x,dict): #Sometimes if we have columns with values that have {} around them then they are considered as lists, this will help it out.
+    #     if len(x) == 2:
+    #         return True
+    #     else:
+    #         return False
     try:
         if x[0]=='(' and x[-1]==')' and len(x.split(','))==2:
             return True
@@ -677,6 +707,7 @@ def segregator(df):
 def pseudoFormat(df):
     lat_long_cols = []
     for col in df.columns:
+        # print(f"testing column {col}")
         a = df[col].apply(lambda x: checkCondition(x)).to_list()
         if a.count(True) > 0.9*len(df):
             lat_long_cols.append(col)
