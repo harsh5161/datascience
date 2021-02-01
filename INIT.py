@@ -67,7 +67,8 @@ def INIT(df,info):
 
     # Remove all rows with Target Column Empty
     beforeIndex = df.index
-    df.dropna(subset=[target],inplace=True)
+    df = df[df[target].str.strip().astype(bool)] #vectorized format to remove rows with target values that contain ''
+    df.dropna(axis=0,subset=[target],inplace=True)
     afterIndex = df.index
     rowsRemoved = list(set(beforeIndex)-set(afterIndex))
     print('\n {} rows were removed since target had these missing'.format(len(rowsRemoved)))
@@ -117,6 +118,23 @@ def INIT(df,info):
     if class_or_Reg == 'Classification':
         print('printing target variable distribution for classification:\n')
         print(pd.Series(y).value_counts(normalize=True))
+
+
+
+    ####### Logic to remove labels from validation that arent present in training ########## 
+    print("Checking if there are labels present in validation that arent present in training")
+    if class_or_Reg == 'Classification':
+        stored_labels = y.value_counts().keys().to_list() #To add future logic if required to only use the levels present in training for scoring purpose
+        # print("STORED LABELS ",stored_labels)
+        init_len = len(validation)
+        validation[target] = validation[target].apply(lambda x: format_y_labels(x,stored_labels))
+        validation.dropna(axis=0,subset=[target],inplace=True)
+        validation.reset_index(drop=True,inplace=True)
+        print(f"Number of columns dropped from validation dataset due to mismatched target variable is : {init_len-len(validation)}")
+    else:
+        stored_labels = None
+
+
 
     ######## LAT-LONG ENGINEERING #########
     print('\n#### LAT-LONG ENGINEERING RUNNING WAIT ####')
@@ -501,9 +519,8 @@ def INIT(df,info):
     print('This is final shape of Y_train : {}\n'.format(y.shape))
     ############# SAMPLE EQUATION ##################### 
 
-
     print('\n #### SAVING INIT INFORMATION ####')
-    init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
+    init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
                 'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
