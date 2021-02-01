@@ -418,7 +418,7 @@ def removeLowClass(df,target):
         return None
     else:
         print('Dropping levels in target with less than 0.5%')
-        vc = df[target].value_counts(normalize=True)<0.005
+        vc = df[target].value_counts(normalize=True)<0.006
         classes = vc[vc==True].index.to_list()
         if df[target].nunique() - len(classes) < 2:
             print('{} levels are left. Classification will not be performed'.format(df[target].nunique() - len(classes)))
@@ -599,3 +599,10 @@ def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary 
     numeric_df.drop(drop_col,axis=1,inplace=True)
     del column_counter[drop_col]
     return numeric_df,column_counter
+
+
+def format_y_labels(x,stored_labels):
+        if x in stored_labels:
+            return x
+        else:
+            return np.nan
