@@ -67,7 +67,8 @@ def INIT(df,info):
 
     # Remove all rows with Target Column Empty
     beforeIndex = df.index
-    df = df[df[target].str.strip().astype(bool)] #vectorized format to remove rows with target values that contain ''
+    if class_or_Reg == 'Classification':
+        df = df[df[target].str.strip().astype(bool)] #vectorized format to remove rows with target values that contain ''
     df.dropna(axis=0,subset=[target],inplace=True)
     afterIndex = df.index
     rowsRemoved = list(set(beforeIndex)-set(afterIndex))
