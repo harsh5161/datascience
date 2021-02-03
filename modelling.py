@@ -1825,7 +1825,7 @@ class Regression:
       for i in range(0,len(df)):
           arr1=np.hstack((arr1,np.reshape(df.loc[i,'model'].predict(X_test),(len(y_test),1))))
 
-      min_rmse=1000000
+      min_rmse=1000000000000
       max_seq=0
       for i in range(2,len(df)+1):
           comb=list(combinations(enumerate(arr1.T), i))
