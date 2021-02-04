@@ -68,6 +68,7 @@ def INIT(df,info):
     # Remove all rows with Target Column Empty
     beforeIndex = df.index
     if class_or_Reg == 'Classification':
+        df[target] = df[target].astype(str)
         df = df[df[target].str.strip().astype(bool)] #vectorized format to remove rows with target values that contain ''
     df.dropna(axis=0,subset=[target],inplace=True)
     afterIndex = df.index
@@ -366,7 +367,9 @@ def INIT(df,info):
     ############# PEARSON CORRELATION ############
     print(f"The shape before Pearson's {num_df.shape}")
     print('\n #### PEARSON CORRELATION ####')
-    corr = num_df.corr(method='pearson')
+    # corr = num_df.corr(method='pearson')
+    corr = np.corrcoef(num_df.values, rowvar=False) 
+    corr = pd.DataFrame(corr, columns = num_df.columns.to_list())
     # print("Initial correlation matrix",corr)
     corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
     # print("The Lower Triangular matrix is \n",corr)

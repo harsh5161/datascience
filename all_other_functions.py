@@ -561,7 +561,9 @@ def findDefaulters(x):
 def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary with related columns, the column with the maximum value
     req_cols = []
     high = 0.85
-    corr = numeric_df.corr(method='pearson')
+    # corr = numeric_df.corr(method='pearson')
+    corr = np.corrcoef(numeric_df.values, rowvar=False) 
+    corr = pd.DataFrame(corr, columns = numeric_df.columns.to_list())
     # print("Initial correlation matrix",corr)
     corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
 
