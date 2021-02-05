@@ -346,7 +346,6 @@ def duplicateHandler(df):
 
     df.rename(columns = {"" : 'Unnamed'}, inplace = True) #dealing with column names that are empty strings
     actual = df.columns.to_list()
-    print("Printing actual values ::",actual)
     a = [x.strip().lower() for x in df.columns.to_list()]
     dups = [item for item, count in collections.Counter(a).items() if count > 1]
 
