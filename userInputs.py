@@ -309,11 +309,11 @@ def disable_graphs():
 ######################################
 
 def dataHandler(dx,update=False):
-        # for col in dx.columns:
-        #     if 'Unnamed' in col:
-        #         if len(dx[col].value_counts())<0.5*dx.shape[0]:
-        #             dx.drop(col,axis=1,inplace=True)
-        #             update = True
+        for col in dx.columns: 			#Counting the non-null values present in a column and removing them if necessary
+            if 'Unnamed' in col:
+                if dx[col].count()<0.5*dx.shape[0]:
+                    dx.drop(col,axis=1,inplace=True)
+                    update = True
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
         if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
             colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
@@ -346,6 +346,7 @@ def duplicateHandler(df):
 
     df.rename(columns = {"" : 'Unnamed'}, inplace = True) #dealing with column names that are empty strings
     actual = df.columns.to_list()
+    print("Printing actual values ::",actual)
     a = [x.strip().lower() for x in df.columns.to_list()]
     dups = [item for item, count in collections.Counter(a).items() if count > 1]
 
