@@ -348,13 +348,17 @@ def INIT(df,info):
     ########################### TEXT ENGINEERING #############################
     disc_df.reset_index(drop=True,inplace=True)
     num_df.reset_index(drop=True,inplace=True)
+    #This is the num_df,disc_df that we will be checking for in the scoring file (Before adding the TEXT_DF variables that are actually artificially created by us)
+    NumColumns = num_df.columns
+    NumMean = num_df.mean().to_dict()
+    DiscColumns = disc_df.columns
     TEXT_DF.reset_index(drop=True, inplace=True)
     if not TEXT_DF.empty:
         for col in TEXT_DF.columns:
             if col.find("_Topic")!=-1:
-                pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+                disc_df = pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
             else:
-                pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+                num_df = pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
 
 
 
@@ -402,8 +406,11 @@ def INIT(df,info):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    concat_list = [num_df,disc_df]
-    X = pd.concat(concat_list,axis=1)
+    if num_df.shape[1] != 0:    #Some datasets may contain only categorical data
+        concat_list = [num_df,disc_df]
+        X = pd.concat(concat_list,axis=1)
+    else:
+        X = disc_df
     X_old = X.copy()# X_old is before Target Encoding
 
     ############# TARGET ENCODING ############
@@ -524,7 +531,7 @@ def INIT(df,info):
     ############# SAMPLE EQUATION ##################### 
 
     print('\n #### SAVING INIT INFORMATION ####')
-    init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns, 'StoredLabels':stored_labels,
+    init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
                 'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,

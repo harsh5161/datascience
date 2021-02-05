@@ -148,9 +148,9 @@ def score(df,init_info,validation=False):
     if not TEXT_DF.empty:
         for col in TEXT_DF.columns:
             if col.find("_Topic")!=-1:
-                pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+                disc_df = pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
             else:
-                pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+                num_df = pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
 
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
@@ -161,7 +161,10 @@ def score(df,init_info,validation=False):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    X_test = pd.concat([num_df,disc_df],axis=1)
+    if num_df.shape[1] != 0:    #Some datasets may contain only categorical data
+        X_test = pd.concat([num_df,disc_df],axis=1)
+    else:
+        X_test = disc_df 
     print('Applying Target Encoding...')
     X_test = init_info['TargetEncoder'].transform(X_test)
     print('Target Encoding completed')
