@@ -74,6 +74,7 @@ def INIT(df,info):
     afterIndex = df.index
     rowsRemoved = list(set(beforeIndex)-set(afterIndex))
     print('\n {} rows were removed since target had these missing'.format(len(rowsRemoved)))
+    print(f'Target Unique values and count \n {df[target].value_counts()} \n Unique values \n {df[target].nunique()}')
     del beforeIndex,afterIndex
 
     ############# TRAIN VALIDATION SPLIT ###########
@@ -394,6 +395,7 @@ def INIT(df,info):
     # print(f'Pearsons Matrix \n {pd.DataFrame(num_df.corr())}')
     print(f"The shape after Pearson's {num_df.shape}")
     print(' #### DONE ####')
+    PearsonsColumns = num_df.columns 
     ############# PEARSON CORRELATION ############
 
     y.reset_index(drop=True, inplace=True)
@@ -532,7 +534,7 @@ def INIT(df,info):
 
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
-                'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
+                'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
                 'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,

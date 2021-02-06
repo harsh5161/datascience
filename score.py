@@ -28,6 +28,7 @@ def score(df,init_info,validation=False):
     else:
         X_test = df
         y_test = pd.Series()
+    print(f'Target Unique values and count \n {y_test.value_counts()} \n Unique values \n {y_test.nunique()}')
 
     if init_info['KEY']:
         print("Value of Key from Training is: ",init_info['KEY'])
@@ -152,6 +153,9 @@ def score(df,init_info,validation=False):
             else:
                 num_df = pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
 
+    #Removing the same columns that were removed in Pearson's Correlation
+    num_df = num_df[init_info['PearsonsColumns']]
+    print(f'Shape after Pearsons Correlation {num_df.shape}')
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
@@ -165,6 +169,7 @@ def score(df,init_info,validation=False):
         X_test = pd.concat([num_df,disc_df],axis=1)
     else:
         X_test = disc_df 
+
     print('Applying Target Encoding...')
     X_test = init_info['TargetEncoder'].transform(X_test)
     print('Target Encoding completed')
