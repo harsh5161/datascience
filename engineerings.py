@@ -424,7 +424,7 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
     corpus_tfidf = tfidf[bow_corpus] #generating the TF-IDF of the corpus
     print("!!!!!!",len(corpus_tfidf))
     start = time.time()
-    lda_model_tfidf = gensim.models.LdaMulticore(corpus_tfidf, num_topics=10, id2word=dictionary, passes=1, workers=6) #multiprocessing Latent Dirilichtion Allocation Model
+    lda_model_tfidf = gensim.models.LdaModel(corpus_tfidf, num_topics=10, id2word=dictionary) #multiprocessing Latent Dirilichtion Allocation Model , passes=1, workers=6
     end = time.time()
     print(end-start)
     for idx, topic in lda_model_tfidf.print_topics(-1):
@@ -438,9 +438,9 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
   count = 0
   for i in range(len(bow_corpus)):
     val = bow_corpus[i]
-    # for i in range(len(val)):
-    #     print("Word {} (\"{}\") appears {} time.".format(val[i][0], dictionary[val[i][0]], val[i][1]))
-    # count = count+1
+    for i in range(len(val)):
+       sentence =  "Word {} (\"{}\") appears {} time.".format(val[i][0], dictionary[val[i][0]], val[i][1]) #Messy3.csv
+    count = count+1
     for idx, topic in sorted(lda_model_tfidf[bow_corpus[i]], key= lambda tup: -1*tup[1]):
       append(idx)
       break
