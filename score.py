@@ -360,7 +360,8 @@ def score(df,init_info,validation=False):
         
         for k,v in preview_vals.iteritems():
             printer = printer + f"{k} is present in {v}% of the Testing Preview\n"
-        print(printer)
+        if init_info['ML'] == 'Classification':
+            print(printer)
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
     else:
@@ -368,7 +369,8 @@ def score(df,init_info,validation=False):
         printer = ""
         for k,v in preview_vals.iteritems():
             printer = printer + f"{k} is present in {round((v/len(preview))*100,3)}% of the Scoring File\n"
-        print(printer)
+        if init_info['ML'] == 'Classification':
+            print(printer)
         preview.to_csv('score.csv',sep=',',index=False)
         print('\nFile Saved as score.csv')
     print('\nCode executed Successfully')
