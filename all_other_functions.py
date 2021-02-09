@@ -13,6 +13,7 @@ import pydotplus
 from category_encoders import TargetEncoder
 from missingpy import MissForest
 import operator
+import json
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -21,13 +22,13 @@ def targetAnalysis(df):
     print('Printing % occurence of each class in target Column')
     print(df.value_counts(normalize=True))
     if ('int' in Type) or ('float' in Type):
-        if df.nunique() < 5:
+        if df.nunique() <= 5:
             return 'Classification'
         else:
             return 'Regression'
 
     else:
-        if df.nunique() < 5:
+        if df.nunique() <= 5:
             return 'Classification'
         else:
             return None
@@ -315,6 +316,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                     from tabulate import tabulate
                     pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql', showindex = False)
                     print(pdtabulate(dum3))
+                    json_var = dum3.to_json() # Json variable to show the tables in a new format in the front end
+                    # print(json_var)
 
 #     from IPython.display import display,HTML
 #     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
@@ -354,8 +357,7 @@ def FeatureSelection(X,y,class_or_Reg):
 #             if k[0]>k[1]: impact_ratio = k[0]/k[1]
 #             else: impact_ratio = k[1]/k[0]
 #             selector = XGBClassifier(n_estimators =100, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
-            with joblib.parallel_backend('dask'):
-                selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='binary',n_jobs=4)
+            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='binary')
         else:
             print("\nMulticlass Classification")
 
@@ -367,16 +369,15 @@ def FeatureSelection(X,y,class_or_Reg):
 #               w_array[i] = class_w[val]
 
 #             selector = XGBClassifier(n_estimators =100, sample_weight = w_array, max_depth= 5, n_jobs=-1);
-            with joblib.parallel_backend('dask'):
-                selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss',n_jobs=4)
+            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss')
     else :
 #         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
-        with joblib.parallel_backend('dask'):
-            selector = lgb.LGBMRegressor(n_estimators=100,random_state=1,n_jobs=4)
+        selector = lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
         print('runnning regressor selector')
 
     for i in tqdm(range(10)):
-        selector.fit(X, y)
+        with joblib.parallel_backend('dask'):
+            selector.fit(X, y)
 
     # all columns container
     cols = pd.DataFrame(X.columns)
@@ -385,6 +386,7 @@ def FeatureSelection(X,y,class_or_Reg):
     k = selector.feature_importances_
     k = k.reshape(X.shape[1],1)
     k = pd.DataFrame(k)
+    print("k",k)
 
     # threshold one(This thres is able to select only top best features which are very few)
     thresh1 = k.mean(); l = k>thresh1
@@ -408,35 +410,6 @@ def FeatureSelection(X,y,class_or_Reg):
     print('\n{} columns are eliminated during Feature Selection which are:\n{}' .format(len(rejected_cols), rejected_cols))
     return list(rejected_cols),new_2.drop(['t/f'],axis=1)
 
-def dataHandler(dx):
-        for col in dx.columns:
-            if 'Unnamed' in col:
-                if len(dx[col].value_counts())<0.5*dx.shape[0]:
-                    dx.drop(col,axis=1,inplace=True)
-        # to handel cases when some blank rows or other information above the data table gets assumed to be column name
-        if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
-            colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
-            dx.columns = colNew                          #Making values stored in colNew as the new column names
-            dx = dx.drop(labels=[0])                     #dropping the row whose values we made as the column names
-            dx.reset_index(drop=True, inplace=True)      #resetting index to the normal pattern 0,1,2,3...
-        else:
-            return dx
-
-        new_column_names=dx.columns.values.tolist() # Following three lines of code are for counting the number of null values in our new set of column names
-        new_column_names=pd.DataFrame(new_column_names)
-        null_value_sum=new_column_names.isnull().sum()[0]
-        if null_value_sum<0.5*dx.shape[1]: # if count of null values are less than a certain ratio of total no of columns
-            return dx
-        while(null_value_sum>=0.5*dx.shape[1]):
-            colNew = dx.loc[0].values.tolist()
-            dx.columns = colNew
-            dx = dx.drop(labels=[0])
-            dx.reset_index(drop=True, inplace=True)
-            new_column_names=dx.columns.values.tolist()
-            new_column_names=pd.DataFrame(new_column_names)
-            null_value_sum=new_column_names.isnull().sum()[0]
-        return dx
-
 def removeLowClass(df,target):
     if df[target].nunique() == 2:
         print('\nTarget has 2 Levels! No classes will be removed')
@@ -446,7 +419,7 @@ def removeLowClass(df,target):
         return None
     else:
         print('Dropping levels in target with less than 0.5%')
-        vc = df[target].value_counts(normalize=True)<0.005
+        vc = df[target].value_counts(normalize=True)<0.006
         classes = vc[vc==True].index.to_list()
         if df[target].nunique() - len(classes) < 2:
             print('{} levels are left. Classification will not be performed'.format(df[target].nunique() - len(classes)))
@@ -589,7 +562,9 @@ def findDefaulters(x):
 def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary with related columns, the column with the maximum value
     req_cols = []
     high = 0.85
-    corr = numeric_df.corr(method='pearson')
+    # corr = numeric_df.corr(method='pearson')
+    corr = np.corrcoef(numeric_df.values, rowvar=False) 
+    corr = pd.DataFrame(corr, columns = numeric_df.columns.to_list())
     # print("Initial correlation matrix",corr)
     corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
 
@@ -627,3 +602,10 @@ def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary 
     numeric_df.drop(drop_col,axis=1,inplace=True)
     del column_counter[drop_col]
     return numeric_df,column_counter
+
+
+def format_y_labels(x,stored_labels):
+        if x in stored_labels:
+            return x
+        else:
+            return np.nan
