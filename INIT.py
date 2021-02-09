@@ -67,10 +67,14 @@ def INIT(df,info):
 
     # Remove all rows with Target Column Empty
     beforeIndex = df.index
-    df.dropna(subset=[target],inplace=True)
+    if class_or_Reg == 'Classification':
+        df[target] = df[target].astype(str)
+        df = df[df[target].str.strip().astype(bool)] #vectorized format to remove rows with target values that contain ''
+    df.dropna(axis=0,subset=[target],inplace=True)
     afterIndex = df.index
     rowsRemoved = list(set(beforeIndex)-set(afterIndex))
     print('\n {} rows were removed since target had these missing'.format(len(rowsRemoved)))
+    print(f'Target Unique values and count \n {df[target].value_counts()} \n Unique values \n {df[target].nunique()}')
     del beforeIndex,afterIndex
 
     ############# TRAIN VALIDATION SPLIT ###########
@@ -117,6 +121,23 @@ def INIT(df,info):
     if class_or_Reg == 'Classification':
         print('printing target variable distribution for classification:\n')
         print(pd.Series(y).value_counts(normalize=True))
+
+
+
+    ####### Logic to remove labels from validation that arent present in training ########## 
+    print("Checking if there are labels present in validation that arent present in training")
+    if class_or_Reg == 'Classification':
+        stored_labels = y.value_counts().keys().to_list() #To add future logic if required to only use the levels present in training for scoring purpose
+        # print("STORED LABELS ",stored_labels)
+        init_len = len(validation)
+        validation[target] = validation[target].apply(lambda x: format_y_labels(x,stored_labels))
+        validation.dropna(axis=0,subset=[target],inplace=True)
+        validation.reset_index(drop=True,inplace=True)
+        print(f"Number of columns dropped from validation dataset due to mismatched target variable is : {init_len-len(validation)}")
+    else:
+        stored_labels = None
+
+
 
     ######## LAT-LONG ENGINEERING #########
     print('\n#### LAT-LONG ENGINEERING RUNNING WAIT ####')
@@ -328,13 +349,17 @@ def INIT(df,info):
     ########################### TEXT ENGINEERING #############################
     disc_df.reset_index(drop=True,inplace=True)
     num_df.reset_index(drop=True,inplace=True)
+    #This is the num_df,disc_df that we will be checking for in the scoring file (Before adding the TEXT_DF variables that are actually artificially created by us)
+    NumColumns = num_df.columns
+    NumMean = num_df.mean().to_dict()
+    DiscColumns = disc_df.columns
     TEXT_DF.reset_index(drop=True, inplace=True)
     if not TEXT_DF.empty:
         for col in TEXT_DF.columns:
             if col.find("_Topic")!=-1:
-                pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+                disc_df = pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
             else:
-                pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
+                num_df = pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
 
 
 
@@ -347,7 +372,9 @@ def INIT(df,info):
     ############# PEARSON CORRELATION ############
     print(f"The shape before Pearson's {num_df.shape}")
     print('\n #### PEARSON CORRELATION ####')
-    corr = num_df.corr(method='pearson')
+    # corr = num_df.corr(method='pearson')
+    corr = np.corrcoef(num_df.values, rowvar=False) 
+    corr = pd.DataFrame(corr, columns = num_df.columns.to_list())
     # print("Initial correlation matrix",corr)
     corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
     # print("The Lower Triangular matrix is \n",corr)
@@ -365,8 +392,10 @@ def INIT(df,info):
             # print(f"Len of the col_counter",len(col_counter))
             num_df,col_counter = pearsonmaker(num_df,col_counter)
 
+    # print(f'Pearsons Matrix \n {pd.DataFrame(num_df.corr())}')
     print(f"The shape after Pearson's {num_df.shape}")
     print(' #### DONE ####')
+    PearsonsColumns = num_df.columns 
     ############# PEARSON CORRELATION ############
 
     y.reset_index(drop=True, inplace=True)
@@ -379,8 +408,11 @@ def INIT(df,info):
     print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
     print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
     print('URL_DF - {}'.format(URL_DF.shape))
-    concat_list = [num_df,disc_df]
-    X = pd.concat(concat_list,axis=1)
+    if num_df.shape[1] != 0:    #Some datasets may contain only categorical data
+        concat_list = [num_df,disc_df]
+        X = pd.concat(concat_list,axis=1)
+    else:
+        X = disc_df
     X_old = X.copy()# X_old is before Target Encoding
 
     ############# TARGET ENCODING ############
@@ -405,7 +437,6 @@ def INIT(df,info):
         print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
         X.drop(rem,axis=1,inplace=True)
         X_old.drop(rem,axis=1,inplace=True)  # removing columns through feature selection without target encoding
-        TrainingColumns = X.columns
         fe_s = time.time()
 
         try:
@@ -418,8 +449,21 @@ def INIT(df,info):
         print(y.shape)
     else:
         print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
-        TrainingColumns = X.columns
     ############# FEATURE SELECTION AND PLOTS #####################
+
+    ##################### Checking for constant columns ###################
+
+    for col in X.columns:
+        if X[col].nunique() == 1:
+            X.drop(col,axis=1,inplace=True)
+            print(f"Dropping column {col} because it only contains one value throughout the column")
+
+    TrainingColumns = X.columns
+    if TrainingColumns.empty:
+        print("Error : There are no informative columns present in the dataset. Please collect more information.")
+        return None, None 
+
+    ##################### Checking for constant columns ###################
 
     ############# CART DECISION TREE VISUALIZATION #####################
     if not info['graph']:
@@ -446,6 +490,11 @@ def INIT(df,info):
             print(e)
             print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     ############# CART DECISION TREE VISUALIZATION #####################   
+
+    # for col in X.columns:
+    #     X[col].hist()
+    
+    # y.hist()
 
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
     print('\n #### SCALING ####')
@@ -483,10 +532,9 @@ def INIT(df,info):
     print('This is final shape of Y_train : {}\n'.format(y.shape))
     ############# SAMPLE EQUATION ##################### 
 
-
     print('\n #### SAVING INIT INFORMATION ####')
-    init_info = {'NumericColumns':num_df.columns,'NumericMean':num_df.mean().to_dict(),'DiscreteColumns':disc_df.columns,
-                'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,
+    init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
+                'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
                 'DateFinalColumns':DATE_DF.columns,'DateMean':DATE_DF.mean().to_dict(),
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,

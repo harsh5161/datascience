@@ -21,7 +21,7 @@ from time import process_time
 import time
 from decimal import Decimal
 import math
-
+import joblib
 # Model
 import xgboost as xgb
 import catboost as cb
@@ -36,6 +36,7 @@ from sklearn import svm
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.svm import LinearSVC
+
 #Hyperopt
 import hyperopt
 from hyperopt import *
@@ -65,7 +66,7 @@ from imblearn.ensemble import EasyEnsembleClassifier
 
 import xgboost as xgb
 from scipy.stats import ks_2samp
-import joblib 
+
 #TerminalPush Test
 class classification:
 
@@ -118,9 +119,9 @@ class classification:
             #######################################################################
             df.loc[ind,'Machine Learning Model']='XGBoost'
             if check == 1:
-                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss',n_jobs=4)
+                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
             elif check ==0:
-                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList),n_jobs=4)
+                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList))
 
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -161,7 +162,7 @@ class classification:
                 df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass')
             df.loc[ind,'param']=str(best)
             Start=time.time()
-            with joblib.parallel_backend('dask'): 
+            with joblib.parallel_backend('dask'):
                 df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
             catboost_pred = np.array(df.loc[ind,'model'].predict(X_test)).reshape(-1)
             catboost_probas = df.loc[ind,'model'].predict_proba(X_test)
@@ -188,9 +189,9 @@ class classification:
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
             if check==1:
-                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='binary',n_jobs=4)
+                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='binary')
             elif check==0:
-                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='multiclass',num_class=len(priorList),metric='multi_logloss',n_jobs=4)
+                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
             df.loc[ind,'param']= str(best)
             Start=time.time()
             if check==1:
@@ -222,12 +223,6 @@ class classification:
 
             ##Random forest
             ########################################################################################################
-
-            #This is probably going to work since it's based on sklearn, but it will result in memory crash because it has parrallel processing internally.
-
-
-
-
             df.loc[ind,'Machine Learning Model']='Random Forest'
             df['model'][ind]=RandomForestClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
             df.loc[ind,'param']= str(best)
@@ -288,7 +283,7 @@ class classification:
             if(flag == 1):
                 best = {'priors': priorList}
                 df.loc[ind,'Machine Learning Model']='Naive Bayes(Bayesisan Statistics)'
-                df.loc[ind,'model']=GaussianNB(priors = priorList,n_jobs=4)
+                df.loc[ind,'model']=GaussianNB(priors = priorList)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
                 with joblib.parallel_backend('dask'):
@@ -317,7 +312,7 @@ class classification:
             ##########################################################################################################
 
             df.loc[ind,'Machine Learning Model']='Logistic Regression'
-            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto',n_jobs=4)
+            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
             df.loc[ind,'param']=""
             Start=time.time()
             with joblib.parallel_backend('dask'):
@@ -349,7 +344,7 @@ class classification:
 
             if(flag == 1):
                 df.loc[ind,'Machine Learning Model']='Neural Network'
-                best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_jobs':4}
+                best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True}
                 df.loc[ind,'model']=MLPClassifier(**best)
                 df.loc[ind,'param']=str(best)
                 Start=time.time()
@@ -1152,7 +1147,6 @@ class classification:
                   max_seq=seq
 
       print("this is what you are printing",max_seq)
-      print(type(max_seq))
       ########################################################################################################
 
       ##Ensemble(2) List of the best combination from the above method
@@ -1172,11 +1166,18 @@ class classification:
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft',n_jobs=2)
+      df.loc[ind,'model']=VotingClassifier(df_en.values, voting='soft')
       df.loc[ind,'param']="Default"
       Start=time.time()
-      with joblib.parallel_backend('dask'):
-        df.loc[ind,'model'].fit(X_train, y_train)
+      gen = ['NotEnsembled']
+      for x in [3,4]:
+          if x in max_seq:
+              gen = 'Ensembled'
+      if gen == 'Ensembled':
+            df.loc[ind,'model'].fit(X_train, y_train)
+      else:
+          with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train)
       ensemble_pred = df.loc[ind,'model'].predict(X_test)
       ensemble_probas = df.loc[ind,'model'].predict_proba(X_test)
       End=time.time()
@@ -1311,7 +1312,8 @@ class Regression:
         df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=1000,eta=0.01,max_depth=16,min_child_weight=2,gamma=5,subsample=0.8,objective="reg:squarederror",eval_metric='rmse')
         df.loc[ind,'param']=str(best)
         Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
+        with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train)
         xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
         print(type(xgb_reg_prob1))
         End = time.time()
@@ -1335,7 +1337,8 @@ class Regression:
         df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True)
         df.loc[ind,'param']=str(best)
         Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
+        with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train)
         cat_reg_prob1 = df.loc[ind,'model'].predict(X_test)
         End = time.time()
         df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
@@ -1358,7 +1361,8 @@ class Regression:
         df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
         df.loc[ind,'param']= str(best)
         Start=time.time()
-        df.loc[ind,'model'].fit(X_train, y_train,verbose=False)
+        with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train,verbose=False)
         lightgbm_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
         df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
@@ -1377,7 +1381,7 @@ class Regression:
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='Random Forest'
-        df['model'][ind]=RandomForestRegressor(n_estimators=1000,max_depth=16)
+        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=16)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1400,7 +1404,7 @@ class Regression:
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
-        df['model'][ind]=ExtraTreesRegressor(n_estimators=1000,max_depth=16)
+        df['model'][ind]=ExtraTreesRegressor(n_estimators=100,max_depth=16)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1426,7 +1430,8 @@ class Regression:
         df.loc[ind,'model']=LinearRegression()
         df.loc[ind,'param']=None
         Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
+        with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train)
         logr_reg_prob1 = df.loc[ind,'model'].predict(X_test)
         End = time.time()
         df.loc[ind,'accuracy']=r2_score(y_test, logr_reg_prob1)*100
@@ -1448,7 +1453,8 @@ class Regression:
         df.loc[ind,'model']=Ridge()
         df.loc[ind,'param']=None
         Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
+        with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train)
         ridge_reg_prob1 = df.loc[ind,'model'].predict(X_test)
         End = time.time()
         df.loc[ind,'accuracy']=r2_score(y_test, ridge_reg_prob1)*100
@@ -1462,32 +1468,32 @@ class Regression:
         print("ridge reg done")
         ind=ind+1
 
-        #Neural network
-        ########################################################################################################
+        # #Neural network
+        # ########################################################################################################
 
-        best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-        df.loc[ind,'Machine Learning Model']='Neural Network'
-        df.loc[ind,'model']=MLPRegressor(**best)
-        df.loc[ind,'param']=str(best)
-        Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
-        mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-        End = time.time()
-        try:
-            df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
-        except:
-            print("Neural Net threw an error")
-        else:
-            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
-            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
-            df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
-            df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
-            #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
-            df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-            df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
+        # best={'hidden_layer_sizes':(25,),'solver':'sgd','learning_rate':'adaptive','max_iter':10}
+        # df.loc[ind,'Machine Learning Model']='Neural Network'
+        # df.loc[ind,'model']=MLPRegressor(**best)
+        # df.loc[ind,'param']=str(best)
+        # Start = time.time()
+        # df.loc[ind,'model'].fit(X_train, y_train)
+        # mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+        # End = time.time()
+        # try:
+        #     df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
+        # except:
+        #     print("Neural Net threw an error")
+        # else:
+        #     df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
+        #     df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
+        #     df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
+        #     df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
+        #     #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
+        #     df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
+        #     df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
-            print("neural net done")
-            ind=ind+1
+        #     print("neural net done")
+        #     ind=ind+1
 
         #SVC
         #########################################################################################################
@@ -1496,7 +1502,8 @@ class Regression:
         df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
         df.loc[ind,'param']=None
         Start = time.time()
-        df.loc[ind,'model'].fit(X_train, y_train)
+        with joblib.parallel_backend('dask'):
+            df.loc[ind,'model'].fit(X_train, y_train)
         svc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
         End = time.time()
         df.loc[ind,'accuracy']=r2_score(y_test, svc_reg_prob1)*100
@@ -1520,7 +1527,8 @@ class Regression:
             def objective(params):
                   print(params)
                   xg = xgb.XGBRegressor(**params)
-                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
+                  with joblib.parallel_backend('dask'):
+                    result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("XGB Training Done")
                   return (1-result.min())
 
@@ -1559,7 +1567,8 @@ class Regression:
             df.loc[ind,'Machine Learning Model']='XGBoost'
             df.loc[ind,'model']=xgb.XGBRegressor(**best)
             df.loc[ind,'param']=str(best)
-            df.loc[ind,'model'].fit(X_train, y_train,eval_metric="rmse", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train,eval_metric="rmse", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             xgb_reg_prob1 = df.loc[ind,'model'].predict(X_test).tolist()
             print(type(xgb_reg_prob1))
             End = time.time()
@@ -1585,7 +1594,8 @@ class Regression:
             df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True)
             df.loc[ind,'param']=str(best)
             Start = time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             cat_reg_prob1 = df.loc[ind,'model'].predict(X_test)
             End = time.time()
             df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
@@ -1609,7 +1619,8 @@ class Regression:
             def objective(params):
                   print(params)
                   xg = lgb.LGBMRegressor(**params)
-                  result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
+                  with joblib.parallel_backend('dask'):
+                    result=cross_val_score(xg,X=X_train,y=y_train,cv=CV,scoring='r2',error_score=np.nan)
                   print("XGB Training Done")
                   return (1-result.min())
 
@@ -1647,7 +1658,8 @@ class Regression:
             df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
             df['model'][ind]=lgb.LGBMRegressor(**best)
             df.loc[ind,'param']= str(best)
-            df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             lightgbm_pred = df.loc[ind,'model'].predict(X_test)
             End=time.time()
             df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
@@ -1759,7 +1771,8 @@ class Regression:
             df.loc[ind,'model']=Ridge()
             df.loc[ind,'param']=None
             Start = time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             ridge_reg_prob1 = df.loc[ind,'model'].predict(X_test)
             End = time.time()
             df.loc[ind,'accuracy']=r2_score(y_test, ridge_reg_prob1)*100
@@ -1779,7 +1792,8 @@ class Regression:
             df.loc[ind,'model']=LinearRegression()
             df.loc[ind,'param']=None
             Start = time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             logr_reg_prob1 = df.loc[ind,'model'].predict(X_test)
             End = time.time()
             df.loc[ind,'accuracy']=r2_score(y_test, logr_reg_prob1)*100
@@ -1794,31 +1808,31 @@ class Regression:
             print("linear reg done")
             ind=ind+1
 
-            #Neural net
-            ########################################################################################################
-            best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
-            df.loc[ind,'Machine Learning Model']='Neural Network'
-            df.loc[ind,'model']=MLPRegressor(**best)
-            df.loc[ind,'param']=str(best)
-            Start = time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
-            mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
-            End = time.time()
-            try:
-                df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
-            except:
-                print("Neural Net threw an error")
-            else:
-                df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
-                df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
-                df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
-                df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
-                #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
-                df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
-                df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
+            # #Neural net
+            # ########################################################################################################
+            # best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
+            # df.loc[ind,'Machine Learning Model']='Neural Network'
+            # df.loc[ind,'model']=MLPRegressor(**best)
+            # df.loc[ind,'param']=str(best)
+            # Start = time.time()
+            # df.loc[ind,'model'].fit(X_train, y_train)
+            # mlpc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
+            # End = time.time()
+            # try:
+            #     df.loc[ind,'accuracy']=r2_score(y_test, mlpc_reg_prob1)*100
+            # except:
+            #     print("Neural Net threw an error")
+            # else:
+            #     df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, mlpc_reg_prob1))))
+            #     df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, mlpc_reg_prob1))
+            #     df.loc[ind,'MSE'] = mean_squared_error(y_test, mlpc_reg_prob1)
+            #     df.loc[ind,'MAE']=mean_absolute_error(y_test, mlpc_reg_prob1)
+            #     #df.loc[ind,'AIC']=aic.aic(y_test, mlpc_reg_prob1,X_train.shape[1])
+            #     df.loc[ind,'BIC']=bic.bic(y_test, mlpc_reg_prob1,X_train.shape[1])
+            #     df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
 
-                print("neural net done")
-                ind=ind+1
+            #     print("neural net done")
+            #     ind=ind+1
 
 
             #Support Vector Machine
@@ -1827,7 +1841,8 @@ class Regression:
             df.loc[ind,'model']=svm.SVR(kernel='linear',max_iter=1000)
             df.loc[ind,'param']=None
             Start = time.time()
-            df.loc[ind,'model'].fit(X_train, y_train)
+            with joblib.parallel_backend('dask'):
+                df.loc[ind,'model'].fit(X_train, y_train)
             svc_reg_prob1 = df.loc[ind,'model'].predict(X_test)
             End = time.time()
             df.loc[ind,'accuracy']=r2_score(y_test, svc_reg_prob1)*100
@@ -1852,7 +1867,7 @@ class Regression:
       for i in range(0,len(df)):
           arr1=np.hstack((arr1,np.reshape(df.loc[i,'model'].predict(X_test),(len(y_test),1))))
 
-      min_rmse=100000
+      min_rmse=1000000000000
       max_seq=0
       for i in range(2,len(df)+1):
           comb=list(combinations(enumerate(arr1.T), i))
@@ -1884,15 +1899,23 @@ class Regression:
 
       df_en.dropna(axis=0,inplace=True)
       ########################################################################################################
-
+      gen = 'NotEnsembled'
+      for x in max_seq:
+          if x in [3,4]:
+              gen = 'Ensembled'
+    
 
       ##Ensemble(3) Making an esemble model of the best combination
       ########################################################################################################
       df.loc[ind,'Machine Learning Model']=('Ensemble '+'(' + name[:-1] + ')')
-      df.loc[ind,'model']=VotingRegressor(df_en.values,n_jobs=-1)
+      df.loc[ind,'model']=VotingRegressor(df_en.values)
       df.loc[ind,'param']="Default"
       Start = time.time()
-      df.loc[ind,'model'].fit(X_train, y_train)
+      if gen == 'Ensembled':
+            df.loc[ind,'model'].fit(X_train, y_train)
+      else:
+          with joblib.parallel_backend('dask'):
+              df.loc[ind,'model'].fit(X_train, y_train)
       ensemble_pred = df.loc[ind,'model'].predict(X_test)
       End = time.time()
       df.loc[ind,'accuracy']=r2_score(y_test, ensemble_pred)*100
