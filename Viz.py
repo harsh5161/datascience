@@ -77,6 +77,7 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
     elif len(df.columns) >40:
         grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100,res=350)#
 
+    num_of_cols = len(df.columns) #Front end needs this variable to resize the decision tree, pass it through the backend 
     if class_or_Reg =='Classification':
             rfunc=ro.r(rstring1)#
             p=rfunc(r_from_pd_df) 
