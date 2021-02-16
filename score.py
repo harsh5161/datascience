@@ -272,6 +272,7 @@ def score(df,init_info,validation=False):
 
             #lm plot
             fig2 = sns.lmplot('y_pred','y_test',regplotdf,fit_reg =True, line_kws={'color': 'red'})
+            plt.xticks(plt.xticks()[0], rotation=40)
             plt.xlabel("Predicted Values")
             plt.ylabel("Actual Values")
             plt.title("\n\nPredicted vs Actual")
