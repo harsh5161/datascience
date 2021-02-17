@@ -253,9 +253,9 @@ def score(df,init_info,validation=False):
             axcm.set_ylabel('Actual value');
             if len(priorList) ==2:
 
-                skplt.metrics.plot_lift_curve(y_test, y_probas)
-                skplt.metrics.plot_cumulative_gain(y_test, y_probas)
-            skplt.metrics.plot_roc(y_test, y_probas)
+                skplt.metrics.plot_lift_curve(y_test, y_probas, title = 'Lift Curve (Test Dataset)')
+                skplt.metrics.plot_cumulative_gain(y_test, y_probas, title='Cumulative Gains Curve (Test Dataset)')
+            skplt.metrics.plot_roc(y_test, y_probas,title='ROC Curves (Test Dataset)')
 
     else:
         if validation:
@@ -267,7 +267,7 @@ def score(df,init_info,validation=False):
             fig1 = sns.residplot('y_test','y_pred',regplotdf)
             plt.xlabel("Actual Values")
             plt.ylabel("Residuals of Predicted Values")
-            plt.title("\n\nResidual Plot")
+            plt.title("\n\nResidual Plot (Test Dataset)")
             plt.show(fig1)
 
             #lm plot
@@ -275,7 +275,7 @@ def score(df,init_info,validation=False):
             plt.xticks(plt.xticks()[0], rotation=40)
             plt.xlabel("Predicted Values")
             plt.ylabel("Actual Values")
-            plt.title("\n\nPredicted vs Actual")
+            plt.title("\n\nPredicted vs Actual (Test Dataset)")
             plt.show(fig2)
 
             # decile plot function
@@ -293,7 +293,7 @@ def score(df,init_info,validation=False):
                 fig, ax1 = plt.subplots(figsize=(10, 7))
                 plt.xticks(df_mean['Decile'])
                 tidy = pd.melt(df_mean, id_vars='Decile', value_vars= ['Actualvalue_mean','Predictedvalue_mean'],value_name='Mean values per decile')
-                sns.lineplot(x='Decile', y='Mean values per decile', hue='variable', data=tidy, ax=ax1)
+                sns.lineplot(x='Decile', y='Mean values per decile', hue='variable', data=tidy, ax=ax1).set_title('Distribution of Actual vs Predicted Values in the Test Dataset by Deciles')
                 pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql', showindex = False)
                 print("\nDistribution of Mean of Actual and Predicted Values by Deciles:")
                 print(pdtabulate(df_mean))
@@ -307,6 +307,54 @@ def score(df,init_info,validation=False):
             # plt.plot(np.ones(len(y_pred))*y_pred.mean(), figure=fig3)
             # plt.show()
     ############ PREDICTION/SCORING #############
+
+    ############ Model Explainer#############
+    if validation:
+        r = random.random()
+        b = random.random()
+        g = random.random()
+        colors = (r, g, b)
+
+
+        # customized number 
+        if len(X_test.columns) >10:
+            num_features = 10
+        else:
+            num_features = len(X_test.columns)
+
+        features = X_test.columns
+        try:
+            importances = mod.feature_importances_
+            indices = np.argsort(importances)
+            plt.figure(figsize=(10,10))
+            plt.title('Feature Importances for Winner Model based on Test Data')
+            # only plot the customized number of features
+            plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
+            plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
+            plt.xlabel('Relative Importance')
+            plt.show()
+        except:
+            for alg in mod.named_estimators:
+                try:
+                    clf = mod.named_estimators[alg]
+                    importances = clf.feature_importances_
+                    indices = np.argsort(importances)
+                    plt.figure(figsize=(10,10))
+                    plt.title(f'Feature Importances for {alg} model in Voting Ensemble based on Test Data')
+                    plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
+                    plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
+                    plt.xlabel('Relative Importance')
+                    plt.show()
+                except:
+                    pass
+
+
+
+
+
+    ############ Model Explainer #############
+    ############ PREDICTION/SCORING #############
+
     if validation:
         mc = model_info.drop(['model','param','accuracy'],axis=1)
         if init_info['ML'] == 'Classification':mc.sort_values('Weighted F1',ascending=False,inplace=True)
