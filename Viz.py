@@ -70,12 +70,8 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
                 rpart.plot(fit,roundint=TRUE)
                 }
                 """
-    if len(df.columns) <=15:
-        grdevices.jpeg(file="dec_tree.jpeg", width=800, height=800,quality=100,res=200)#
-    elif len(df.columns) >15 and len(df.columns) <=40:
-        grdevices.jpeg(file="dec_tree.jpeg", width=1300, height=1300,quality=100,res=300)# 
-    elif len(df.columns) >40:
-        grdevices.jpeg(file="dec_tree.jpeg", width=1600, height=1600,quality=100,res=350)#
+                
+    grdevices.svg(file="dec_tree.svg", width=16)
 
     num_of_cols = len(df.columns) #Front end needs this variable to resize the decision tree, pass it through the backend 
     if class_or_Reg =='Classification':
@@ -87,4 +83,4 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
             p=rfunc(r_from_pd_df) 
     grdevices.dev_off()#
     from IPython.display import Image, display
-    display(Image('dec_tree.jpeg'))
+    display(Image('dec_tree.svg'))
