@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import xlrd
 import csv
 import collections 
@@ -307,13 +308,27 @@ def disable_graphs():
 ######################################
 ######## disable_graphs Function #######
 ######################################
+def removeCommas(x):
+    if ',' in str(x):
+        return pd.to_numeric(str(x).replace(',',''))
 
-def dataHandler(dx,update=False):
+def dataHandler(dx,target=None):
+        update=False
         for col in dx.columns: 			#Counting the non-null values present in a column and removing them if necessary
             if 'Unnamed' in col:
                 if dx[col].count()<0.5*dx.shape[0]:
                     dx.drop(col,axis=1,inplace=True)
                     update = True
+
+        #checking if there are string specified null values in the target column and replacing it 
+        if target is not None:
+            if str(dx[target].dtype) == 'object':
+                dx[target].replace({'NA':np.nan},inplace=True)
+                dx[target] = dx[target].apply(lambda x: removeCommas(x))
+                if dx[target].nunique()>5:
+                    dx[target].astype(float)
+                
+
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
         if (len([col for col in dx.columns if 'Unnamed' in col]) > 0.5*dx.shape[1]  ):#Checking for unnamed columns
             colNew = dx.loc[0].values.tolist()           # Getting the values in the first row of the dataframe into a list
@@ -336,6 +351,8 @@ def dataHandler(dx,update=False):
             new_column_names=dx.columns.values.tolist()
             new_column_names=pd.DataFrame(new_column_names)
             null_value_sum=new_column_names.isnull().sum()[0]
+
+
         return dx,update
 
 ######################################
