@@ -423,7 +423,7 @@ def removeLowClass(df,target):
         print('\nTarget has less than 2 Levels! Classification will not be performed')
         return None
     else:
-        print('Dropping levels in target with less than 0.8%')
+        print('Dropping levels in target with less than 0.5%')
         vc = df[target].value_counts(normalize=True)<0.006
         classes = vc[vc==True].index.to_list()
         if df[target].nunique() - len(classes) < 2:
@@ -615,7 +615,7 @@ def format_y_labels(x,stored_labels):
         else:
             return np.nan
 
-def rules_tree(X,y,mode,X_transformed):
+def rules_tree(X,y,mode,X_transformed): # Still testing, no links in the program to call this and it is normal. Will update flow when logic is ready.
     print('Trying to generate a rule tree...')
     if mode == 'Classification':
         classes_num = y.nunique() #Checking Number of classes in Target
