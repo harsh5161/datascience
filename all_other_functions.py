@@ -14,10 +14,14 @@ from category_encoders import TargetEncoder
 from missingpy import MissForest
 import operator
 import json
+import graphviz
+import joblib
+from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor,export_text
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
     # IF INT OR FLOAT IN TARGET, and IF NUMBER OF UNIQUE IS LESS, CLASSIFICATION, ELSE, REGRESSION
+    print(Type)
     print('Target has {} unique values'.format(df.nunique()))
     print('Printing % occurence of each class in target Column')
     print(df.value_counts(normalize=True))
@@ -31,7 +35,11 @@ def targetAnalysis(df):
         if df.nunique() <= 5:
             return 'Classification'
         else:
-            return None
+            try:
+                df.astype(float)
+                return 'Regression'
+            except:
+                return None
 
 def ForestImputer(num_df,disc_df,target):
     num_df.reset_index(drop=True,inplace=True)
@@ -377,7 +385,6 @@ def FeatureSelection(X,y,class_or_Reg):
 
     for i in tqdm(range(10)):
         selector.fit(X, y)
-
     # all columns container
     cols = pd.DataFrame(X.columns)
 
@@ -408,7 +415,6 @@ def FeatureSelection(X,y,class_or_Reg):
     rejected_cols = set(X.columns) - set(new_2.col_name)
     print('\n{} columns are eliminated during Feature Selection which are:\n{}' .format(len(rejected_cols), rejected_cols))
     return list(rejected_cols),new_2.drop(['t/f'],axis=1)
-
 def removeLowClass(df,target):
     if df[target].nunique() == 2:
         print('\nTarget has 2 Levels! No classes will be removed')
@@ -417,7 +423,7 @@ def removeLowClass(df,target):
         print('\nTarget has less than 2 Levels! Classification will not be performed')
         return None
     else:
-        print('Dropping levels in target with less than 0.5%')
+        print('Dropping levels in target with less than 0.8%')
         vc = df[target].value_counts(normalize=True)<0.006
         classes = vc[vc==True].index.to_list()
         if df[target].nunique() - len(classes) < 2:
@@ -608,3 +614,35 @@ def format_y_labels(x,stored_labels):
             return x
         else:
             return np.nan
+
+def rules_tree(X,y,mode,X_transformed):
+    print('Trying to generate a rule tree...')
+    if mode == 'Classification':
+        classes_num = y.nunique() #Checking Number of classes in Target
+        # if classes_num == 2:
+        #     selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='binary')
+        # else:
+        #     selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss')
+
+        text_selector = DecisionTreeClassifier(class_weight='balanced')
+    else :
+#         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
+        # selector = lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
+        text_selector = DecisionTreeRegressor()
+        print('runnning regressor selector')
+
+    for i in tqdm(range(10)):
+        # selector.fit(X, y)
+        text_selector.fit(X_transformed,y)
+
+    # v = lgb.create_tree_digraph(selector)
+    # v.view()
+    # v.render(filename='rule_tree.dot')
+    text_rules = export_text(text_selector,feature_names=X.columns.to_list(),show_weights=True)
+    joblib.dump(text_rules,'text_rule.txt')
+    # s = graphviz.Source(v.source, filename = "test1.gv", format = "png")
+    # try:
+    #     lgb.plot_tree(selector,figsize=(15,20),dpi=300).view()
+    #     return 1
+    # except:
+    #     return 0 
