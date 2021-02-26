@@ -310,7 +310,12 @@ def disable_graphs():
 ######################################
 def removeCommas(x):
     if ',' in str(x):
-        return pd.to_numeric(str(x).replace(',',''))
+        try:
+            return pd.to_numeric(str(x).replace(',',''))
+        except:
+            return x
+    else:
+        return x
 
 def dataHandler(dx,target=None):
         update=False
@@ -324,9 +329,14 @@ def dataHandler(dx,target=None):
         if target is not None:
             if str(dx[target].dtype) == 'object':
                 dx[target].replace({'NA':np.nan},inplace=True)
-                dx[target] = dx[target].apply(lambda x: removeCommas(x))
                 if dx[target].nunique()>5:
-                    dx[target].astype(float)
+                    dx[target] = dx[target].apply(lambda x: removeCommas(x))
+                    try:
+                        dx[target] = pd.to_numeric(dx[target])
+                        if str(dx[target].dtype) != 'object':
+                            dx[target] = dx[target].astype(float)
+                    except Exception as e:
+                        print(f'Exception has occurred : {e}')
                 
 
         # to handel cases when some blank rows or other information above the data table gets assumed to be column name
