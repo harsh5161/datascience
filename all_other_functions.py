@@ -529,6 +529,7 @@ def userInteractVisualization(df,targ):
                 numlist.remove(col)
         objectlist = list(df1.select_dtypes(include=['object']).columns)
         start = time.time()
+        df[numlist] = df[numlist].clip(lower=df[numlist].quantile(0.1),upper=df[numlist].quantile(0.9))
         if numlist:
             print("Generating Histograms for numeric columns")
             try:
