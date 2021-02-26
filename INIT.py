@@ -58,7 +58,7 @@ def INIT(df,info):
         if key:
             x = df.drop(key,axis=1)
             userInteractVisualization(x,target)
-        else:
+        else: 
             userInteractVisualization(df,target)
         uee = time.time()
         print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
@@ -87,6 +87,7 @@ def INIT(df,info):
             train,validation = train_test_split(df,test_size=0.2,random_state=1)
     else:
         LE = None
+        df[target] = df[target].astype(float)
         df[target].clip(lower=df[target].quantile(0.1),upper=df[target].quantile(0.9),inplace=True)
         try:
             train,validation = train_test_split(df,test_size=0.2,random_state=1,stratify=df[target])
@@ -365,7 +366,9 @@ def INIT(df,info):
 
     ############# OUTLIER WINSORIZING ###########
     print('\n#### OUTLIER WINSORIZING ####')
+    bef_out = num_df.shape[0]
     num_df.clip(lower=num_df.quantile(0.1),upper=num_df.quantile(0.9),inplace=True,axis=1)
+    print(f'No. of outliers handled : {bef_out-num_df.shape[0]}')
     print(' #### DONE ####')
     ############# OUTLIER WINSORIZING ###########
 
@@ -450,6 +453,13 @@ def INIT(df,info):
     else:
         print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
     ############# FEATURE SELECTION AND PLOTS #####################
+
+    # rule_val = rules_tree(X_old,y,class_or_Reg,X)
+    # if rule_val == 1:
+    #     print('Rule tree generated')
+    # else:
+    #     print('Rule tree not generated')
+
 
     ##################### Checking for constant columns ###################
 
