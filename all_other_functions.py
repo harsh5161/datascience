@@ -518,8 +518,7 @@ def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var s
           
       return a
 
-def userInteractVisualization(df,targ):
-        df1 =  df.copy() #df.sample(n=1000,random_state=1) if len(df)>1000
+def userInteractVisualization(df1,targ):
         B=list(df1.columns)
         B.remove(targ)
         l=[]
@@ -529,7 +528,10 @@ def userInteractVisualization(df,targ):
                 numlist.remove(col)
         objectlist = list(df1.select_dtypes(include=['object']).columns)
         start = time.time()
-        df[numlist] = df[numlist].clip(lower=df[numlist].quantile(0.1),upper=df[numlist].quantile(0.9))
+        df1[numlist]=df1[numlist].fillna(df1.mode().iloc[0])
+        for col in numlist:
+            df1[col] = df1[col].clip(lower=df1[col].quantile(0.1),upper=df1[col].quantile(0.9))
+
         if numlist:
             print("Generating Histograms for numeric columns")
             try:
