@@ -54,14 +54,13 @@ def INIT(df,info):
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     if not info['graph']:
-        ues = time.time()
         if key:
             x = df.drop(key,axis=1)
-            userInteractVisualization(x,target)
+            eda_df = x.copy()
         else: 
-            userInteractVisualization(df,target)
-        uee = time.time()
-        print('Bi/Uni Variate Plotter time taken : {}'.format(uee-ues))
+            eda_df = df.copy()
+    else:
+        eda_df = pd.DataFrame()
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
@@ -549,7 +548,7 @@ def INIT(df,info):
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
-                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS}
+                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'eda_df' : eda_df}
     print(' #### DONE ####')
     return init_info,validation
     
