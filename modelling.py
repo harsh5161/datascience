@@ -1175,6 +1175,15 @@ class classification:
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
+
+
+      if 'Ensemble' in str(best_name):
+          info = df.sort_values('Weighted F1',ignore_index=True,ascending=False).loc[1,:]
+          explainable_model = info['model']
+          exp_name = info['Machine Learning Model']
+      else:
+          explainable_model =  best_mod
+          exp_name = best_name
       ########################################################################################################
       # Testing area for model performance comparison
     #   for ind in range(0,len(df)-1):
@@ -1193,7 +1202,7 @@ class classification:
 
 
 
-      return best_name,best_mod, best_acc, best_param,df
+      return best_name,best_mod, best_acc, best_param,df,explainable_model,exp_name
 
 
 
@@ -1883,7 +1892,15 @@ class Regression:
       best_mod=best_info['model']
       best_acc=best_info['accuracy']
       best_param=best_info['param']
+      
 
+      if 'Ensemble' in str(best_name):
+          info = df.sort_values('RMSE',ignore_index=True,ascending=True).loc[1,:]
+          explainable_model = info['model']
+          exp_name = info['Machine Learning Model']
+      else:
+          explainable_model =  best_mod
+          exp_name = best_name
       # Testing area for model performance comparison
     #   for ind in range(0,len(df)):
     #       print("!!!!!!!!!!Individual Model  Scores!!!!!!!!",df.at[ind,'Machine Learning Model'])
@@ -1898,4 +1915,4 @@ class Regression:
 
 
 
-      return best_name,best_mod, best_acc, best_param,df
+      return best_name,best_mod, best_acc, best_param,df,explainable_model,exp_name
