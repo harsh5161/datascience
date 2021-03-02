@@ -61,7 +61,7 @@ def ClusterMags(segdata,algo):
     cmags['Cummulative Frequency'] = cmags['Frequency'].cumsum()
     cmags['Cummulative Percent'] = round(((cmags['Frequency']/cmags['Frequency'].sum())* 100).cumsum(),2)
     styled_cmags =cmags.style.set_table_styles(styls).set_precision(2).hide_index() #styling
-    dfi.export(styled_cmags,'Cmags_table_'+str(algo)+'.png')  # storing as image
+    dfi.export(styled_cmags,'Cmags_table_'+str(algo)+'.png',table_conversion='matplotlib')  # storing as image
     display(styled_cmags)
     
     ## bar chart
@@ -116,7 +116,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
                           else '' )) for v in x]
 
         styled_num_cp =num_cp.style.set_table_styles(styls).apply(highlight, subset= num_cp.columns[1:]).set_precision(2).hide_index()  # styling df
-        dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1)  # storing as image
+        dfi.export(styled_num_cp,'Numeric var cluster profiles.png', max_cols=-1,table_conversion='matplotlib')  # storing as image
         print("\nFor easier comparison the overall dataset row is scaled to 100 and all other values are scaled accordingly in the table below. This table can be interpreted like so: For example, if the value of mean of a variable in a cluster is 150, that means, in that particular cluster the mean of said variable is 50% higher than its mean in the overall dataset. ")
         display(styled_num_cp)  # displaying df
 
@@ -189,11 +189,11 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df):
             # if column names in cat_cp contain special characters(which throw a unicodeerror) then they are encoded
             try:  
                 styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
-                dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image     
+                dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1,table_conversion='matplotlib')# save as image     
             except UnicodeEncodeError:
                 cat_cp.columns=pd.Series(cat_cp.columns).apply(lambda x: str(x.encode('utf-8'))[2:-1] if type(x)==str else x)
                 styled_cat_cp =cat_cp.style.set_table_styles(styls).apply(cat_highlight, axis = 1).set_caption(str(col)+" (%)").set_precision(2) #styling
-                dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1)# save as image
+                dfi.export(styled_cat_cp, 'cluster profiles for '+str(col)+ '.png',max_cols=-1,table_conversion='matplotlib')# save as image
            
             print("\nFor easier comparison the overall dataset row is scaled to 100 and all other values are scaled accordingly in the table below. This table can be interpreted like so: For example, if the value of a category in a cluster is 150, that means, in that particular cluster the share of that category is 50 times more than its share in the overall dataset.")
             display(styled_cat_cp)
