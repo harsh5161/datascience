@@ -9,6 +9,7 @@ import swifter
 from sklearn.preprocessing import MinMaxScaler
 import joblib
 from sklearn.model_selection import train_test_split
+import shap
 
 def score(df,init_info,validation=False):
     print('\n\t #### VALIDATION AND SCORING ZONE ####')
@@ -170,6 +171,9 @@ def score(df,init_info,validation=False):
     else:
         X_test = disc_df 
 
+    shapely_X = X_test.copy()
+    shapely_X = shapely_X[init_info['TrainingColumns']]
+    shapely_X = shapely_X.fillna(X_test.mode())
     print('Applying Target Encoding...')
     X_test = init_info['TargetEncoder'].transform(X_test)
     print('Target Encoding completed')
@@ -207,7 +211,7 @@ def score(df,init_info,validation=False):
         start = time.time()
         ############# MODEL TRAINING #############
         print('Modelling...')
-        mod,model_info = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
+        mod,model_info,exp_mod,exp_name = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
         print('Modelling completed')
         print('MODEL SAVED')
         ############# MODEL TRAINING #############
@@ -324,32 +328,38 @@ def score(df,init_info,validation=False):
 
         features = X_test.columns
         try:
-            importances = mod.feature_importances_
+            importances = exp_mod.feature_importances_
             indices = np.argsort(importances)
             plt.figure(figsize=(10,10))
-            plt.title('Feature Importances for Winner Model based on Test Data')
+            plt.title(f'Feature Importances for {exp_name} Explainable Model based on Test Data')
             # only plot the customized number of features
             plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
             plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
             plt.xlabel('Relative Importance')
             plt.show()
         except:
-            for alg in mod.named_estimators:
-                try:
-                    clf = mod.named_estimators[alg]
-                    importances = clf.feature_importances_
-                    indices = np.argsort(importances)
-                    plt.figure(figsize=(10,10))
-                    plt.title(f'Feature Importances for {alg} model in Voting Ensemble based on Test Data')
-                    plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
-                    plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
-                    plt.xlabel('Relative Importance')
-                    plt.show()
-                except:
-                    pass
+            print(f"{exp_name} Model type not supported")
 
 
+    shap.initjs()
+    
+    try:
+        explainer = shap.TreeExplainer(exp_mod,data=X_test)
+        shap_values = explainer.shap_values(X_test,check_additivity=False)
+        for i in range(0,10):
+            shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[0,:],matplotlib=True)
 
+        shap.summary_plot(shap_values, X_test)
+    except :
+        try:
+            explainer = shap.Explainer(exp_mod.predict, X_test)
+            shap_values = explainer.shap_values(X_test,check_additivity=False)
+            for i in range(0,10):
+                shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[0,:],matplotlib=True)
+
+            shap.summary_plot(shap_values, X_test)
+        except Exception as E:
+            print(f"{E} : {exp_name} Model type not supported by SHAP.")
 
 
     ############ Model Explainer #############
