@@ -17,6 +17,7 @@ import json
 import graphviz
 import joblib
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor,export_text
+import shap
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -441,12 +442,12 @@ def model_training(X_train,y_train,X_test,y_test,class_or_Reg,priorList,q_s):
   # Selecting best model
   if class_or_Reg == 'Classification':
     Classification=classification()
-    name,mod,acc,par,model_info = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList,q_s)
+    name,mod,acc,par,model_info,exp_mod,exp_name = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList,q_s)
   else:#Regression
     regression=Regression()
-    name,mod,acc,par,model_info = regression.best_model_reg(X_train, X_test, y_train, y_test,q_s)
+    name,mod,acc,par,model_info,exp_mod,exp_name = regression.best_model_reg(X_train, X_test, y_train, y_test,q_s)
   print('Accuracy :',acc)
-  return mod,model_info
+  return mod,model_info,exp_mod,exp_name
 
 def data_model_select(X_train,y_train):
   if len(X_train) <= 10000:
