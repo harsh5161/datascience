@@ -347,7 +347,7 @@ def score(df,init_info,validation=False):
         explainer = shap.TreeExplainer(exp_mod,data=X_test)
         shap_values = explainer.shap_values(X_test,check_additivity=False)
         for i in range(0,10):
-            shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[0,:],matplotlib=True)
+            shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[i,:],matplotlib=True)
 
         shap.summary_plot(shap_values, X_test)
     except :
@@ -355,11 +355,11 @@ def score(df,init_info,validation=False):
             explainer = shap.Explainer(exp_mod.predict, X_test)
             shap_values = explainer.shap_values(X_test,check_additivity=False)
             for i in range(0,10):
-                shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[0,:],matplotlib=True)
+                shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[i,:],matplotlib=True)
 
             shap.summary_plot(shap_values, X_test)
-        except Exception as E:
-            print(f"{E} : {exp_name} Model type not supported by SHAP.")
+        except Exception as e:
+            print(f"{e} : {exp_name} Model type not supported by SHAP.")
 
 
     ############ Model Explainer #############
