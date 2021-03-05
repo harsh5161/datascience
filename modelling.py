@@ -1176,14 +1176,15 @@ class classification:
       best_acc=best_info['accuracy']
       best_param=best_info['param']
 
+      req_info = df.sort_values('Weighted F1',ignore_index=True,ascending=False)
+      for i in range(len(req_info)):
+          if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
+              continue
+          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] or "Random" in req_info.loc[i,:]['Machine Learning Model']:
+              explainable_model = req_info.loc[i,:]['model']
+              exp_name = req_info.loc[i,:]['Machine Learning Model']
+              break
 
-      if 'Ensemble' in str(best_name):
-          info = df.sort_values('Weighted F1',ignore_index=True,ascending=False).loc[1,:]
-          explainable_model = info['model']
-          exp_name = info['Machine Learning Model']
-      else:
-          explainable_model =  best_mod
-          exp_name = best_name
       ########################################################################################################
       # Testing area for model performance comparison
     #   for ind in range(0,len(df)-1):
@@ -1894,13 +1895,14 @@ class Regression:
       best_param=best_info['param']
       
 
-      if 'Ensemble' in str(best_name):
-          info = df.sort_values('RMSE',ignore_index=True,ascending=True).loc[1,:]
-          explainable_model = info['model']
-          exp_name = info['Machine Learning Model']
-      else:
-          explainable_model =  best_mod
-          exp_name = best_name
+      req_info = df.sort_values('RMSE',ignore_index=True,ascending=True)
+      for i in range(len(req_info)):
+          if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
+              continue
+          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] or "Random" in req_info.loc[i,:]['Machine Learning Model']:
+              explainable_model = req_info.loc[i,:]['model']
+              exp_name = req_info.loc[i,:]['Machine Learning Model']
+              break
       # Testing area for model performance comparison
     #   for ind in range(0,len(df)):
     #       print("!!!!!!!!!!Individual Model  Scores!!!!!!!!",df.at[ind,'Machine Learning Model'])
