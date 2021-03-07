@@ -359,8 +359,6 @@ def score(df,init_info,validation=False):
                 shap.summary_plot(shap_values, X_test)
             except Exception as e:
                 print(f"{e} : {exp_name} Model type not supported by SHAP.")
-        print(type(shap_values))
-        print(shap_values.shape)
         features = features.tolist()[0:3]
         if shap_values.any():
             try:
