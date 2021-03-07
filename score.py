@@ -340,7 +340,6 @@ def score(df,init_info,validation=False):
         except:
             print(f"{exp_name} Model type not supported")
 
-
         shap.initjs()
         
         try:
@@ -360,6 +359,17 @@ def score(df,init_info,validation=False):
                 shap.summary_plot(shap_values, X_test)
             except Exception as e:
                 print(f"{e} : {exp_name} Model type not supported by SHAP.")
+        print(type(shap_values))
+        print(shap_values.shape)
+        features = features.tolist()[0:3]
+        if shap_values.any():
+            try:
+                print("Generating Dependence Scatter Plots")
+                for val in features:
+                    shap.dependence_plot(val,shap_values,X_test)
+            except Exception as e:
+                print(e)
+
 
 
     ############ Model Explainer #############
