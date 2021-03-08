@@ -4,7 +4,7 @@ import re
 from userInputs import *
 
 def web_init():
-	path = 'datasets/telco.csv' #Plug in the path to the valid dataset
+	path = 'datasets/loandefault.csv' #Plug in the path to the valid dataset
 	df, _ = importFile(path)
 	df = df.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
 	df = duplicateHandler(df)
@@ -13,7 +13,17 @@ def web_init():
 
 	if len(df)>1000:
 		df = df.sample(n=1000,random_state=42)
-    
+
+	# print(f'No. of NAs in dataset before transformation {df.isna().sum()}')
+
+	numlist = list(df.select_dtypes(include=['int64','float64']).columns)
+	objectlist = list(df.select_dtypes(include=['object']).columns)
+	df[numlist]=df[numlist].fillna(df.mode().iloc[0])
+	for col in numlist:
+		df[col] = df[col].clip(lower=df[col].quantile(0.1),upper=df[col].quantile(0.9))
+	df[objectlist] = df[objectlist].fillna('missing',axis=1)
+
+	# print(f'No. of NAs in dataset after transformation {df.isna().sum()}')
 	print(f'Returning DataFrame of shape {df.shape}')
 	return df
 
