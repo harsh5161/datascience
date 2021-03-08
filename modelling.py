@@ -1180,7 +1180,7 @@ class classification:
       for i in range(len(req_info)):
           if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
               continue
-          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] or "Random" in req_info.loc[i,:]['Machine Learning Model']:
+          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] :
               explainable_model = req_info.loc[i,:]['model']
               exp_name = req_info.loc[i,:]['Machine Learning Model']
               break
@@ -1899,7 +1899,7 @@ class Regression:
       for i in range(len(req_info)):
           if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
               continue
-          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] or "Random" in req_info.loc[i,:]['Machine Learning Model']:
+          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model']:
               explainable_model = req_info.loc[i,:]['model']
               exp_name = req_info.loc[i,:]['Machine Learning Model']
               break
