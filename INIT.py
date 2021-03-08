@@ -452,19 +452,12 @@ def INIT(df,info):
     else:
         print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
     ############# FEATURE SELECTION AND PLOTS #####################
-
-    # rule_val = rules_tree(X_old,y,class_or_Reg,X)
-    # if rule_val == 1:
-    #     print('Rule tree generated')
-    # else:
-    #     print('Rule tree not generated')
-
-
     ##################### Checking for constant columns ###################
 
     for col in X.columns:
         if X[col].nunique() == 1:
             X.drop(col,axis=1,inplace=True)
+            X_old.drop(col,axis=1,inplace=True)
             print(f"Dropping column {col} because it only contains one value throughout the column")
 
     TrainingColumns = X.columns
@@ -500,10 +493,20 @@ def INIT(df,info):
             print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
     ############# CART DECISION TREE VISUALIZATION #####################   
 
-    # for col in X.columns:
-    #     X[col].hist()
-    
-    # y.hist()
+    ############# RULE TREE VISUALIZATION #####################   
+
+    if class_or_Reg == 'Classification':
+        ros = RandomOverSampler(sampling_strategy='minority')
+        X_rt, y_rt = ros.fit_resample(X,y)
+        rule_val = rules_tree(X_old,y_rt,class_or_Reg,X_rt)
+    else:
+        rule_val = rules_tree(X_old,y,class_or_Reg,X)
+
+    if rule_val:
+        print('Rule Tree Generated')
+    else:
+        print('Rule Tree not Generated')
+    ############# RULE TREE VISUALIZATION ##################### 
 
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
     print('\n #### SCALING ####')
