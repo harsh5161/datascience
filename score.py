@@ -347,7 +347,8 @@ def score(df,init_info,validation=False):
             shap_values = explainer.shap_values(X_test,check_additivity=False)
             if init_info['ML'] == 'Regression':
                 for i in range(0,4):
-                    shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[i,:],matplotlib=True)
+                    value = int(np.random.randint(0,len(shap_values),1))
+                    shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True)
 
             shap.summary_plot(shap_values, X_test)
         except :
@@ -356,7 +357,8 @@ def score(df,init_info,validation=False):
                 shap_values = explainer.shap_values(X_test,check_additivity=False)
                 if init_info['ML'] == 'Regression':
                     for i in range(0,4):
-                        shap.force_plot(explainer.expected_value, shap_values[i,:], shapely_X.iloc[i,:],matplotlib=True)
+                        value = int(np.random.randint(0,len(shap_values),1))
+                        shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True)
 
                 shap.summary_plot(shap_values, X_test)
             except Exception as e:
