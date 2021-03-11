@@ -451,7 +451,76 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
 
   return asf, lda_model_tfidf
 
+def returnPol(x):
+    if float(x) > 0.0:
+        return "Positive"
+    elif float(x) < 0.0:
+        return "Negative"
+    elif float(x) == 0.0:
+        return "Neutral"
+def returnCountSum(x,val):
+    if val in x[0]:
+        return x[2]
+    else:
+        return np.nan
+def text_analytics(polarity,review,mode,target):
+    print("Running Text Analytics...")
+    for col in polarity.columns:        #Dropping Subjectivity from sentiment_frame
+        if "Subjectivity" in col:
+            polarity.drop(col,axis=1,inplace=True)
 
+    for col in review.columns:
+        temp = []
+        req = pd.DataFrame()
+        for pol_col in polarity.columns:
+            if str(col) in pol_col:
+                req['Review'] = review[col]
+                req['Polarity'] = polarity[pol_col]
+            
+        processed_docs = req['Review'].map(preprocess)
+        req['Review'] = processed_docs
+        req['Polarity_s'] = req['Polarity'].apply(lambda x: returnPol(x))
+        req['Target'] = target
+        req.drop('Polarity',axis=1,inplace=True)
+        req['Target'].fillna(req['Target'].mode()[0], inplace=True)
+        # print(req)
+        if mode == 'Classification':
+            target_vals = list(set(req['Target'].tolist()))
+        trem = req.groupby('Polarity_s')
+        # groups = [trem.get_group(x) for x in ['Negative','Neutral','Positive']] # for x in trem.groups
+        # print(groups)
+        for i in ['Negative','Neutral','Positive']:
+            l2 = []
+            temp_df = pd.DataFrame(trem.get_group(i))
+            temp_one = []
+            temp_one.extend(temp_df['Review'])
+            flat_list = [item for sublist in temp_one for item in sublist]
+            common = Counter(flat_list).most_common(20)
+            output_df = pd.DataFrame()
+            output_df['Top Words'] = np.array([item[0] for item in common[:]])
+            output_df['Word count in Dataset'] = np.array([item[1] for item in common[:]])
+            output_df['Polarity'] = np.array([i for j in range(20)])
+            for val in [item[0] for item in common[:]]:
+                l3 = []
+                if mode == 'Regression':
+                    ser = req.apply(lambda x: returnCountSum(x,val),axis=1).to_list()
+                    l2.append(np.nanmean(ser))
+                elif mode == 'Classification':
+                    ser = req.apply(lambda x: returnCountSum(x,val),axis=1).to_list()
+                    for k in target_vals:
+                        l3.append(ser.count(k))
+                    l2.append(l3)
+            m = 0
+            if mode == 'Regression':        
+                output_df['Influence of Word on Target'] = l2 
+            elif mode == 'Classification':
+                for k in target_vals:
+                    if m <= len(target_vals):
+                        output_df[f'Influence of Word on Target [{k}]'] = [item[m] for item in l2]
+                        m = m+1
+                        continue
+            print(output_df) 
+        
 ############################################
 ############## EMAIL ENGINEERING ##############
 ############################################
