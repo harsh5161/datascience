@@ -313,8 +313,6 @@ def INIT(df,info):
             new_frame = X[some_list].copy()
             new_frame.fillna(value="None",inplace=True)
             lda_models = pd.DataFrame(index= range(5),columns=['Model'])
-            print("TEXT_DF",TEXT_DF)
-            print("NEW_FRAME",new_frame)
             ind = 0
             text_analytics(sentiment_frame,new_frame,class_or_Reg,y)
             for col in new_frame.columns:
