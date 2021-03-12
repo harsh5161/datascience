@@ -498,7 +498,6 @@ def text_analytics(polarity,review,mode,target):
             common = Counter(flat_list).most_common(20)
             output_df = pd.DataFrame()
             output_df['Top Words'] = np.array([item[0] for item in common[:]])
-            output_df['Word count in Dataset'] = np.array([item[1] for item in common[:]])
             output_df['Polarity'] = np.array([i for j in range(20)])
             for val in [item[0] for item in common[:]]:
                 l3 = []
@@ -512,11 +511,11 @@ def text_analytics(polarity,review,mode,target):
                     l2.append(l3)
             m = 0
             if mode == 'Regression':        
-                output_df['Influence of Word on Target'] = l2 
+                output_df['Influence of Word on Target (Mean)'] = l2 
             elif mode == 'Classification':
                 for k in target_vals:
                     if m <= len(target_vals):
-                        output_df[f'Influence of Word on Target [{k}]'] = [item[m] for item in l2]
+                        output_df[f'Influence of Word on Target [{k}] (Count)'] = [item[m] for item in l2]
                         m = m+1
                         continue
             print(output_df) 
