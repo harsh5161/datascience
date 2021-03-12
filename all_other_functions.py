@@ -261,10 +261,10 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
                     s=s+str(model.coef_[i][j])+"*"+X.columns[j]+" + "
                 s=s+str(model.intercept_[i])
 
-                lbls = LE.inverse_transform(model.classes_)       #to display class names of target instead of numbers
+                lbls = LE.inverse_transform([1])       #to display class names of target instead of numbers
                 print("ln(odds) = " + s)
                 print("\n=> odds = exp ( "+s+" )")
-                print("\nWhere, odds = P(class={}) / 1 - P(class={}) \n".format(lbls[i+1],lbls[i+1]))
+                print("\nWhere, odds = P(class={}) / 1 - P(class={}) \n".format(lbls,lbls))
                 print("In simple terms Odds of an event happening is defined as the likelihood that an event will occur, expressed as a proportion of the likelihood that the event will not occur. For example - the odds of rolling four on a dice are 1/6 or 16.67%.")
                 print("\nEstimated f1 score = ","{:.2%}".format(Decimal(str(f1_score(Y,Y_pred,average='weighted')))) )
                 print("(F1 score is the harmonic mean of precision and recall, it tells how good the model is at predicting correctly and avoiding false predictions. Simply put, it is approximate accuracy.)")
