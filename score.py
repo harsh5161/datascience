@@ -10,6 +10,7 @@ from sklearn.preprocessing import MinMaxScaler
 import joblib
 from sklearn.model_selection import train_test_split
 import shap
+import matplotlib.pyplot as plt
 
 def score(df,init_info,validation=False):
     print('\n\t #### VALIDATION AND SCORING ZONE ####')
@@ -348,9 +349,7 @@ def score(df,init_info,validation=False):
             if init_info['ML'] == 'Regression':
                 for i in range(0,4):
                     value = int(np.random.randint(0,len(shap_values),1))
-                    shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True)
-
-            shap.summary_plot(shap_values, X_test)
+                    shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True,show=False).savefig(f'forceplot{i}.png',bbox_inches='tight')
         except :
             try:
                 explainer = shap.Explainer(exp_mod.predict, X_test)
@@ -358,11 +357,14 @@ def score(df,init_info,validation=False):
                 if init_info['ML'] == 'Regression':
                     for i in range(0,4):
                         value = int(np.random.randint(0,len(shap_values),1))
-                        shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True)
-
-                shap.summary_plot(shap_values, X_test)
+                        shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True,show=False).savefig(f'forceplot{i}.png',bbox_inches='tight')
             except Exception as e:
                 print(f"{e} : {exp_name} Model type not supported by SHAP.")
+        plt.close('all')
+        try:
+            shap.summary_plot(shap_values, X_test)
+        except Exception as e:
+            print(e)
         features = features.tolist()[0:3]
         if shap_values.any():
             try:
