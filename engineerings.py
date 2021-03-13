@@ -471,6 +471,7 @@ def text_analytics(polarity,review,mode,target):
 
     for col in review.columns:
         temp = []
+        oxford = {}
         req = pd.DataFrame()
         for pol_col in polarity.columns:
             if str(col) in pol_col:
@@ -518,7 +519,13 @@ def text_analytics(polarity,review,mode,target):
                         output_df[f'Influence of Word on Target [{k}] (Count)'] = [item[m] for item in l2]
                         m = m+1
                         continue
-            print(output_df) 
+            oxford[f'{i}'] = output_df
+        req_list = []
+        for key, value in oxford.items():
+            req_list.append(value)
+        output_df = pd.concat(req_list,axis=1)
+        print(output_df)
+        output_df.to_csv("output_df.csv")
         
 ############################################
 ############## EMAIL ENGINEERING ##############
