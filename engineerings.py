@@ -463,7 +463,7 @@ def returnCountSum(x,val):
         return x[2]
     else:
         return np.nan
-def text_analytics(polarity,review,mode,target):
+def text_analytics(polarity,review,mode,target,LE):
     print("Running Text Analytics...")
     for col in polarity.columns:        #Dropping Subjectivity from sentiment_frame
         if "Subjectivity" in col:
@@ -484,9 +484,11 @@ def text_analytics(polarity,review,mode,target):
         req['Target'] = target
         req.drop('Polarity',axis=1,inplace=True)
         req['Target'].fillna(req['Target'].mode()[0], inplace=True)
+        req['Target'] = req['Target'].astype('int')
         # print(req)
         if mode == 'Classification':
             target_vals = list(set(req['Target'].tolist()))
+            # target_vals = LE.inverse_transform(target_vals)
         trem = req.groupby('Polarity_s')
         # groups = [trem.get_group(x) for x in ['Negative','Neutral','Positive']] # for x in trem.groups
         # print(groups)
@@ -514,7 +516,7 @@ def text_analytics(polarity,review,mode,target):
             if mode == 'Regression':        
                 output_df['Influence of Word on Target (Mean)'] = l2 
             elif mode == 'Classification':
-                for k in target_vals:
+                for k in LE.inverse_transform(target_vals).tolist()[:]:
                     if m <= len(target_vals):
                         output_df[f'Influence of Word on Target [{k}] (Count)'] = [item[m] for item in l2]
                         m = m+1
@@ -525,7 +527,7 @@ def text_analytics(polarity,review,mode,target):
             req_list.append(value)
         output_df = pd.concat(req_list,axis=1)
         print(output_df)
-        output_df.to_csv("output_df.csv")
+        # output_df.to_csv("output_df.csv")
         
 ############################################
 ############## EMAIL ENGINEERING ##############
