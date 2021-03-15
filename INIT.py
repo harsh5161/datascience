@@ -314,7 +314,7 @@ def INIT(df,info):
             new_frame.fillna(value="None",inplace=True)
             lda_models = pd.DataFrame(index= range(5),columns=['Model'])
             ind = 0
-            text_analytics(sentiment_frame,new_frame,class_or_Reg,y)
+            text_analytics(sentiment_frame,new_frame,class_or_Reg,y,LE)
             for col in new_frame.columns:
                 topic_frame, lda_model = topicExtraction(new_frame[[col]])
                 topic_frame.rename(columns={0:str(col)+"_Topic"},inplace=True)
