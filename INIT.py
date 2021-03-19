@@ -498,9 +498,9 @@ def INIT(df,info):
     if class_or_Reg == 'Classification':
         ros = RandomOverSampler(sampling_strategy='minority')
         X_rt, y_rt = ros.fit_resample(X,y)
-        rule_val = rules_tree(X_old,y_rt,class_or_Reg,X_rt)
+        rule_val = rules_tree(X_old,y_rt,class_or_Reg,X_rt,LE)
     else:
-        rule_val = rules_tree(X_old,y,class_or_Reg,X)
+        rule_val = rules_tree(X_old,y,class_or_Reg,X,LE)
 
     if rule_val:
         print('Rule Tree Generated')
