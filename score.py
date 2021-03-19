@@ -365,14 +365,6 @@ def score(df,init_info,validation=False):
             shap.summary_plot(shap_values, X_test)
         except Exception as e:
             print(e)
-        features = features.tolist()[0:3]
-        if shap_values.any():
-            try:
-                print("Generating Dependence Scatter Plots")
-                for val in features:
-                    shap.dependence_plot(val,shap_values,X_test)
-            except Exception as e:
-                print(e)
 
 
 
