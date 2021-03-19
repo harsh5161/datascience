@@ -619,13 +619,15 @@ def format_y_labels(x,stored_labels):
         else:
             return np.nan
 
-def rules_tree(X,y,mode,X_transformed):
+def rules_tree(X,y,mode,X_transformed,LE):
     print('Trying to generate a rule tree...')
     if mode == 'Classification':
         text_selector = DecisionTreeClassifier(class_weight='balanced',max_depth=4,min_samples_split=int(0.05*len(X_transformed)),ccp_alpha=0.001)
+        y.fillna(y.mode()[0],inplace=True)
+        y = y.astype('int')
+        y = LE.inverse_transform(y)
     else :
         text_selector = DecisionTreeRegressor(max_depth=4,min_samples_split=int(0.05*len(X_transformed)),ccp_alpha=0.001)
-
     for i in tqdm(range(10)):
         text_selector.fit(X_transformed,y)
 
