@@ -1177,13 +1177,17 @@ class classification:
       best_param=best_info['param']
 
       req_info = df.sort_values('Weighted F1',ignore_index=True,ascending=False)
-      for i in range(len(req_info)):
-          if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
-              continue
-          elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] :
-              explainable_model = req_info.loc[i,:]['model']
-              exp_name = req_info.loc[i,:]['Machine Learning Model']
-              break
+      if imbalance==0:
+        for i in range(len(req_info)):
+            if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
+                continue
+            elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] :
+                explainable_model = req_info.loc[i,:]['model']
+                exp_name = req_info.loc[i,:]['Machine Learning Model']
+                break
+      else:
+          explainable_model = None
+          exp_name = None
 
       ########################################################################################################
       # Testing area for model performance comparison
