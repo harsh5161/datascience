@@ -442,12 +442,12 @@ def model_training(X_train,y_train,X_test,y_test,class_or_Reg,priorList,q_s):
   # Selecting best model
   if class_or_Reg == 'Classification':
     Classification=classification()
-    name,mod,acc,par,model_info,exp_mod,exp_name = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList,q_s)
+    name,mod,acc,par,model_info,exp_mod,exp_name,feat_mod,feat_name = Classification.best_model_class(X_train, X_test, y_train.values, y_test.values,priorList,q_s)
   else:#Regression
     regression=Regression()
-    name,mod,acc,par,model_info,exp_mod,exp_name = regression.best_model_reg(X_train, X_test, y_train, y_test,q_s)
+    name,mod,acc,par,model_info,exp_mod,exp_name,feat_mod,feat_name = regression.best_model_reg(X_train, X_test, y_train, y_test,q_s)
   print('Accuracy :',acc)
-  return mod,model_info,exp_mod,exp_name
+  return mod,model_info,exp_mod,exp_name,feat_mod,feat_name
 
 def data_model_select(X_train,y_train):
   if len(X_train) <= 10000:
@@ -634,3 +634,20 @@ def rules_tree(X,y,mode,X_transformed,LE):
     text_rules = export_text(text_selector,feature_names=X.columns.to_list(),show_weights=True,decimals=0)
     joblib.dump(text_rules,'text_rule.txt')
     return text_rules
+
+
+def featureimportance(exp_mod,exp_name,num_features,features):
+    r = random.random()
+    b = random.random()
+    g = random.random()
+    colors = (r, g, b)
+    importances = exp_mod.feature_importances_
+    indices = np.argsort(importances)
+    plt.figure(figsize=(10,10))
+    plt.title(f'Feature Importances for {exp_name} Explainable Model based on Test Data')
+    # only plot the customized number of features
+    plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
+    plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
+    plt.xlabel('Relative Importance')
+    plt.show()
+    plt.close('all')
