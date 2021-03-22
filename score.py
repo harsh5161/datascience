@@ -212,7 +212,7 @@ def score(df,init_info,validation=False):
         start = time.time()
         ############# MODEL TRAINING #############
         print('Modelling...')
-        mod,model_info,exp_mod,exp_name = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
+        mod,model_info,exp_mod,exp_name,feat_mod,feat_name = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
         print('Modelling completed')
         print('MODEL SAVED')
         ############# MODEL TRAINING #############
@@ -329,17 +329,12 @@ def score(df,init_info,validation=False):
 
         features = X_test.columns
         try:
-            importances = exp_mod.feature_importances_
-            indices = np.argsort(importances)
-            plt.figure(figsize=(10,10))
-            plt.title(f'Feature Importances for {exp_name} Explainable Model based on Test Data')
-            # only plot the customized number of features
-            plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
-            plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
-            plt.xlabel('Relative Importance')
-            plt.show()
+            featureimportance(feat_mod,feat_name,num_features,features)
         except:
-            print(f"{exp_name} Model type not supported")
+            try:
+                featureimportance(exp_mod,exp_name,num_features,features)
+            except:
+                print(f"{exp_name} Model type not supported")
 
         shap.initjs()
         
@@ -362,7 +357,14 @@ def score(df,init_info,validation=False):
                 print(f"{e} : {exp_name} Model type not supported by SHAP.")
         plt.close('all')
         try:
-            shap.summary_plot(shap_values, X_test)
+            string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
+            shap.summary_plot(shap_values, X_test,title=string)
+            if init_info['ML'] == 'Classification':
+                LE  = init_info['TargetLabelEncoder']
+                le_mapping = dict(zip(LE.classes_, LE.transform(LE.classes_)))
+                encoded_targ = pd.DataFrame(le_mapping.items(),columns = ['Target Classes','Encodings'])
+                print('Generating Target Encodings')
+                print(encoded_targ) #Embed this dataframe in the WebApp on the right side of the summary plot
         except Exception as e:
             print(e)
 
