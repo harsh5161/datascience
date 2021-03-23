@@ -633,7 +633,7 @@ def rules_tree(X,y,mode,X_transformed,LE):
 
     text_rules = export_text(text_selector,feature_names=X.columns.to_list(),show_weights=True,decimals=0)
     joblib.dump(text_rules,'text_rule.txt')
-    return text_rules
+    return text_rules,text_selector
 
 
 def featureimportance(exp_mod,exp_name,num_features,features):
@@ -651,3 +651,26 @@ def featureimportance(exp_mod,exp_name,num_features,features):
     plt.xlabel('Relative Importance')
     plt.show()
     plt.close('all')
+
+def ruleTesting(X_test,y_test,mode,model,LE):
+    if mode == 'Classification':
+        result = pd.DataFrame(index = range(1),columns=['Machine Learning Model','Accuracy%','Precision','Recall','Weighted F1'])
+        predictions = model.predict(X_test)
+        try:
+            predictions = [int(i) for i in predictions[:]]
+        except:
+            predictions = [int(i) for i in LE.transform(predictions[:]).tolist()]
+        result['Machine Learning Model'] = 'Decision Tree Classifier'
+        result['Accuracy%'] = "{:.2%}".format(Decimal(str(accuracy_score(y_test, predictions))))
+        result['Precision'] = precision_score(y_test, predictions,average='weighted')
+        result['Recall'] = recall_score(y_test, predictions,average='weighted')
+        result['Weighted F1'] = f1_score(y_test, predictions,average='weighted')
+    else:
+        result = pd.DataFrame(index = range(1),columns=['Machine Learning Model','RMSE','MSE','MAE'])
+        predictions = model.predict(X_test)
+        result['Machine Learning Model'] = 'Decision Tree Regressor'
+        result['RMSE'] = sqrt(mean_squared_error(y_test, predictions))
+        result['MSE'] = mean_squared_error(y_test, predictions)
+        result['MAE'] = mean_absolute_error(y_test, predictions)
+
+    return result
