@@ -11,7 +11,7 @@ import joblib
 from sklearn.model_selection import train_test_split
 import shap
 import matplotlib.pyplot as plt
-
+from imblearn.over_sampling import RandomOverSampler
 def score(df,init_info,validation=False):
     print('\n\t #### VALIDATION AND SCORING ZONE ####')
 
@@ -194,6 +194,12 @@ def score(df,init_info,validation=False):
     # joblib.dump(X_train,'XT')
     # joblib.dump(y_train,'YT')
     # joblib.dump(y_test,'Yt')
+    if validation:
+        if init_info['ML'] == 'Classification':
+            ros = RandomOverSampler(sampling_strategy='minority')
+            X_rt,y_rt = ros.fit_resample(X_test,y_test)
+        else:
+            X_rt,y_rt = X_test,y_test
 
     print('\n #### PRINTING THE LIST OF COLUMNS AND ITS TYPES THAT ENTER THE MODEL TRAINING ####')
     print('#### PRINTING X_test ####')
@@ -213,6 +219,9 @@ def score(df,init_info,validation=False):
         ############# MODEL TRAINING #############
         print('Modelling...')
         mod,model_info,exp_mod,exp_name,feat_mod,feat_name = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
+        rule_result = ruleTesting(X_rt,y_rt,init_info['ML'],init_info['rule_model'],init_info['TargetLabelEncoder'])
+        print('Printing Rule Tree Model Information')
+        print(rule_result) #This needs to be embedded in the WebApp right below the text-rule tree image
         print('Modelling completed')
         print('MODEL SAVED')
         ############# MODEL TRAINING #############
