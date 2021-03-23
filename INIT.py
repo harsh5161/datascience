@@ -498,9 +498,9 @@ def INIT(df,info):
     if class_or_Reg == 'Classification':
         ros = RandomOverSampler(sampling_strategy='minority')
         X_rt, y_rt = ros.fit_resample(X,y)
-        rule_val = rules_tree(X_old,y_rt,class_or_Reg,X_rt,LE)
+        rule_val,rule_model = rules_tree(X_old,y_rt,class_or_Reg,X_rt,LE)
     else:
-        rule_val = rules_tree(X_old,y,class_or_Reg,X,LE)
+        rule_val,rule_model = rules_tree(X_old,y,class_or_Reg,X,LE)
 
     if rule_val:
         print('Rule Tree Generated')
@@ -551,7 +551,8 @@ def INIT(df,info):
                 'TargetEncoder':TE,'MinMaxScaler':MM,'PowerTransformer':PT,'TargetLabelEncoder':LE,'Target':target,
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
-                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols, 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'eda_df' : eda_df}
+                'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols,
+                 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'eda_df' : eda_df,'rule_model':rule_model}
     print(' #### DONE ####')
     return init_info,validation
     
