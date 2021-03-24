@@ -418,6 +418,8 @@ def INIT(df,info):
     X_old = X.copy()# X_old is before Target Encoding
 
     ############# TARGET ENCODING ############
+    temp = disc_df.columns.tolist()
+    X_1 = X.copy()
     TE = TargetEncoder(cols=disc_df.columns)
     print('\n #### TARGET ENCODING ####')
     te_start = time.time()
@@ -427,7 +429,7 @@ def INIT(df,info):
     print(y.shape)
     print('Target Encoding Time taken : {}'.format(te_end-te_start))
     ############# TARGET ENCODING ############
-
+    X_2 = X.copy()
     ############# FEATURE SELECTION AND PLOTS ############
     if (len(X.columns)>=10):
         print('\n #### FEATURE SELECTION ####')
@@ -507,7 +509,6 @@ def INIT(df,info):
     else:
         print('Rule Tree not Generated')
     ############# RULE TREE VISUALIZATION ##################### 
-
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
     print('\n #### SCALING ####')
     MM = MinMaxScaler(feature_range=(1, 2))
@@ -524,7 +525,6 @@ def INIT(df,info):
     print(X.shape)
     print(y.shape)
     ############# NORMALISATION AND TRANSFORMATIONS ##################### 
-
     ############# SAMPLE EQUATION ##################### 
     print('\n #### Printing Sample Equation of the DATA ####')
     # The few lines below consider only columns of object/category type that remained after feature selection
@@ -544,6 +544,19 @@ def INIT(df,info):
     print('This is final shape of Y_train : {}\n'.format(y.shape))
     ############# SAMPLE EQUATION ##################### 
 
+    ############# SHAP ENCODINGS ##################### 
+
+    for val in temp[:]:
+        if val not in X.columns.tolist():
+            temp.drop(val)
+    encoded_disc = []
+    for col in temp:
+        encoding_df = pd.DataFrame()
+        encoding_df[f'Original {col} Values'] = X_1[col].unique()
+        encoding_df[f'Encoded {col} Values'] = X_2[col].unique()
+        encoded_disc.append(encoding_df)
+
+    ############# SHAP ENCODINGS ##################### 
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
@@ -552,7 +565,7 @@ def INIT(df,info):
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
                 'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols,
-                 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'eda_df' : eda_df,'rule_model':rule_model}
+                 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'eda_df' : eda_df,'rule_model':rule_model,'encoded_disc':encoded_disc}
     print(' #### DONE ####')
     return init_info,validation
     

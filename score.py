@@ -374,6 +374,8 @@ def score(df,init_info,validation=False):
                 encoded_targ = pd.DataFrame(le_mapping.items(),columns = ['Target Classes','Encodings'])
                 print('Generating Target Encodings')
                 print(encoded_targ) #Embed this dataframe in the WebApp on the right side of the summary plot
+            for idf in init_info['encoded_disc']:
+                print(idf) #a number of dataframes gets generated here, which will vary per usecase: embed them in the same place as encoded_targ
         except Exception as e:
             print(e)
 
