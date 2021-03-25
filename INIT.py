@@ -551,10 +551,13 @@ def INIT(df,info):
             temp.drop(val)
     encoded_disc = []
     for col in temp:
-        encoding_df = pd.DataFrame()
-        encoding_df[f'Original {col} Values'] = X_1[col].unique()
-        encoding_df[f'Encoded {col} Values'] = X_2[col].unique()
-        encoded_disc.append(encoding_df)
+        try:
+            encoding_df = pd.DataFrame()
+            encoding_df[f'Original {col} Values'] = X_1[col].unique()
+            encoding_df[f'Encoded {col} Values'] = X_2[col].unique()
+            encoded_disc.append(encoding_df)
+        except:
+            pass
 
     ############# SHAP ENCODINGS ##################### 
     print('\n #### SAVING INIT INFORMATION ####')
