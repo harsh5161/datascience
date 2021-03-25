@@ -548,7 +548,7 @@ def INIT(df,info):
 
     for val in temp[:]:
         if val not in X.columns.tolist():
-            temp.drop(val)
+            temp.remove(val)
     encoded_disc = []
     for col in temp:
         try:
