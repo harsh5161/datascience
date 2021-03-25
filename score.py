@@ -338,10 +338,10 @@ def score(df,init_info,validation=False):
 
         features = X_test.columns
         try:
-            featureimportance(feat_mod,feat_name,num_features,features)
+            top_ten = featureimportance(feat_mod,feat_name,num_features,features)
         except:
             try:
-                featureimportance(exp_mod,exp_name,num_features,features)
+                top_ten = featureimportance(exp_mod,exp_name,num_features,features)
             except:
                 print(f"{exp_name} Model type not supported")
 
@@ -374,8 +374,12 @@ def score(df,init_info,validation=False):
                 encoded_targ = pd.DataFrame(le_mapping.items(),columns = ['Target Classes','Encodings'])
                 print('Generating Target Encodings')
                 print(encoded_targ) #Embed this dataframe in the WebApp on the right side of the summary plot
-            for idf in init_info['encoded_disc']:
-                print(idf) #a number of dataframes gets generated here, which will vary per usecase: embed them in the same place as encoded_targ
+            for top in top_ten:
+                for idf in init_info['encoded_disc']:
+                    if top in idf.columns.tolist()[0]:
+                        print(idf)
+                    else:
+                        continue
         except Exception as e:
             print(e)
 

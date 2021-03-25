@@ -555,7 +555,8 @@ def INIT(df,info):
             encoding_df = pd.DataFrame()
             encoding_df[f'Original {col} Values'] = X_1[col].unique()
             encoding_df[f'Encoded {col} Values'] = X_2[col].unique()
-            encoded_disc.append(encoding_df)
+            if len(encoding_df)<=10:
+                encoded_disc.append(encoding_df)
         except:
             pass
 
