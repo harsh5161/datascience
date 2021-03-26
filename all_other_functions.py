@@ -651,6 +651,7 @@ def featureimportance(exp_mod,exp_name,num_features,features):
     plt.xlabel('Relative Importance')
     plt.show()
     plt.close('all')
+    return [features[i] for i in indices[-num_features:]]
 
 def ruleTesting(X_test,y_test,mode,model,LE):
     if mode == 'Classification':
