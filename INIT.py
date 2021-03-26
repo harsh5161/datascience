@@ -556,6 +556,7 @@ def INIT(df,info):
             encoding_df[f'{col}'] = X_1[col].unique()
             encoding_df['Encoding'] = X_2[col].unique()
             encoding_df['Encoding'] = encoding_df['Encoding'].round(decimals=2)
+            encoding_df = encoding_df.sort_values('Encoding',ignore_index=True,ascending=True)
             if len(encoding_df)<5:
                 encoded_disc.append(encoding_df)
         except:
