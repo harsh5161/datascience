@@ -553,9 +553,10 @@ def INIT(df,info):
     for col in temp:
         try:
             encoding_df = pd.DataFrame()
-            encoding_df[f'Original {col} Values'] = X_1[col].unique()
-            encoding_df[f'Encoded {col} Values'] = X_2[col].unique()
-            if len(encoding_df)<=10:
+            encoding_df[f'{col}'] = X_1[col].unique()
+            encoding_df['Encoding'] = X_2[col].unique()
+            encoding_df['Encoding'] = encoding_df['Encoding'].round(decimals=2)
+            if len(encoding_df)<5:
                 encoded_disc.append(encoding_df)
         except:
             pass
