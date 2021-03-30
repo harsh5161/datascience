@@ -315,7 +315,6 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE,feat):
     dum2=pd.DataFrame()  
 #     list_dfs=[]
     selected_obj_cols=list(set(selected_features)&set(obj_df.columns))
-    selected_obj_cols.extend(feat)
     if len(selected_obj_cols)!=0:  # to only print those encoded columns which are included in equation
             print("\nWhere the columns are encoded like this:\n")             
             for i in selected_obj_cols: 
@@ -344,7 +343,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE,feat):
         
 #     if list_dfs:    # only display table grid if any columns were encoded
 #         multi_column_df_display(list_dfs)
-
+    print(feat)
+    return list(set(feat))
 
 def featureSelectionPlot(feat_df):
     f = 20

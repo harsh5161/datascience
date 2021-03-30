@@ -8,6 +8,7 @@ from category_encoders import TargetEncoder
 import joblib
 from Viz import *
 from imblearn.over_sampling import RandomOverSampler
+from tabulate import tabulate 
 
 def INIT(df,info):
     print("Length of the dataframe entering INIT is: ", df.shape[0])
@@ -544,7 +545,7 @@ def INIT(df,info):
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
-        SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE,feat)
+        selected_obj_cols = SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE,feat)
         
     except Exception as e:
         print(e)
@@ -563,17 +564,32 @@ def INIT(df,info):
     encoded_disc = []
     for col in temp:
         try:
+            print('Generating SHAP encodings...')
             encoding_df = pd.DataFrame()
             encoding_df[f'{col}'] = X_1[col].unique()
             encoding_df['Encoding'] = X_2[col].unique()
             encoding_df['Encoding'] = encoding_df['Encoding'].round(decimals=2)
             encoding_df = encoding_df.sort_values('Encoding',ignore_index=True,ascending=True)
+            print (tabulate(encoding_df, headers='keys', tablefmt='psql', showindex=False)) #to output on python not for webapp
             if len(encoding_df)<5:
                 encoded_disc.append(encoding_df)
         except:
             pass
-
     ############# SHAP ENCODINGS ##################### 
+
+    ############# RT ENCODINGS ##################### 
+    print("Generating Rule Tree Encodings.....")
+    print(selected_obj_cols)
+    for val in selected_obj_cols:
+        rule_df = pd.DataFrame()
+        rule_df[f'{val}'] = X_1[val].unique()
+        rule_df['Encoding'] = X_2[val].unique()
+        rule_df['Encoding'] = rule_df['Encoding'].round(decimals=2)
+        rule_df = rule_df.sort_values('Encoding',ignore_index=True,ascending=True) 
+        #extract rule_df here and embed onto webapp under ruletree
+        print (tabulate(rule_df, headers='keys', tablefmt='psql', showindex=False)) #to output on python not for webapp
+    ############# RT ENCODINGS ##################### 
+    
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
