@@ -76,6 +76,9 @@ def INIT(df,info):
     print('\n {} rows were removed since target had these missing'.format(len(rowsRemoved)))
     print(f'Target Unique values and count \n {df[target].value_counts()} \n Unique values \n {df[target].nunique()}')
     del beforeIndex,afterIndex
+    if class_or_Reg == 'Classification':
+        target_unique = df[target].unique().tolist()
+        target_unique.sort()
 
     ############# TRAIN VALIDATION SPLIT ###########
     if class_or_Reg == 'Classification':
@@ -491,6 +494,8 @@ def INIT(df,info):
             cart_df = pd.concat(cart_list,axis=1)
         try:
             cart_decisiontree(cart_df,target,class_or_Reg,passingList)
+            if class_or_Reg  == 'Classification':
+                print(f'{target_unique[0]} is alphabetically lower so its on the left and {target_unique[-1]} is alphabetically higher so its on the right')
         except Exception as e:
             print(e)
             print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
@@ -589,7 +594,7 @@ def INIT(df,info):
         #extract rule_df here and embed onto webapp under ruletree
         print (tabulate(rule_df, headers='keys', tablefmt='psql', showindex=False)) #to output on python not for webapp
     ############# RT ENCODINGS ##################### 
-    
+
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
