@@ -219,12 +219,13 @@ def DatasetSelection(X,Y):
     print("Shape of the target column {}".format(Y.shape))
     return X2,Y
 
-def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
+def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE,feat):
     obj_df = pd.DataFrame(X[disc_df_columns])     # collect all 'category' columns
     for col in obj_df.columns:                 # convert numeric category column type from object to numeric 
         obj_df[col]=pd.to_numeric(obj_df[col], errors = 'ignore')       
     num = obj_df._get_numeric_data().columns    
     obj = list(set(obj_df.columns)-set(num))
+    feat = list(set(feat[:])-set(num))
     obj_df=obj_df[obj]                         # only keep those category columns which are of type object(have non numeric values)
     if not obj_df.empty:
         X.drop(obj_df.columns,axis=1,inplace=True)         # drop non numerical category columns from X
@@ -313,7 +314,8 @@ def SampleEquation(X,Y,class_or_Reg,disc_df_columns,LE):
     
     dum2=pd.DataFrame()  
 #     list_dfs=[]
-    selected_obj_cols=list(set(selected_features)&set(obj_df.columns)) 
+    selected_obj_cols=list(set(selected_features)&set(obj_df.columns))
+    selected_obj_cols.extend(feat)
     if len(selected_obj_cols)!=0:  # to only print those encoded columns which are included in equation
             print("\nWhere the columns are encoded like this:\n")             
             for i in selected_obj_cols: 

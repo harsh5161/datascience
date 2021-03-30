@@ -501,9 +501,20 @@ def INIT(df,info):
         ros = RandomOverSampler(sampling_strategy='minority')
         X_rt, y_rt = ros.fit_resample(X,y)
         rule_val,rule_model = rules_tree(X_old,y_rt,class_or_Reg,X_rt,LE)
+        feat = X_rt.columns.tolist()
     else:
         rule_val,rule_model = rules_tree(X_old,y,class_or_Reg,X,LE)
+        feat = X.columns.tolist()
 
+    imps = rule_model.feature_importances_
+    indices = np.argsort(imps)
+    if len(feat)>10:
+        num = 10
+    else:
+        num = len(feat)
+    feat = [feat[i] for i in indices[-num:]]
+    feat = [x for x in feat[:] if x in disc_df.columns.tolist()]
+    # print(f'Top important discrete features from Rule Tree are: {feat}')
     if rule_val:
         print('Rule Tree Generated')
     else:
@@ -533,7 +544,7 @@ def INIT(df,info):
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
-        SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE)
+        SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE,feat)
         
     except Exception as e:
         print(e)
