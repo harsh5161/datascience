@@ -586,13 +586,16 @@ def INIT(df,info):
     print("Generating Rule Tree Encodings.....")
     print(selected_obj_cols)
     for val in selected_obj_cols:
-        rule_df = pd.DataFrame()
-        rule_df[f'{val}'] = X_1[val].unique()
-        rule_df['Encoding'] = X_2[val].unique()
-        rule_df['Encoding'] = rule_df['Encoding'].round(decimals=2)
-        rule_df = rule_df.sort_values('Encoding',ignore_index=True,ascending=True) 
-        #extract rule_df here and embed onto webapp under ruletree
-        print (tabulate(rule_df, headers='keys', tablefmt='psql', showindex=False)) #to output on python not for webapp
+        try:
+            rule_df = pd.DataFrame()
+            rule_df[f'{val}'] = X_1[val].unique()
+            rule_df['Encoding'] = X_2[val].unique()
+            rule_df['Encoding'] = rule_df['Encoding'].round(decimals=2)
+            rule_df = rule_df.sort_values('Encoding',ignore_index=True,ascending=True) 
+            #extract rule_df here and embed onto webapp under ruletree
+            print (tabulate(rule_df, headers='keys', tablefmt='psql', showindex=False)) #to output on python not for webapp
+        except:
+            pass
     ############# RT ENCODINGS ##################### 
 
     print('\n #### SAVING INIT INFORMATION ####')
