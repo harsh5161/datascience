@@ -346,28 +346,33 @@ def score(df,init_info,validation=False):
                 print(f"{exp_name} Model type not supported")
 
         shap.initjs()
-        
-        try:
-            explainer = shap.TreeExplainer(exp_mod,data=X_test)
-            shap_values = explainer.shap_values(X_test,check_additivity=False)
+        if len(X_test)>20000:
+            samp = X_test.sample(n=20000,axis=0)
+            samp_X = shapely_X.sample(n=20000,axis=0)
+        else:
+            samp = X_test
+            samp_X = shapely_X
+        try:    
+            explainer = shap.TreeExplainer(exp_mod,data=samp)
+            shap_values = explainer.shap_values(samp,tree_limit=10,check_additivity=False)
             if init_info['ML'] == 'Regression':
                 for i in range(0,4):
                     value = int(np.random.randint(0,len(shap_values),1))
-                    shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True,show=False).savefig(f'forceplot{i}.png',bbox_inches='tight')
+                    shap.force_plot(explainer.expected_value, shap_values[value,:], samp_X.iloc[value,:],matplotlib=True,show=False).savefig(f'forceplot{i}.png',bbox_inches='tight')
         except :
             try:
-                explainer = shap.Explainer(exp_mod.predict, X_test)
-                shap_values = explainer.shap_values(X_test,check_additivity=False)
+                explainer = shap.Explainer(exp_mod.predict,samp)
+                shap_values = explainer.shap_values(samp,check_additivity=False)
                 if init_info['ML'] == 'Regression':
                     for i in range(0,4):
                         value = int(np.random.randint(0,len(shap_values),1))
-                        shap.force_plot(explainer.expected_value, shap_values[value,:], shapely_X.iloc[value,:],matplotlib=True,show=False).savefig(f'forceplot{i}.png',bbox_inches='tight')
+                        shap.force_plot(explainer.expected_value, shap_values[value,:], samp_X.iloc[value,:],matplotlib=True,show=False).savefig(f'forceplot{i}.png',bbox_inches='tight')
             except Exception as e:
                 print(f"{e} : {exp_name} Model type not supported by SHAP.")
         plt.close('all')
         try:
             string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
-            shap.summary_plot(shap_values, X_test,title=string)
+            shap.summary_plot(shap_values,samp,title=string)
             if init_info['ML'] == 'Classification':
                 LE  = init_info['TargetLabelEncoder']
                 le_mapping = dict(zip(LE.classes_, LE.transform(LE.classes_)))
