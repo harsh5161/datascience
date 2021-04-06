@@ -1303,7 +1303,7 @@ class Regression:
         #XGBoost
         #######################################################################
         df.loc[ind,'Machine Learning Model']='XGBoost'
-        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=1000,eta=0.01,max_depth=16,min_child_weight=2,gamma=5,subsample=0.8,objective="reg:squarederror",eval_metric='rmse')
+        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=100,eta=0.01,max_depth=16,min_child_weight=2,gamma=5,subsample=0.8,objective="reg:squarederror",eval_metric='rmse')
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1327,7 +1327,7 @@ class Regression:
         ##Catboost
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='CatBoost'
-        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True)
+        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=100,learning_rate=0.01,rsm=1.0,silent=True)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
