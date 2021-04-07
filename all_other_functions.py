@@ -18,6 +18,7 @@ import graphviz
 import joblib
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor,export_text
 import shap
+from engineerings import numeric_engineering
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -677,3 +678,30 @@ def ruleTesting(X_test,y_test,mode,model,LE):
         result['MAE'] = mean_absolute_error(y_test, predictions)
 
     return result
+
+def inputCap(df,target):
+                
+    print("###Performing Initial Numeric Engineering for Capping Purposes###")
+#                 print("Initial columns",df.columns.to_list())
+    dfsamp = df.sample(n=1000,random_state=1) if len(df)>1000 else df.copy()
+    dfsamp = numeric_engineering(dfsamp)
+    dfsamp = dfsamp.dropna(axis=0,subset=[target])
+    print("###Estimating the type of target for Capping Purposes###")
+    class_or_Reg = targetAnalysis(dfsamp[target])
+    if class_or_Reg == 'Classification':
+        if len(df) >1000000:
+            df_train, _ = train_test_split(df, train_size=1000000,random_state=1, stratify=df[target])
+            print("Dataset size has been capped to 1 million rows for better performance")
+            print("Length of the dataset is now",len(df_train))
+            return df_train 
+        else:
+            print("Dataset has not been capped")
+            print("Length of the dataset is same as original",len(df))
+            return df
+    elif class_or_Reg == 'Regression':
+        dfr = df.sample(n=1000000, random_state=1) if len(df)>1000000 else df.copy()
+        print("Dataset size has been capped to 1 million rows for better performance")
+        print("Length of the dataset is now",len(dfr))
+        return dfr
+    elif class_or_Reg is None:
+        return pd.DataFrame()
