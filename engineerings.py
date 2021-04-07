@@ -650,7 +650,7 @@ def urlCheck(x,extractor):
 
 def findURLS(df):
     extractor = URLExtract()
-    extractor.update()
+#    extractor.update()
     url_cols = []
     for col in df.columns:
         a = df[col].apply(lambda x: urlCheck(x,extractor)).to_list()
@@ -681,8 +681,8 @@ def URlEngineering(df):
     urls = {}
     extractor = URLExtract()
     # extractor.update()
-    print("Updating if extractor TLD's haven't been updated in seven days")
-    extractor.update_when_older(7) #updates when list is older than 7 days 
+#    print("Updating if extractor TLD's haven't been updated in seven days")
+ #   extractor.update_when_older(7) #updates when list is older than 7 days 
     for col in df.columns:
         ser = df[col].apply(lambda x: urlparser(x,extractor))
         urls[f'{col}_domain'] = ser 
