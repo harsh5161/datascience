@@ -51,6 +51,7 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
             function(data1){
             library(rpart)
             library(rpart.plot)
+            library(rattle)
             library(RColorBrewer)
             fivepercent <- as.integer(0.05*nrow(data1))
             fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,parms = priors,cp=0.001,maxdepth = 4,minsplit=fivepercent)
@@ -62,6 +63,7 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
                 function(data1){
                 library(rpart)
                 library(rpart.plot)
+                library(rattle)
                 library(RColorBrewer)
                 fivepercent <- as.integer(0.05*nrow(data1))
                 fit <- rpart("""+target_variable_name+"""~., data = data1,xval = 10,cp=0.001,maxdepth = 4,minsplit=fivepercent)
