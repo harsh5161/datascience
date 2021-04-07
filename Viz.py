@@ -13,13 +13,13 @@ from rpy2.robjects.conversion import localconverter
 from rpy2.robjects import pandas2ri
 
 # utils = importr('utils')
+# utils.install_packages('rpart',repos="https://mirror.niser.ac.in/cran/")
 # utils.install_packages('rpart.plot',repos="https://mirror.niser.ac.in/cran/")
 grdevices = importr('grDevices')
 # utils.install_packages('rattle',repos="https://mirror.niser.ac.in/cran/")
 # utils.install_packages('RColorBrewer',repos="https://mirror.niser.ac.in/cran/")
 
 def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
-    
     cat_df = df.select_dtypes('category')    # converting all category type columns to object type
     if not cat_df.empty:
         df.drop(cat_df.columns,axis=1,inplace=True)
@@ -50,7 +50,6 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
     rstring1="""
             function(data1){
             library(rpart)
-            library(rattle)
             library(rpart.plot)
             library(RColorBrewer)
             fivepercent <- as.integer(0.05*nrow(data1))
@@ -62,7 +61,6 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
     rstring2="""
                 function(data1){
                 library(rpart)
-                library(rattle)
                 library(rpart.plot)
                 library(RColorBrewer)
                 fivepercent <- as.integer(0.05*nrow(data1))
