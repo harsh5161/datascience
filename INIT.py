@@ -57,11 +57,11 @@ def INIT(df,info):
     if not info['graph']:
         if key:
             x = df.drop(key,axis=1)
-            eda_df = x.copy()
+            x.to_csv('eda_df.csv',index=False)
         else: 
-            eda_df = df.copy()
+            df.to_csv('eda_df.csv',index=False)
     else:
-        eda_df = pd.DataFrame()
+        pass
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
     ######################### UNIVARIATE and BIVARIATE GRAPHS #########################
 
@@ -606,7 +606,7 @@ def INIT(df,info):
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
                 'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols,
-                 'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'eda_df' : eda_df,'rule_model':rule_model,'encoded_disc':encoded_disc}
+                'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'rule_model':rule_model,'encoded_disc':encoded_disc}
     print(' #### DONE ####')
     return init_info,validation
     
