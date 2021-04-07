@@ -149,6 +149,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("XGB val done")
             ind=ind+1
+            del xgb_pred 
+            del xgb_probas 
             ########################################################################################################
 
             ##Catboost
@@ -179,6 +181,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("CAT val done")
             ind=ind+1
+            del catboost_pred
+            del catboost_probas
             ########################################################################################################
 
 
@@ -213,7 +217,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LGBM val done")
             ind=ind+1
-
+            del lightgbm_pred
+            del lightgbm_probas 
 
 
             ##Random forest
@@ -241,6 +246,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("RF val done")
             ind=ind+1
+            del randomforest_pred
+            del randomforest_probas
 
             ########################################################################################################
 
@@ -270,6 +277,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ET val done")
             ind=ind+1
+            del extra_pred
+            del extra_probas
             #########################################################################################################
 
             #NaiveBayes
@@ -300,7 +309,8 @@ class classification:
                 df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
                 print("Naive Bayes done")
                 ind=ind+1
-
+                del naive_pred
+                del naive_probas 
 
             #Logistic Regression
             ##########################################################################################################
@@ -328,7 +338,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LR val done")
             ind=ind+1
-
+            del log_pred
+            del log_probas 
 
 
 
@@ -360,7 +371,8 @@ class classification:
                 df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
                 print("NN done")
                 ind=ind+1
-
+                del neural_pred
+                del neural_probas
 
             #SVC
             #########################################################################################################
@@ -388,6 +400,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("SVC val done ")
             ind=ind+1
+            del support_pred
+            del support_probas
 
 
         elif imbalance ==1:
@@ -419,6 +433,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ADAEns val done")
             ind=ind+1
+            del adaens_pred
+            del adaens_probas
             #########################################################################################################################
 
             #EasyEnsemble LightGBM
@@ -453,6 +469,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LightEns val done")
             ind=ind+1
+            del lightens_pred
+            del lightens_probas
             #########################################################################################################################
 
             #EasyEnsemble XGBoost
@@ -488,6 +506,9 @@ class classification:
             print("XGBEns val done")
             ind=ind+1
 
+            del xgbens_pred
+            del xgbens_probas
+
             #EasyEnsemble RandomForest
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='Random Forest Ensemble Classifier'
@@ -513,6 +534,8 @@ class classification:
             df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomens_pred)
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("RFEns val done")
+            del randomens_pred
+            del randomens_probas
 
       elif q_s == False:
         if imbalance ==0:
@@ -609,6 +632,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("XGB val done")
             ind=ind+1
+            del xgb_pred
+            del xgb_probas 
             ########################################################################################################
 
             #Catboost
@@ -640,6 +665,9 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("CAT val done")
             ind=ind+1
+            del catboost_pred 
+            del catboost_probas
+             
             ########################################################################################################
 
 
@@ -727,7 +755,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LGBM val done")
             ind=ind+1
-
+            del lightgbm_pred
+            del lightgbm_probas
 
 
             #Random Forest
@@ -806,6 +835,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("RF val done")
             ind=ind+1
+            del randomforest_pred
+            del randomforest_probas
 
             ########################################################################################################
 
@@ -834,6 +865,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ET val done")
             ind=ind+1
+            del extra_pred
+            del extra_probas
             #########################################################################################################
 
             #NaiveBayes
@@ -864,7 +897,8 @@ class classification:
                 df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
                 print("Naive Bayes done")
                 ind=ind+1
-
+                del naive_pred
+                del naive_probas
 
             #Logistic regression
             ########################################################################################################
@@ -891,7 +925,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LR val done")
             ind=ind+1
-
+            del log_pred
+            del log_probas
 
             #Neural network
             ########################################################################################################
@@ -921,7 +956,8 @@ class classification:
                     df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
                     print("NN done")
                     ind=ind+1
-
+                    del neural_pred
+                    del neural_probas
             #Support Vector Machine(linear)
             ########################################################################################################
 
@@ -947,6 +983,8 @@ class classification:
             df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, support_pred)
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("SVC val done ")
+            del support_pred
+            del support_probas
         ########################################################################################################
 
         elif imbalance ==1:
@@ -978,6 +1016,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ADAEns val done")
             ind=ind+1
+            del adaens_pred
+            del adaens_probas
             #########################################################################################################################
 
             #EasyEnsemble LightGBM
@@ -1012,6 +1052,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LightEns val done")
             ind=ind+1
+            del lightens_pred
+            del lightens_probas
             #########################################################################################################################
 
             #EasyEnsemble XGBoost
@@ -1046,6 +1088,8 @@ class classification:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("XGBEns val done")
             ind=ind+1
+            del xgbens_pred
+            del xgbens_probas
 
             #EasyEnsemble RandomForest
             #########################################################################################################################
@@ -1072,6 +1116,8 @@ class classification:
             df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, randomens_pred)
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("RFEns val done")
+            del randomens_pred
+            del randomens_probas
 
       df.dropna(axis=0,thresh=10,inplace=True)
       print("Shape of ModelDF",df.shape)
@@ -1167,7 +1213,8 @@ class classification:
       df.loc[ind, 'KS_statistic'],df.loc[ind, 'KS_p-value']=ks_2samp(y_test, ensemble_pred)
       df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
       ind=ind+1
-
+      del ensemble_pred
+      del ensemble_probas
       ##Best Model
       ########################################################################################################
       best_info=df.sort_values('Weighted F1',ignore_index=True,ascending=False).loc[0,:]
@@ -1322,6 +1369,7 @@ class Regression:
 
         print("XGB Validation done")
         ind=ind+1
+        del xgb_reg_prob1
         ########################################################################################################
 
         ##Catboost
@@ -1343,6 +1391,7 @@ class Regression:
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("CAT Validation done")
         ind=ind+1
+        del cat_reg_prob1
         ########################################################################################################
 
 
@@ -1356,23 +1405,24 @@ class Regression:
         df.loc[ind,'model'].fit(X_train, y_train,verbose=False)
         lightgbm_pred = df.loc[ind,'model'].predict(X_test)
         End=time.time()
-        df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
-        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
-        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
-        df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
-        df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
+        df.loc[ind,'accuracy']=r2_score(y_test, lightgbm_pred)*100
+        df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, lightgbm_pred))))
+        df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, lightgbm_pred))
+        df.loc[ind,'MSE'] = mean_squared_error(y_test, lightgbm_pred)
+        df.loc[ind,'MAE']=mean_absolute_error(y_test, lightgbm_pred)
         #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
-        df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
+        df.loc[ind,'BIC']=bic.bic(y_test, lightgbm_pred,X_train.shape[1])
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("LGBM val done")
         ind=ind+1
+        del lightgbm_pred
         ########################################################################################################
 
 
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='Random Forest'
-        df['model'][ind]=RandomForestRegressor(n_estimators=100,max_depth=16)
+        df['model'][ind]=RandomForestRegressor(n_estimators=50,max_depth=10)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1388,14 +1438,14 @@ class Regression:
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("RF Validation done")
         ind=ind+1
-
+        del random_reg_prob1
         ########################################################################################################
 
 
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
-        df['model'][ind]=ExtraTreesRegressor(n_estimators=100,max_depth=16)
+        df['model'][ind]=ExtraTreesRegressor(n_estimators=50,max_depth=10)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1411,6 +1461,7 @@ class Regression:
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("ET Validation done")
         ind=ind+1
+        del extra_reg_prob1
         #########################################################################################################
 
 
@@ -1435,7 +1486,7 @@ class Regression:
 
         print("linear reg done")
         ind=ind+1
-
+        del logr_reg_prob1
         #Ridge Regression
         ##########################################################################################################
 
@@ -1456,7 +1507,7 @@ class Regression:
         df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
         print("ridge reg done")
         ind=ind+1
-
+        del ridge_reg_prob1
         # #Neural network
         # ########################################################################################################
 
@@ -1505,7 +1556,7 @@ class Regression:
 
         print("SVC done")
         ind=ind+1
-
+        del svc_reg_prob1
       elif q_s==False:
             ind = 0
             #XGBoost
@@ -1569,6 +1620,7 @@ class Regression:
 
             print("XGB Validation done")
             ind=ind+1
+            del xgb_reg_prob1
             ########################################################################################################
 
 
@@ -1593,6 +1645,7 @@ class Regression:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("CAT Validation done")
             ind=ind+1
+            del cat_reg_prob1
             ########################################################################################################
 
 
@@ -1645,16 +1698,17 @@ class Regression:
             df.loc[ind,'model'].fit(X_train, y_train,eval_metric="logloss", eval_set=eval_set,early_stopping_rounds=30,verbose=False)
             lightgbm_pred = df.loc[ind,'model'].predict(X_test)
             End=time.time()
-            df.loc[ind,'accuracy']=r2_score(y_test, cat_reg_prob1)*100
-            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, cat_reg_prob1))))
-            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, cat_reg_prob1))
-            df.loc[ind,'MSE'] = mean_squared_error(y_test, cat_reg_prob1)
-            df.loc[ind,'MAE']=mean_absolute_error(y_test, cat_reg_prob1)
+            df.loc[ind,'accuracy']=r2_score(y_test, lightgbm_pred)*100
+            df.loc[ind,'Accuracy%']="{:.2%}".format(Decimal(str(r2_score(y_test, lightgbm_pred))))
+            df.loc[ind,'RMSE']=sqrt(mean_squared_error(y_test, lightgbm_pred))
+            df.loc[ind,'MSE'] = mean_squared_error(y_test, lightgbm_pred)
+            df.loc[ind,'MAE']=mean_absolute_error(y_test, lightgbm_pred)
             #df.loc[ind,'AIC']=aic.aic(y_test, cat_reg_prob1,X_train.shape[1])
-            df.loc[ind,'BIC']=bic.bic(y_test, cat_reg_prob1,X_train.shape[1])
+            df.loc[ind,'BIC']=bic.bic(y_test, lightgbm_pred,X_train.shape[1])
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("LGBM val done")
             ind=ind+1
+            del lightgbm_pred
 
 
             #Random forest
@@ -1721,7 +1775,7 @@ class Regression:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("RF Validation done")
             ind=ind+1
-
+            del random_reg_prob1
             ########################################################################################################
 
 
@@ -1744,7 +1798,7 @@ class Regression:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ETextra_reg_prob1 Validation done")
             ind=ind+1
-
+            del extra_reg_prob1
             ########################################################################################################
 
 
@@ -1767,7 +1821,7 @@ class Regression:
             df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
             print("ridge reg done")
             ind=ind+1
-
+            del ridge_reg_prob1
             #Linear regression
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Linear Regression'
@@ -1788,7 +1842,7 @@ class Regression:
 
             print("linear reg done")
             ind=ind+1
-
+            del logr_reg_prob1
             # #Neural net
             # ########################################################################################################
             # best={'hidden_layer_sizes':(50,),'solver':'sgd','learning_rate':'adaptive','max_iter':1000,'early_stopping':True,'n_iter_no_change':30}
@@ -1836,7 +1890,7 @@ class Regression:
 
             print("SVC done")
             ind=ind+1
-
+            del svc_reg_prob1
 
 
       #Ensemble
@@ -1899,7 +1953,7 @@ class Regression:
       df.loc[ind,'BIC']=bic.bic(y_test, ensemble_pred,X_train.shape[1])
       df.loc[ind,'Total time (hh:mm:ss)']= time.strftime("%H:%M:%S", time.gmtime(End-Start))
       ind=ind+1
-
+      del ensemble_pred
       best_info=df.sort_values('RMSE',ignore_index=True,ascending=True).loc[0,:]
       best_name=best_info['Machine Learning Model']
       best_mod=best_info['model']
