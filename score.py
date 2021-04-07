@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 import shap
 import matplotlib.pyplot as plt
 from imblearn.over_sampling import RandomOverSampler
+import gc
 def score(df,init_info,validation=False):
     print('\n\t #### VALIDATION AND SCORING ZONE ####')
 
@@ -216,6 +217,7 @@ def score(df,init_info,validation=False):
         print(X_train.head(20))
         print('\n\n')
         start = time.time()
+        gc.collect()
         ############# MODEL TRAINING #############
         print('Modelling...')
         mod,model_info,exp_mod,exp_name,feat_mod,feat_name = model_training(X_train,y_train,X_test,y_test,init_info['ML'],priorList,init_info['q_s'])
@@ -227,6 +229,7 @@ def score(df,init_info,validation=False):
         ############# MODEL TRAINING #############
         end = time.time()
         print('\nTotal Model Training Time taken : {}'.format(end-start))
+        gc.collect()
         ############# PREDICTION/SCORING #############
     else:
         mod = init_info['model']
