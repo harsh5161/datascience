@@ -461,6 +461,7 @@ def INIT(df,info):
     ############# FEATURE SELECTION AND PLOTS #####################
     ##################### Checking for constant columns ###################
 
+
     for col in X.columns:
         if X[col].nunique() == 1:
             X.drop(col,axis=1,inplace=True)

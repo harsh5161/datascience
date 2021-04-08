@@ -358,6 +358,7 @@ def featureSelectionPlot(feat_df):
     plt.xticks(fontsize=12,rotation=90)
     plt.yticks(fontsize=12)
     plt.show()
+    plt.close('all')
 
 def FeatureSelection(X,y,class_or_Reg):
     print(X.shape)
@@ -506,6 +507,7 @@ def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var s
                 plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
                 plt.title(targ)
                 plt.show()
+                plt.close()
           else:
             a=c.loc[list(c.sum(axis=1).sort_values().index)[-10:]].plot(kind='bar')
             plt.xlabel(base_var)
@@ -513,7 +515,7 @@ def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var s
             plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
             plt.title(targ)
             plt.show()
-           
+            plt.close()           
       else:
           a=c.plot(kind='line',alpha=0.5)
           plt.xlabel(base_var)
@@ -521,7 +523,7 @@ def bivar_ploter(df1,targ,base_var):  #!! targ stores column name and base_var s
           plt.legend(loc='center left', bbox_to_anchor=(1, 0.7), fancybox=True, shadow=True)
           plt.title(targ)
           plt.show()
-          
+          plt.close()          
       return a
 
 def userInteractVisualization(df1,targ):
@@ -544,7 +546,7 @@ def userInteractVisualization(df1,targ):
                 for c in numlist:
                     df1.hist( column=c, bins=15, color=np.random.rand(3,))
                     plt.show()
-                
+                    plt.close()                
             except:
                 pass
 
