@@ -9,7 +9,7 @@ import joblib
 from Viz import *
 from imblearn.over_sampling import RandomOverSampler
 from tabulate import tabulate 
-
+import gc
 def INIT(df,info):
     print("Length of the dataframe entering INIT is: ", df.shape[0])
     target = info['target']
@@ -403,7 +403,8 @@ def INIT(df,info):
     print(' #### DONE ####')
     PearsonsColumns = num_df.columns 
     ############# PEARSON CORRELATION ############
-
+    del corr
+    gc.collect()
     y.reset_index(drop=True, inplace=True)
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
@@ -488,6 +489,8 @@ def INIT(df,info):
             passingList = y_cart_res.value_counts(normalize=True).values
             cart_list =[X_cart_res,y_cart_res]
             cart_df = pd.concat(cart_list,axis=1)
+            del X_cart_res
+            del y_cart_res
         else:
             passingList = []
             cart_list =[X_cart,y_cart]
@@ -499,6 +502,10 @@ def INIT(df,info):
         except Exception as e:
             print(e)
             print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
+        del X_cart
+        del y_cart
+        del cart_df
+        gc.collect()
     ############# CART DECISION TREE VISUALIZATION #####################   
 
     ############# RULE TREE VISUALIZATION #####################   
@@ -508,10 +515,13 @@ def INIT(df,info):
         X_rt, y_rt = ros.fit_resample(X,y)
         rule_val,rule_model = rules_tree(X_old,y_rt,class_or_Reg,X_rt,LE)
         feat = X_rt.columns.tolist()
+        del X_rt
+        del y_rt
+        gc.collect()
     else:
         rule_val,rule_model = rules_tree(X_old,y,class_or_Reg,X,LE)
         feat = X.columns.tolist()
-
+    
     imps = rule_model.feature_importances_
     indices = np.argsort(imps)
     if len(feat)>10:
@@ -550,7 +560,7 @@ def INIT(df,info):
         for col in disc_df.columns:
             if col in X.columns:
                 vis_disc_cols.append(col)
-        selected_obj_cols = SampleEquation(X_old.copy(),y.copy(),class_or_Reg,vis_disc_cols,LE,feat)
+        selected_obj_cols = SampleEquation(X_old,y,class_or_Reg,vis_disc_cols,LE,feat)
         
     except Exception as e:
         print(e)
@@ -560,7 +570,8 @@ def INIT(df,info):
     print('\nThis is final shape of X_train : {}'.format(X.shape))
     print('This is final shape of Y_train : {}\n'.format(y.shape))
     ############# SAMPLE EQUATION ##################### 
-
+    del X_old
+    gc.collect()
     ############# SHAP ENCODINGS ##################### 
 
     for val in temp[:]:
@@ -597,7 +608,9 @@ def INIT(df,info):
         except:
             pass
     ############# RT ENCODINGS ##################### 
-
+    del X_1
+    del X_2 
+    gc.collect()
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
