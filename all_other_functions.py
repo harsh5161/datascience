@@ -19,6 +19,7 @@ import joblib
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor,export_text
 import shap
 from engineerings import numeric_engineering
+import gc
 def targetAnalysis(df):
     print('\n### TARGET ANALYSIS ENTERED ###')
     Type = str(df.dtypes)
@@ -397,7 +398,8 @@ def FeatureSelection(X,y,class_or_Reg):
     k = k.reshape(X.shape[1],1)
     k = pd.DataFrame(k)
     print("k",k)
-
+    del selector
+    gc.collect()
     # threshold one(This thres is able to select only top best features which are very few)
     thresh1 = k.mean(); l = k>thresh1
     sheet1 = pd.concat([cols, k, l], axis =1)
