@@ -273,7 +273,7 @@ def score(df,init_info,validation=False):
                 skplt.metrics.plot_lift_curve(y_test, y_probas, title = 'Lift Curve (Test Dataset)')
                 skplt.metrics.plot_cumulative_gain(y_test, y_probas, title='Cumulative Gains Curve (Test Dataset)')
             skplt.metrics.plot_roc(y_test, y_probas,title='ROC Curves (Test Dataset)')
-
+            plt.close('all')
     else:
         if validation:
             import seaborn as sns
@@ -286,7 +286,7 @@ def score(df,init_info,validation=False):
             plt.ylabel("Residuals of Predicted Values")
             plt.title("\n\nResidual Plot (Test Dataset)")
             plt.show(fig1)
-
+            plt.close()                 
             #lm plot
             fig2 = sns.lmplot('y_pred','y_test',regplotdf,fit_reg =True, line_kws={'color': 'red'})
             plt.xticks(plt.xticks()[0], rotation=40)
@@ -294,7 +294,7 @@ def score(df,init_info,validation=False):
             plt.ylabel("Actual Values")
             plt.title("\n\nPredicted vs Actual (Test Dataset)")
             plt.show(fig2)
-
+            plt.close()
             # decile plot function
             def decileplot(regplotdf):
                 div=math.floor(len(regplotdf)/10)
@@ -317,7 +317,7 @@ def score(df,init_info,validation=False):
 
             # decile plot
             decileplot(regplotdf)
-
+            plt.close('all')
             # y_probas = pd.Series()
             # fig3 = plt.figure()
             # plt.plot(y_pred, figure =fig3)
@@ -345,8 +345,8 @@ def score(df,init_info,validation=False):
         except:
             try:
                 top_ten = featureimportance(exp_mod,exp_name,num_features,features)
-            except:
-                print(f"{exp_name} Model type not supported")
+            except Exception as e:
+                print(f"{e}")
 
         shap.initjs()
         if len(X_test)>20000:
@@ -392,7 +392,7 @@ def score(df,init_info,validation=False):
             print(e)
 
 
-
+    plt.close('all')
     ############ Model Explainer #############
     ############ PREDICTION/SCORING #############
 
