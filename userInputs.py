@@ -3,7 +3,7 @@ import numpy as np
 import xlrd
 import csv
 import collections 
-
+from openpyxl import load_workbook
 def importFile(path,nrows=None):
 
     print('#### RUNNING WAIT ####')
@@ -89,29 +89,20 @@ def importFile(path,nrows=None):
             print('We have an Excel file')
             #######
             # opening workbook
-            wb = xlrd.open_workbook(path)
+            wb = load_workbook(path)
 
-            # Tracking Sheets inside workbook
-            sheet_names = wb.sheet_names()
-            if len(sheet_names)==1:
-              sheet_selected = sheet_names[0]
+            if len(wb.sheetnames) == 1 :
+                data = wb[wb.sheetnames[0]].values
+                cols = next(data)[0:]
             else:
-              print("\nFollowing Are The sheets Found in the workbook\n {}".format(sheet_names))
-              sheet_selected = input("Type the sheet name:  ")
+                val = input('Input the name of the sheet')
+                data = wb[val].values
+                cols =  next(data)[0:]
+                
+            df = pd.DataFrame(data,columns=cols)
 
-            # open workbook by and get sheet by index
-            sheet = wb.sheet_by_name(sheet_selected)
+            return df
 
-            # # writer object is created
-            col = csv.writer(open("SheetSheetSheet.csv", 'w', newline=""))
-
-            # writing the data into csv file
-            for row in range(sheet.nrows):
-                col.writerow(sheet.row_values(row))
-            print('\nXlrd Done')
-
-            # read csv file and convert into a dataframe object
-            return pd.read_csv("SheetSheetSheet.csv")
             #######
         except FileNotFoundError:
             print('File not found, Check the name, path, spelling mistakes')
@@ -144,7 +135,7 @@ def importFile(path,nrows=None):
             return df,None
         elif 'xl' in ext:
             df = importExcel(path)
-            return df,'SheetSheetSheet.csv'
+            return df,None
         elif ext == 'data':
             df = importTable(path)
             df = duplicateHandler(df)
