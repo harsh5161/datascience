@@ -410,7 +410,7 @@ class classification:
             eval_set = [(X_test, y_test)]
             #EasyEnsemble AdaBoost
             #########################################################################################################################
-            df.loc[ind,'Machine Learning Model']='AdaBoost Ensemble Classifier'
+            df.loc[ind,'Machine Learning Model']='AdaBoost Classifier'
             df['model'][ind]= EasyEnsembleClassifier(sampling_strategy='not minority',random_state=1)
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -439,7 +439,7 @@ class classification:
 
             #EasyEnsemble LightGBM
             #########################################################################################################################
-            df.loc[ind,'Machine Learning Model']='LightGBM Ensemble Classifier'
+            df.loc[ind,'Machine Learning Model']='LightGBM AdaBoosted Classifier'
             if check==1:
                 light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=1,num_leaves=50,max_depth=20,objective='binary')
             elif check==0:
@@ -475,7 +475,7 @@ class classification:
 
             #EasyEnsemble XGBoost
             #########################################################################################################################
-            df.loc[ind,'Machine Learning Model']='XGBoost Ensemble Classifier'
+            df.loc[ind,'Machine Learning Model']='XGBoost AdaBoosted Classifier'
             if check == 1:
                 xgb_model=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=20,eval_metric='logloss')
             elif check ==0:
@@ -511,7 +511,7 @@ class classification:
 
             #EasyEnsemble RandomForest
             #########################################################################################################################
-            df.loc[ind,'Machine Learning Model']='Random Forest Ensemble Classifier'
+            df.loc[ind,'Machine Learning Model']='Random Forest AdaBoosted Classifier'
             random_model=RandomForestClassifier(n_estimators=100,max_depth=20)
             df['model'][ind]= EasyEnsembleClassifier(base_estimator=random_model,sampling_strategy='not minority',random_state=1)
             df.loc[ind,'param']=str(best)
@@ -1224,25 +1224,19 @@ class classification:
       best_param=best_info['param']
 
       req_info = df.sort_values('Weighted F1',ignore_index=True,ascending=False)
-      if imbalance==0:
-        for i in range(len(req_info)):
-            if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
-                continue
-            elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] :
-                explainable_model = req_info.loc[i,:]['model']
-                exp_name = req_info.loc[i,:]['Machine Learning Model']
-                break
-        if "Ensemble" in best_name:
-            featimp_mod = req_info.loc[1,:]['model']
-            featimp_name = req_info.loc[1,:]['Machine Learning Model']
-        else:
-            featimp_mod = best_mod
-            featimp_name = best_name
+      for i in range(len(req_info)):
+           if "Ensemble" in req_info.loc[i,:]['Machine Learning Model']:
+              continue
+           elif "Light" in req_info.loc[i,:]['Machine Learning Model'] or "XGBoost" in req_info.loc[i,:]['Machine Learning Model'] :
+              explainable_model = req_info.loc[i,:]['model']
+              exp_name = req_info.loc[i,:]['Machine Learning Model']
+              break
+      if "Ensemble" in best_name:
+           featimp_mod = req_info.loc[1,:]['model']
+           featimp_name = req_info.loc[1,:]['Machine Learning Model']
       else:
-          explainable_model = None
-          exp_name = None
-          featimp_mod = None
-          featimp_name = None
+           featimp_mod = best_mod
+           featimp_name = best_name
 
       ########################################################################################################
       # Testing area for model performance comparison
