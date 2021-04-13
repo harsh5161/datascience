@@ -38,7 +38,7 @@ def cart_decisiontree(df,target_variable_name,class_or_Reg,priors):
                 pd.to_numeric(s)
             except Exception as e:
                 print(f"{col} column will now be truncated")
-                df[col]= df[col].apply(lambda x: x[0:6]+"..." if (len(x)>6) else x)
+                df[col]= df[col].apply(lambda x: x[0:6]+"." if (len(x)>6) else x)
                 print("The values after truncating the text are as follows")
                 print(df[col].value_counts())
 

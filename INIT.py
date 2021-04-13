@@ -499,7 +499,7 @@ def INIT(df,info):
         try:
             cart_decisiontree(cart_df,target,class_or_Reg,passingList)
             if class_or_Reg  == 'Classification':
-                print(f'{target_unique[0]} is alphabetically lower so its on the left and {target_unique[-1]} is alphabetically higher so its on the right')
+                print(f'{target_unique[0]} is alphabetically lower so its [0] and {target_unique[-1]} is alphabetically higher so its [1]')
         except Exception as e:
             print(e)
             print('#### CART VISUALIZATION DID NOT RUN AND HAD ERRORS ####')
