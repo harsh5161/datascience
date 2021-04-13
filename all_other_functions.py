@@ -371,7 +371,7 @@ def FeatureSelection(X,y,class_or_Reg):
 #             if k[0]>k[1]: impact_ratio = k[0]/k[1]
 #             else: impact_ratio = k[1]/k[0]
 #             selector = XGBClassifier(n_estimators =100, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
-            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='binary')
+            selector = lgb.LGBMClassifier(class_weight='balanced',max_depth=16,num_leaves=30,n_estimators=100,random_state=1,objective='binary')
         else:
             print("\nMulticlass Classification")
 
@@ -383,10 +383,10 @@ def FeatureSelection(X,y,class_or_Reg):
 #               w_array[i] = class_w[val]
 
 #             selector = XGBClassifier(n_estimators =100, sample_weight = w_array, max_depth= 5, n_jobs=-1);
-            selector = lgb.LGBMClassifier(class_weight='balanced',n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss')
+            selector = lgb.LGBMClassifier(class_weight='balanced',max_depth=16,num_leaves=30,n_estimators=100,random_state=1,objective='multiclass',num_class=classes_num,metric='multi_logloss')
     else :
 #         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
-        selector = lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
+        selector = lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=30,max_depth=16)
         print('runnning regressor selector')
 
     for i in tqdm(range(10)):
@@ -649,6 +649,7 @@ def featureimportance(exp_mod,exp_name,num_features,features):
     g = random.random()
     colors = (r, g, b)
     importances = exp_mod.feature_importances_
+#    print("Inside feature importance printing feature importance",importances)
     indices = np.argsort(importances)
     plt.figure(figsize=(10,10))
     plt.title(f'Feature Importances for {exp_name} Explainable Model based on Test Data')
