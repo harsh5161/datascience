@@ -38,9 +38,18 @@ def score(df,init_info,validation=False):
         print("Total no. of null values present in the Key: ",df[init_info['KEY']].isna().sum())
         df.dropna(axis=0,subset=[init_info['KEY']],inplace=True)
         print("NUll values after removal are: ",df[init_info['KEY']].isna().sum())
-        if df[init_info['KEY']].dtype == np.float64:             # if the key is float convert it to int
-            df[init_info['KEY']]=df[init_info['KEY']].astype(int)        
-        k_test = df[init_info['KEY']]
+        kkey = df.dtypes[init_info['KEY']]
+        try:
+            if df[init_info['KEY']].dtype == np.float64:
+                df[init_info['KEY']]=df[init_info['KEY']].astype(int)        
+        except:
+            if kkey.any() == np.float64:             # if the key is float convert it to int
+                df[init_info['KEY']]=df[init_info['KEY']].iloc[:,0].astype(int)        
+        if isinstance(df[init_info['KEY']],pd.DataFrame):
+            k_test = df[init_info['KEY']].iloc[:,0]
+        else:
+            k_test = df[init_info['KEY']]
+        k_test.name = 'S.No'
         k_test.index = X_test.index
     else:
         k_test = X_test.index
@@ -411,11 +420,11 @@ def score(df,init_info,validation=False):
 
     preview_length = 100 if len(X_test)>100 else len(X_test)
     if validation:
-        preview = pd.DataFrame({k_test.name:k_test.tolist(),
+        preview = pd.DataFrame({k_test.name:k_test.values.tolist(),
                                 'Actual Values':y_test.tolist(),
                                 'Predicted Values':y_pred.tolist()})
     else:
-        preview = pd.DataFrame({k_test.name:k_test.tolist(),
+        preview = pd.DataFrame({k_test.name:k_test.values.tolist(),
                                 'Predicted Values':y_pred.tolist()})
 
     if init_info['ML'] == 'Classification':
