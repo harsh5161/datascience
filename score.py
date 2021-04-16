@@ -383,8 +383,15 @@ def score(df,init_info,validation=False):
                 print(f"{e} : {exp_name} Model type not supported by SHAP.")
         plt.close('all')
         try:
-            string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
-            shap.summary_plot(shap_values,samp,title=string)
+            print(f'shap value shape is as follows {len(shap_values)}')
+            try:
+                for i in range(len(shap_values)):
+                    string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
+                    shap.summary_plot(shap_values[i],samp,title=string)
+            except:
+                string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
+                shap.summary_plot(shap_values,samp,title=string)
+
             if init_info['ML'] == 'Classification':
                 LE  = init_info['TargetLabelEncoder']
                 le_mapping = dict(zip(LE.classes_, LE.transform(LE.classes_)))
