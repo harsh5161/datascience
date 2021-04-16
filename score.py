@@ -387,8 +387,9 @@ def score(df,init_info,validation=False):
             try:
                 for i in range(len(shap_values)):
                     string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
-                    shap.summary_plot(shap_values[i],samp,title=string)
-            except:
+                    shap.summary_plot(shap_values[i],samp,title=string,class_names=list(init_info['TargetLabelEncoder'].classes_))
+            except Exception as e:
+                print(e)
                 string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
                 shap.summary_plot(shap_values,samp,title=string)
 
