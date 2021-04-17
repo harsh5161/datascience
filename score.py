@@ -388,6 +388,7 @@ def score(df,init_info,validation=False):
                 for i in range(len(shap_values)):
                     string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
                     shap.summary_plot(shap_values[i],samp,title=string,class_names=list(init_info['TargetLabelEncoder'].classes_))
+                    break
             except Exception as e:
                 print(e)
                 string = f'Summary plot of {exp_name}' #Use exp_name variable to get 
@@ -395,7 +396,11 @@ def score(df,init_info,validation=False):
 
             if init_info['ML'] == 'Classification':
                 LE  = init_info['TargetLabelEncoder']
-                le_mapping = dict(zip(LE.classes_, LE.transform(LE.classes_)))
+                if len(LE.classes_) > 2 :
+                    maps = np.flipud(LE.transform(LE.classes_))
+                    le_mapping = dict(zip(LE.classes_,maps))
+                else:
+                    le_mapping = dict(zip(LE.classes_, LE.transform(LE.classes_)))
                 encoded_targ = pd.DataFrame(le_mapping.items(),columns = ['Target Classes','Encodings'])
                 print('Generating Target Encodings')
                 print(encoded_targ) #Embed this dataframe in the WebApp on the right side of the summary plot
