@@ -638,7 +638,7 @@ def rules_tree(X,y,mode,X_transformed,LE):
     for i in tqdm(range(10)):
         text_selector.fit(X_transformed,y)
 
-    text_rules = export_text(text_selector,feature_names=X.columns.to_list(),show_weights=True,decimals=0)
+    text_rules = export_text(text_selector,feature_names=X.columns.to_list(),show_weights=True,decimals=2)
     joblib.dump(text_rules,'text_rule.txt')
     return text_rules,text_selector
 
