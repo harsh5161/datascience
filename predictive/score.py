@@ -1,6 +1,6 @@
-from seg_modelling import *
-from seg_engineerings import *
-from seg_all_other_functions import *
+from modelling import *
+from engineerings import *
+from all_other_functions import *
 import pandas as pd
 import numpy as np
 import scikitplot as skplt
@@ -281,7 +281,7 @@ def score(df,init_info,validation=False):
 
                 skplt.metrics.plot_lift_curve(y_test, y_probas, title = 'Lift Curve (Test Dataset)')
                 skplt.metrics.plot_cumulative_gain(y_test, y_probas, title='Cumulative Gains Curve (Test Dataset)')
-            skplt.metrics.plot_roc(y_test, y_probas,title='ROC Curves (Test Dataset)')
+#            skplt.metrics.plot_roc(y_test, y_probas,title='ROC Curves (Test Dataset)')
             plt.close('all')
     else:
         if validation:
@@ -473,17 +473,11 @@ def score(df,init_info,validation=False):
         
         preview_vals = preview['Predicted Values'].value_counts()
         printer = ""
-<<<<<<< HEAD:segmentation/seg_score.py
-        for k,v in preview_vals.iteritems():
-            printer = printer + f"{k} is present in {v}% of the Testing Preview\n"
-        print(printer)
-=======
         
         for k,v in preview_vals.iteritems():
             printer = printer + f"{k} is present in {v}% of the Testing Preview\n"
         if init_info['ML'] == 'Classification':
             print(printer)
->>>>>>> master:predictive/score.py
         preview.to_csv('preview.csv',sep=',',index=False)
         print('\nFile Saved as preview.csv')
     else:
@@ -491,12 +485,8 @@ def score(df,init_info,validation=False):
         printer = ""
         for k,v in preview_vals.iteritems():
             printer = printer + f"{k} is present in {round((v/len(preview))*100,3)}% of the Scoring File\n"
-<<<<<<< HEAD:segmentation/seg_score.py
-        print(printer)
-=======
         if init_info['ML'] == 'Classification':
             print(printer)
->>>>>>> master:predictive/score.py
         preview.to_csv('score.csv',sep=',',index=False)
         print('\nFile Saved as score.csv')
     print('\nCode executed Successfully')
