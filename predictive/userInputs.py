@@ -4,7 +4,7 @@ import xlrd
 import csv
 import collections 
 from openpyxl import load_workbook
-def importFile(path,nrows=None):
+def importFile(nrows,sheet_name,path):
 
     print('#### RUNNING WAIT ####')
 
@@ -84,7 +84,7 @@ def importFile(path,nrows=None):
                 return None
 
     # IF THE EXTENSION IS XL
-    def importExcel(path):
+    def importExcel(sheet_name,path):
         try:
             print('We have an Excel file')
             #######
@@ -94,14 +94,18 @@ def importFile(path,nrows=None):
             if len(wb.sheetnames) == 1 :
                 data = wb[wb.sheetnames[0]].values
                 cols = next(data)[0:]
+                sheet_name = None
             else:
-                val = input('Input the name of the sheet')
+                if sheet_name:
+                    val = sheet_name
+                else:
+                    val = input('Input the name of the sheet')
                 data = wb[val].values
                 cols =  next(data)[0:]
                 
             df = pd.DataFrame(data,columns=cols)
-
-            return df
+            print(df.head(10))
+            return df,val
 
             #######
         except FileNotFoundError:
@@ -134,8 +138,8 @@ def importFile(path,nrows=None):
             df = duplicateHandler(df)
             return df,None
         elif 'xl' in ext:
-            df = importExcel(path)
-            return df,None
+            df,sheet_name = importExcel(sheet_name,path)
+            return df,sheet_name
         elif ext == 'data':
             df = importTable(path)
             df = duplicateHandler(df)
