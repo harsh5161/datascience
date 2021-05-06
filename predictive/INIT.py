@@ -11,6 +11,8 @@ from imblearn.over_sampling import RandomOverSampler
 from tabulate import tabulate 
 import gc
 def INIT(df,info):
+    init_feat_len = len(df.columns)
+    num_features_created = 0
     print("Length of the dataframe entering INIT is: ", df.shape[0])
     target = info['target']
     key = info['key']
@@ -176,7 +178,7 @@ def INIT(df,info):
         lat = []
         lon = []
         lat_lon_cols = []
-
+    num_features_created += len(LAT_LONG_DF.columns)    
     ######## DATE ENGINEERING #######
     print('\n#### DATE ENGINEERING RUNNING WAIT ####')
 #     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
@@ -211,7 +213,7 @@ def INIT(df,info):
         date_cols = []
     print(' #### DONE ####')
     ######## DATE ENGINEERING #######
-
+    num_features_created += len(DATE_DF.columns)
     ######## EMAIL URL ENGINEERING ########
     print('\n#### EMAIL ENGINEERING RUNNING WAIT ####')
     obj_df  = X.select_dtypes('object') # Sending in only object dtype columns
@@ -235,7 +237,7 @@ def INIT(df,info):
         print("No Email columns found")
         EMAIL_DF = pd.DataFrame(None)
         email_cols = []
-
+    num_features_created += len(EMAIL_DF.columns)
     print('\n#### URL ENGINEERING RUNNING WAIT ####')
     url_cols = findURLS(short_obj_df)
     if len(url_cols)>0:
@@ -254,7 +256,8 @@ def INIT(df,info):
     else:
         print("No URL columns found")
         URL_DF = pd.DataFrame(None)
-        url_cols = []
+        url_cols = [] 
+    num_features_created += len(URL_DF.columns)
     ######## EMAIL URL ENGINEERING ########
     # Additional Logic below because EMAIL and URL Engineering can choose not to work if  there's a lot of missing column
     if EMAIL_DF.empty:
@@ -364,9 +367,8 @@ def INIT(df,info):
                 disc_df = pd.concat([disc_df,pd.DataFrame(TEXT_DF[col])],axis=1)
             else:
                 num_df = pd.concat([num_df,pd.DataFrame(TEXT_DF[col])],axis=1)
-
-
-
+ 
+    num_features_created += len(TEXT_DF.columns)
     ############# OUTLIER WINSORIZING ###########
     print('\n#### OUTLIER WINSORIZING ####')
     bef_out = num_df.shape[0]
@@ -612,6 +614,15 @@ def INIT(df,info):
     del X_1
     del X_2 
     gc.collect()
+    ############# FEATURES INFO ####################
+
+    features_info = {}
+    features_info['Initial'] = init_feat_len
+    features_info['Features Created'] = num_features_created
+    features_info['Training Features'] = len(X.columns)
+    print(f"Features Created Info : {features_info}")
+    
+    ############# FEATURES INFO ####################
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns':NumColumns,'NumericMean':NumMean,'DiscreteColumns':DiscColumns, 'StoredLabels':stored_labels,
                 'DateColumns':date_cols, 'PossibleDateColumns':possible_datecols,'PearsonsColumns':PearsonsColumns,
