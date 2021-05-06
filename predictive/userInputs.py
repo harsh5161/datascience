@@ -311,6 +311,42 @@ def removeCommas(x):
             return x
     else:
         return x
+def removeSpecialCharacters(x):
+    flag = 0
+    temp = str(x).lower()
+    if '€' in str(x)[0]:
+        flag = 1 
+    elif 'k' in temp[-1]:
+        flag = 1 
+    elif 'm' in temp[-1]:
+        flag = 1
+    elif 'b' in temp[-1]:
+        flag = 1
+    if flag == 1 :
+        try:
+            temp = temp.replace('€','')
+        except:
+            pass
+        try:
+            temp = temp.replace('k','000')
+        except:
+            pass
+        try:
+            temp = temp.replace('m','000000')
+        except:
+            pass
+        try:
+            temp = temp.replace('b','000000000')
+        except:
+            pass
+        
+        try:
+            return pd.to_numeric(temp)
+        except:
+            return temp 
+    else : 
+        return x
+
 
 def dataHandler(dx,target=None):
         update=False
@@ -326,6 +362,7 @@ def dataHandler(dx,target=None):
                 dx[target].replace({'NA':np.nan},inplace=True)
                 if dx[target].nunique()>5:
                     dx[target] = dx[target].apply(lambda x: removeCommas(x))
+                    dx[target] = dx[target].apply(lambda x: removeSpecialCharacters(x))
                     try:
                         dx[target] = pd.to_numeric(dx[target])
                         if str(dx[target].dtype) != 'object':
