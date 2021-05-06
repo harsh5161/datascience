@@ -441,9 +441,12 @@ def topicExtraction(df,validation=False,lda_model_tfidf=None):
     for i in range(len(val)):
        sentence =  "Word {} (\"{}\") appears {} time.".format(val[i][0], dictionary[val[i][0]], val[i][1]) #Messy3.csv
     count = count+1
-    for idx, topic in sorted(lda_model_tfidf[bow_corpus[i]], key= lambda tup: -1*tup[1]):
-      append(idx)
-      break
+    try:
+        for idx, topic in sorted(lda_model_tfidf[bow_corpus[i]], key= lambda tup: -1*tup[1]):
+            append(idx)
+            break
+    except:
+        append(idx)
     # print("Loop ran for ",count)
   end = time.time()
   asf = pd.DataFrame(ser)
