@@ -303,18 +303,13 @@ def disable_graphs():
 ######################################
 ######## disable_graphs Function #######
 ######################################
-def removeCommas(x):
-    if ',' in str(x):
-        try:
-            return pd.to_numeric(str(x).replace(',',''))
-        except:
-            return x
-    else:
-        return x
 def removeSpecialCharacters(x):
     flag = 0
     temp = str(x).lower()
-    if '€' in str(x)[0]:
+
+    if '$' in str(x)[0]:
+        flag = 1
+    elif '€' in str(x)[0]:
         flag = 1 
     elif 'k' in temp[-1]:
         flag = 1 
@@ -322,6 +317,9 @@ def removeSpecialCharacters(x):
         flag = 1
     elif 'b' in temp[-1]:
         flag = 1
+    elif ',' in temp:
+        flag = 1
+
     if flag == 1 :
         try:
             temp = temp.replace('€','')
@@ -339,7 +337,14 @@ def removeSpecialCharacters(x):
             temp = temp.replace('b','000000000')
         except:
             pass
-        
+        try:
+            temp = temp.replace('$','')
+        except:
+            pass
+        try:
+            temp = temp.replace(',','')
+        except:
+            pass
         try:
             return pd.to_numeric(temp)
         except:
@@ -361,7 +366,6 @@ def dataHandler(dx,target=None):
             if str(dx[target].dtype) == 'object':
                 dx[target].replace({'NA':np.nan},inplace=True)
                 if dx[target].nunique()>5:
-                    dx[target] = dx[target].apply(lambda x: removeCommas(x))
                     dx[target] = dx[target].apply(lambda x: removeSpecialCharacters(x))
                     try:
                         dx[target] = pd.to_numeric(dx[target])
