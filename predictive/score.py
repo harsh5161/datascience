@@ -50,6 +50,7 @@ def score(df,init_info,validation=False):
         else:
             k_test = df[init_info['KEY']]
         k_test.name = 'S.No'
+        X_test = X_test.set_index(init_info['KEY'])
         k_test.index = X_test.index
     else:
         k_test = X_test.index
