@@ -233,8 +233,9 @@ def date_engineering(df, possible_datecols,DateTime=None,validation=False):
     for i in date_cols:
         df[str(i)+"_month"] = df[str(i)].dt.month.astype(int)
         df[str(i)+"_year"] = df[str(i)].dt.year.astype(int)
+        df[str(i)+"_day"] = df[str(i)].dt.day.astype(int)
         df[str(i)+"-today"] = (pd.to_datetime('today')-df[str(i)]).dt.days.astype(int)
-        visualize_dict[str(i)] =  visualize_dict[str(i)] + [str(i)+"_month"] + [str(i)+"_year"]+[str(i)+"-today"]
+        visualize_dict[str(i)] =  visualize_dict[str(i)] + [str(i)+"_month"] + [str(i)+"_year"]+[str(i)+"_day"]+[str(i)+"-today"]
 
     # create difference columns
     diff_days = list()
