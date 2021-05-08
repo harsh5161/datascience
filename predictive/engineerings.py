@@ -25,7 +25,6 @@ from gensim import corpora, models
 from wordcloud import WordCloud,STOPWORDS 
 from IPython.display import Image 
 stemmer = SnowballStemmer('english')
-
 ############################################
 ############## NUMERIC ENGINEERING #########
 ############################################
@@ -151,28 +150,30 @@ def getDateColumns(df,withPossibilies=0):
     else:
         return DATE_COLUMNS,Possible_date_col,Possibility
 
-def date_engineering(df, possible_datecols, validation=False):
+def date_engineering(df, possible_datecols,DateTime=None,validation=False):
     import itertools
     
-    def fixdate(entry):    # function to introduce '-' before and after month and and removing timestamp if it is seperated from date by':' 
-        months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
-        for month in months:
-            if month in str(entry).lower():
-                index1= entry.find(month)
-                index2= index1+3
-                entry = entry[:index1]+'-'+entry[index1:index2]+'-'+entry[index2:]
-                index3=entry.find(':')  #only specific to messy dataset
-                entry=entry[:index3]
-        return entry  
+    #def fixdate(entry):    # function to introduce '-' before and after month and and removing timestamp if it is seperated from date by':' 
+      #  months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+      #  for month in months:
+      #      if month in str(entry).lower():
+      #          index1= entry.find(month)
+      #          index2= index1+3
+      #          entry = entry[:index1]+'-'+entry[index1:index2]+'-'+entry[index2:]
+      #          index3=entry.find(':')  #only specific to messy dataset
+      #          entry=entry[:index3]
+      #  return entry  
     
     start = time.time()
     
-    if possible_datecols:
-        for col in possible_datecols:
-            df[col]=df[col].apply(fixdate)
+    #if possible_datecols:
+        #for col in possible_datecols:
+           # df[col]=df[col].apply(fixdate)
             
     print('\n\t Entering Date Engineering')
-    df = df.apply(pd.to_datetime,errors='coerce')
+#    print(f'Before pdtodatetime: {df.head(10)}')
+    df = df.apply(pd.to_datetime,errors='coerce') 
+ #   print(f'After pdtodatetime: {df.head(10)}')
     print('\nPrinting Missing % of date columns')
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(ascending=False)*100/len(df)).round(2)),columns=['Missing in %'])[:10]
     print(MISSING)
@@ -191,9 +192,44 @@ def date_engineering(df, possible_datecols, validation=False):
             df[c].fillna(df[c].mean(),inplace=True)   # if error in mode then replacing null values with mean      
      
     date_cols = df.columns
-    visualize_dict = dict.fromkeys(date_cols, [])
+    if validation==False: 
+        #Extracting Time and Date columns separately from Date Time columns
+        possibleDateTime = []
+        date_sample = df.sample(n=100)
+        for col in date_cols : 
+            try :
+                ser = date_sample[col].dt.hour
+                if ser.nunique() > 1:
+                    possibleDateTime.append(col)
+            except Exception as e:
+                print(e)
+        print(f'Possible DateTime columns are {possibleDateTime}')
+    else :
+        possibleDateTime = DateTime
+    #removing datetime cols from date_cols 
+    date_cols = list(date_cols)
+    for col in possibleDateTime : date_cols.remove(col)
 
+    #Extracting date column from possible datetime cols and adding it back into df,date_cols 
+    for col in possibleDateTime:
+        try:
+            df[str(col)+"_Date"] = pd.to_datetime(df[col].dt.date,errors='coerce') 
+            date_cols.append(str(col)+"_Date")
+        except:
+            pass
+    #Creating Time Columns from the possible datetime columns 
+    possibleTimeCols = []
+    for col in possibleDateTime : 
+        try : 
+            df[str(col)+"_HMSTime"] = pd.to_datetime(df[col].dt.time,format="%H:%M:%S",errors='coerce')
+            possibleTimeCols.append(str(col)+"_HMSTime")
+        except:
+            pass
+    #Remove possible DateTimes from the main dataframe 
+    df.drop(possibleDateTime,axis=1,inplace=True)
+    
     # creating separate month and year columns, and difference from current date
+    visualize_dict = dict.fromkeys(date_cols, [])
     for i in date_cols:
         df[str(i)+"_month"] = df[str(i)].dt.month.astype(int)
         df[str(i)+"_year"] = df[str(i)].dt.year.astype(int)
@@ -233,6 +269,15 @@ def date_engineering(df, possible_datecols, validation=False):
         #creating a new columns to check if a date falls near a holiday
         df[str(col)+'_Holiday'] = df.apply(lambda x: nearHol(x[col],us_hols.items(),x[str(col)+'_year']),axis=1)
         visualize_dict[str(col)] =  visualize_dict[str(col)] + [str(col)+"_nearestHoliday"]
+    
+    for col in possibleTimeCols:
+        df[str(col)+"_Hour"] = df[col].dt.hour
+        df[str(col)+"_Minute"] = df[col].dt.minute
+        df[str(col)+"_Seconds"] = df[col].dt.second
+        visualize_dict[str(col)] = [str(col)+"_Hour"] + [str(col)+"_Minute"] + [str(col)+"_Seconds"]
+    #removing the possible timecols from the dataframe 
+    df.drop(possibleTimeCols,axis=1,inplace=True)
+
 
     print("\nVisualizing Coloumns Generated\n {}" .format(visualize_dict))
     print("\nThe Following columns were generated to get days between dates of two seperate date columns\n {}".format(diff_days))
@@ -240,7 +285,7 @@ def date_engineering(df, possible_datecols, validation=False):
     print('\nDate Engineering Time Taken : {}'.format(end-start))
     print('\n\t #### DONE ####')
     if validation==False: 
-        return df.drop(date_cols,axis=1),dropped_cols
+        return df.drop(date_cols,axis=1),dropped_cols,possibleDateTime
     else:
         return df.drop(date_cols,axis=1)
 

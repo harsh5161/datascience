@@ -192,7 +192,7 @@ def INIT(df,info):
         print('Respective columns will undergo date engineering and will be imputed in the function itself')
         print('\n#### DATE ENGINEERING RUNNING WAIT ####')
         try:
-            DATE_DF,dropped_cols = date_engineering(X[date_cols],possible_datecols)
+            DATE_DF,dropped_cols,possibleDateTimeCols = date_engineering(X[date_cols],possible_datecols)
             if dropped_cols:
                 for val in dropped_cols :
                     if val in date_cols[:]:
@@ -631,7 +631,7 @@ def INIT(df,info):
                  'TrainingColumns':TrainingColumns, 'init_cols':init_cols,
                 'ML':class_or_Reg,'KEY':key,'X_train':X,'y_train':y,'disc_cat':disc_cat,'q_s':info['q_s'],
                 'some_list':some_list,'remove_list':remove_list,'lda_models':lda_models,'lat':lat,'lon':lon,'lat_lon_cols':lat_lon_cols,
-                'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'rule_model':rule_model,'encoded_disc':encoded_disc}
+                'email_cols':email_cols,'url_cols':url_cols,'EMAIL_STATUS':EMAIL_STATUS,'rule_model':rule_model,'encoded_disc':encoded_disc,'possibleDateTimeCols':possibleDateTimeCols}
     print(' #### DONE ####')
     return init_info,validation
     

@@ -72,7 +72,7 @@ def score(df,init_info,validation=False):
     possible_datecols= init_info['PossibleDateColumns']
     if date_cols:
         print('Runnning Date Engineering on validation dataset')
-        DATE_DF = date_engineering(X_test[date_cols], possible_datecols, validation=True)
+        DATE_DF = date_engineering(X_test[date_cols], possible_datecols,init_info['possibleDateTimeCols'], validation=True)
         DATE_DF = DATE_DF[init_info['DateFinalColumns']]
         DATE_DF.fillna(init_info['DateMean'],inplace=True)
     else:
