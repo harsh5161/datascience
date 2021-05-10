@@ -8,6 +8,7 @@ from collections import defaultdict
 from sklearn.preprocessing import LabelEncoder,OneHotEncoder
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from sklearn.utils import class_weight
 import pydotplus
 from category_encoders import TargetEncoder
@@ -651,14 +652,18 @@ def featureimportance(exp_mod,exp_name,num_features,features):
     importances = exp_mod.feature_importances_
 #    print("Inside feature importance printing feature importance",importances)
     indices = np.argsort(importances)
+    #print(indices)
     feature_importances = (exp_mod.feature_importances_ / sum(exp_mod.feature_importances_))*100
+    #print(feature_importances)
     results = pd.DataFrame({'Features': features, 'Importances': feature_importances})
     results.sort_values(by='Importances',inplace=True)
     plt.figure(figsize=(10,10))
     plt.title(f'Feature Importances for {exp_name} Explainable Model based on Test Data')
     # only plot the customized number of features
+    fmt = '%.0f%%'
     plt.barh(results['Features'],results['Importances'], color=colors, align='center')
     plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
+    plt.gca().xaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
     plt.xlabel('Relative Importance')
     plt.show()
     plt.close('all')
