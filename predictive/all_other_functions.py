@@ -651,10 +651,13 @@ def featureimportance(exp_mod,exp_name,num_features,features):
     importances = exp_mod.feature_importances_
 #    print("Inside feature importance printing feature importance",importances)
     indices = np.argsort(importances)
+    feature_importances = (exp_mod.feature_importances_ / sum(exp_mod.feature_importances_))*100
+    results = pd.DataFrame({'Features': features, 'Importances': feature_importances})
+    results.sort_values(by='Importances',inplace=True)
     plt.figure(figsize=(10,10))
     plt.title(f'Feature Importances for {exp_name} Explainable Model based on Test Data')
     # only plot the customized number of features
-    plt.barh(range(num_features), importances[indices[-num_features:]], color=colors, align='center')
+    plt.barh(results['Features'],results['Importances'], color=colors, align='center')
     plt.yticks(range(num_features), [features[i] for i in indices[-num_features:]])
     plt.xlabel('Relative Importance')
     plt.show()
