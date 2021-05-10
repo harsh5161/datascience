@@ -208,9 +208,11 @@ def INIT(df,info):
             X.drop(date_cols,axis=1,inplace=True)
             DATE_DF = pd.DataFrame(None)
             date_cols = []
+            possibleDateTimeCols = []
     else:
         DATE_DF = pd.DataFrame(None)
         date_cols = []
+        possibleDateTimeCols = []
     print(' #### DONE ####')
     ######## DATE ENGINEERING #######
     num_features_created += len(DATE_DF.columns)
