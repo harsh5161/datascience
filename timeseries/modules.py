@@ -6,7 +6,7 @@ def userInputs():
         print(df.head(5))
     except:
         print("Import Error: Please try importing an appropriate dataset")
-        return None
+        return None, None
     date_column = input("Enter the Date Column :")
     # format = '%Y-%m-%d %H:%M:%S'
     try:
@@ -18,7 +18,7 @@ def userInputs():
         print(df.head())
     except:
         print("Date Column could not be found or Date Column could not be set as Index")
-        return None
+        return None, None
     print("Exploring the different series' present in the DataFrame")
     dataExploration(df)
 
@@ -39,7 +39,7 @@ def userInputs():
     df = pd.DataFrame(df[target].copy())
     print("Visualising the final DataFrame")
     print(df.head(10))
-    return df
+    return df, target
 # Exploratory DataAnalysis
 
 

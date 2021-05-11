@@ -3,9 +3,9 @@ from modules import *
 
 
 def INIT():
-    df = userInputs()
+    df, target = userInputs()
 
-    if df is None:
+    if df is None or target is None:
         return None
 
     action_list = processIdentifier(df)
