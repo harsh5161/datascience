@@ -138,13 +138,23 @@ def dataResampler(df, perform_list):
     if 'RW' in perform_list:
         weekly_df = df.resample('W').sum()
         weekly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
-        resampled_data["Weekly"] = weekly_df
+        resampled_data["Week"] = weekly_df
         print(
             f'Weekly Resampling done, engineered dataframe size {weekly_df.shape}')
     if 'RM' in perform_list:
         monthly_df = df.resample('M').sum()
         monthly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
-        resampled_data["Monthly"] = monthly_df
+        resampled_data["Month"] = monthly_df
         print(
             f'Monthly Resampling done, engineered dataframe size {monthly_df.shape}')
     return resampled_data
+
+
+def seasonalDecompose(series):
+    rcParams['figure.figsize'] = 18, 8
+    plt.figure(num=None, figsize=(50, 20), dpi=80,
+               facecolor='w', edgecolor='k')
+    series = df[target][:365]
+    # Logic to determine freq need to think (?)
+    result = seasonal_decompose(series, model='multiplicative')
+    result.plot()
