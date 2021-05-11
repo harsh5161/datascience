@@ -60,5 +60,5 @@ start = time.time()
 complete = INIT()
 if complete is None:
     print("Process Failed")
-
-print(f"Process Success : Time Taken {time.time()-start}")
+else:
+    print(f"Process Success : Time Taken {time.time()-start}")
