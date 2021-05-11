@@ -190,3 +190,34 @@ def stationaryNormalityPlots(series, lags, rolling):
     mm = series.rolling(lags).mean()
     mm.plot(ax=mean_ax)
     mean_ax.set_title("Mean over time")
+
+
+def tsplot(y, lags=None):
+    if not isinstance(y, pd.Series):
+        y = pd.Series(y)
+
+    with plt.style.context(style='bmh'):
+        fig = plt.figure(figsize=(15, 10))
+        layout = (3, 2)
+        ts_ax = plt.subplot2grid(layout, (0, 0), colspan=2)
+        acf_ax = plt.subplot2grid(layout, (1, 0))
+        pacf_ax = plt.subplot2grid(layout, (1, 1))
+        mean_std_ax = plt.subplot2grid(layout, (2, 0), colspan=2)
+        y.plot(ax=ts_ax)
+        p_value = sm.tsa.stattools.adfuller(y)[1]
+        hypothesis_result = "Stationary" if p_value <= 0.05 else "Non-Stationary"
+        ts_ax.set_title(
+            'Time Series stationary analysis Plots\n Dickey-Fuller: p={0:.5f} Result: {1}'.format(p_value, hypothesis_result))
+        smt.graphics.plot_acf(y, lags=lags, ax=acf_ax)
+        smt.graphics.plot_pacf(y, lags=lags, ax=pacf_ax)
+        plt.tight_layout()
+
+        rolmean = y.rolling(window=12).mean()
+        rolstd = y.rolling(window=12).std()
+
+        # Plot rolling statistics:
+        orig = plt.plot(y, label='Original')
+        mean = plt.plot(rolmean, color='red', label='Rolling Mean')
+        std = plt.plot(rolstd, color='black', label='Rolling Std')
+        plt.legend(loc='best')
+        plt.title('Rolling Mean & Standard Deviation')
