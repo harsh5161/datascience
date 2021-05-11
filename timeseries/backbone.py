@@ -18,25 +18,25 @@ def INIT():
     for val in action_list:
         if val == 'Y':
             # call function passing df,target and other parameters specific to Y
-            print("function Y")
+            print("Performing Yearly Analysis")
             seasonalDecompose(df[target][:365])
         if val == 'M':
             # call function passing df,target and other parameters specific to M
-            print("function M")
+            print("Performing Monthly Analysis")
             seasonalDecompose(df[target][:300])
         if val == 'D':
             # call function passing df,target and other parameters specific to D
-            print("function D")
+            print("Performing Daily Analysis")
             seasonalDecompose(df[target][:250])
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
-            print("function RQ")
+            print("Performing Resampled Quarterly Analysis")
             seasonalDecompose(resampled_frames['Quarter'][target])
         if val == 'RM':
             # call function passing resampled_frames['Monthly'],target and other parameters specific to RM
-            print("function RM")
+            print("Performing Resampled Monthly Analysis")
             seasonalDecompose(resampled_frames['Month'][target])
         if val == 'RW':
             # call function passing resampled_frames['Daily'],target and other parameters specific to RW
-            print("function RW")
+            print("Performing Resampled Weekly Analysis")
             seasonalDecompose(resampled_frames['Week'][target])
