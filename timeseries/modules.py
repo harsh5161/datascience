@@ -227,6 +227,35 @@ def findTrainSize(df):
     return int(len(df)*0.90)
 
 
+def featureEngineering(df):
+    """
+    Creates time series features from datetime index
+    """
+    df['date'] = df.index
+    try:
+        df['hour'] = df['date'].dt.hour
+        df['minute'] = df['date'].dt.minute
+        df['seconds'] = df['date'].dt.seconds
+    except:
+        pass
+    df['dayofweek'] = df['date'].dt.dayofweek
+    df['quarter'] = df['date'].dt.quarter
+    df['month'] = df['date'].dt.month
+    df['year'] = df['date'].dt.year
+    df['dayofyear'] = df['date'].dt.dayofyear
+    df['sin_day'] = np.sin(df['dayofyear'])
+    df['cos_day'] = np.cos(df['dayofyear'])
+    df['dayofmonth'] = df['date'].dt.day
+    df['weekofyear'] = df['date'].dt.weekofyear
+    X = df.drop(['date'], axis=1)
+    if target:
+        y = df[target]
+        X = X.drop([target], axis=1)
+        return X, y
+
+    return X
+
+
 def modellingInit(df, resultsDict, predictionsDict):
     # X = df.values
     train_size = findTrainSize(df)
