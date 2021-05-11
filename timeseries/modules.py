@@ -260,6 +260,14 @@ def featureEngineering(df, target=None):
     return X
 
 
+def testPlot(y_test, predictionsDict):
+    plt.plot(y_test.values, label='Original')
+    for key, value in predictionsDict.items():
+        yhat = value
+        plt.plot(yhat, color='red', label=f'{key}')
+    plt.legend()
+
+
 def modellingInit(df, target, resultsDict, predictionsDict):
     # X = df.values
     train_size = findTrainSize(df)
@@ -278,8 +286,9 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     X_train_df = pd.DataFrame(X_train, columns=X_train_df.columns)
     X_test_df = pd.DataFrame(X_test, columns=X_test_df.columns)
 
-    modelling_obj = Modelling(X_train_df, X_test_df, y_train, _y_test)
+    modelling_obj = Modelling(X_train_df, X_test_df, y_train, y_test)
     modelling_obj.modeller()
 
-    print(resultsDict)
-    print(predictionsDict)
+    # print(resultsDict)
+    # print(predictionsDict)
+    testPlot(y_test, predictionsDict)
