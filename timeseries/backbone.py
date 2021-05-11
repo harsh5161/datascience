@@ -29,7 +29,7 @@ def INIT():
             seasonalDecompose(df[target][:365])
             stationaryNormalityPlots(df[target], 30, 7)
             tsplot(df[target], lags=30)
-            modellingInit(df, resultsDict, predictionsDict)
+            modellingInit(df, target, resultsDict, predictionsDict)
         if val == 'M':
             # call function passing df,target and other parameters specific to M
             print("Performing Monthly Analysis")

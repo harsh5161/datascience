@@ -227,7 +227,7 @@ def findTrainSize(df):
     return int(len(df)*0.90)
 
 
-def featureEngineering(df):
+def featureEngineering(df, target=None):
     """
     Creates time series features from datetime index
     """
@@ -256,9 +256,19 @@ def featureEngineering(df):
     return X
 
 
-def modellingInit(df, resultsDict, predictionsDict):
+def modellingInit(df, target, resultsDict, predictionsDict):
     # X = df.values
     train_size = findTrainSize(df)
     split_date = df.index[train_size]
     df_training = df.loc[df.index <= split_date]
     df_test = df.loc[df.index > split_date]
+
+    X_train_df, y_train = featureEngineering(df_training, target=target)
+    X_test_df, y_test = featureEngineering(df_test, target=target)
+    scaler = StandardScaler()
+    scaler.fit(X_train_df)  # No cheating, never scale on the training+test!
+    X_train = scaler.transform(X_train_df)
+    X_test = scaler.transform(X_test_df)
+
+    X_train_df = pd.DataFrame(X_train, columns=X_train_df.columns)
+    X_test_df = pd.DataFrame(X_test, columns=X_test_df.columns)
