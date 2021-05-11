@@ -154,7 +154,7 @@ def seasonalDecompose(series):
     rcParams['figure.figsize'] = 18, 8
     plt.figure(num=None, figsize=(50, 20), dpi=80,
                facecolor='w', edgecolor='k')
-    series = df[target][:365]
     # Logic to determine freq need to think (?)
-    result = seasonal_decompose(series, model='multiplicative')
+    result = seasonal_decompose(
+        series, model='multiplicative')  # freq? period?
     result.plot()

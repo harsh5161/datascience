@@ -31,12 +31,12 @@ def INIT():
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
             print("function RQ")
-            seasonalDecompose(resampled_frames['Quarter'][target][:91])
+            seasonalDecompose(resampled_frames['Quarter'][target])
         if val == 'RM':
             # call function passing resampled_frames['Monthly'],target and other parameters specific to RM
             print("function RM")
-            seasonalDecompose(resampled_frames['Month'][target][:300])
+            seasonalDecompose(resampled_frames['Month'][target])
         if val == 'RW':
             # call function passing resampled_frames['Daily'],target and other parameters specific to RW
             print("function RW")
-            seasonalDecompose(resampled_frames['Week'][target][:52])
+            seasonalDecompose(resampled_frames['Week'][target])
