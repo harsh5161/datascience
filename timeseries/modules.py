@@ -158,3 +158,35 @@ def seasonalDecompose(series):
     result = seasonal_decompose(
         series, model='multiplicative')  # freq? period?
     result.plot()
+
+# Now we look for white noise by looking at the plots below, if the mean and std histograms are normally distributed then there is white noise present and we cannot predict that part as it is random.
+# If our time series has white noise this will mean we can't predict that component of the series (as is random) and we should aim to produce a model with errors close to this white noise.
+# things to look for
+# Is original series normally distributed?
+# Is the std deviation normally distributed?
+# Is the mean over time constant?
+# Is the autocorrelation plot reaching minima soon and continuing till the end?
+# If Yes, then the series is stationary, else it is non stationary
+
+
+def stationaryNormalityPlots(series, lags, rolling):
+    fig = plt.figure(figsize=(12, 7))
+    layout = (2, 2)
+    hist_ax = plt.subplot2grid(layout, (0, 0))
+    ac_ax = plt.subplot2grid(layout, (1, 0))
+    hist_std_ax = plt.subplot2grid(layout, (0, 1))
+    mean_ax = plt.subplot2grid(layout, (1, 1))
+
+    series.hist(ax=hist_ax)
+    hist_ax.set_title("Original series histogram")
+
+    plot_acf(series, lags=lags, ax=ac_ax)
+    ac_ax.set_title("Autocorrelation")
+
+    mm = series.rolling(rolling).std()
+    mm.hist(ax=hist_std_ax)
+    hist_std_ax.set_title("Standard deviation histogram")
+
+    mm = series.rolling(lags).mean()
+    mm.plot(ax=mean_ax)
+    mean_ax.set_title("Mean over time")
