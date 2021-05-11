@@ -8,6 +8,17 @@ import statsmodels.tsa.api as smt
 import statsmodels as sm
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+# Extra settings
+seed = 42
+np.random.seed(seed)
+plt.style.use('bmh')
+mpl.rcParams['axes.labelsize'] = 14
+mpl.rcParams['xtick.labelsize'] = 12
+mpl.rcParams['ytick.labelsize'] = 12
+mpl.rcParams['text.color'] = 'k'
 # You want to call this script separately so that we take in a large dataset input by the user and push it out of memory after extracting the two columnss that we need
 
 
@@ -163,13 +174,13 @@ def dataResampler(df, perform_list):
     return resampled_data
 
 
-def seasonalDecompose(series):
-    rcParams['figure.figsize'] = 18, 8
+def seasonalDecompose(series, period):
+    mpl.rcParams['figure.figsize'] = 18, 8
     plt.figure(num=None, figsize=(50, 20), dpi=80,
                facecolor='w', edgecolor='k')
     # Logic to determine freq need to think (?)
     result = seasonal_decompose(
-        series, model='multiplicative')  # freq? period?
+        series, model='multiplicative', period=period)  # freq? period?
     result.plot()
 
 # Now we look for white noise by looking at the plots below, if the mean and std histograms are normally distributed then there is white noise present and we cannot predict that part as it is random.
@@ -295,7 +306,8 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     X_train_df = pd.DataFrame(X_train, columns=X_train_df.columns)
     X_test_df = pd.DataFrame(X_test, columns=X_test_df.columns)
 
-    modelling_obj = Modelling(X_train_df, X_test_df, y_train, y_test)
+    modelling_obj = Modelling(X_train_df, X_test_df,
+                              y_train, y_test, resultsDict, predictionsDict)
     modelling_obj.modeller()
 
     # print(resultsDict)

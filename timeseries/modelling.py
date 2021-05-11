@@ -23,76 +23,76 @@ class Modelling:
 
     def naiveModel(self):
         print("Naive Modelling Running...")
-        mean = y_test.mean()
-        mean = np.array([mean for u in range(len(X_test))])
-        resultsDict['Naive mean'] = evaluate(y_test, mean)
-        predictionsDict['Naive mean'] = mean
+        mean = self.y_test.mean()
+        mean = np.array([mean for u in range(len(self.X_test))])
+        self.resultsDict['Naive mean'] = evaluate(self.y_test, mean)
+        self.predictionsDict['Naive mean'] = mean
 
     def bayesianRegression(self):
         print("Bayesian Model Running...")
         reg = linear_model.BayesianRidge()
-        reg.fit(X_train, y_train)
-        yhat = reg.predict(X_test)
-        resultsDict['BayesianRidge'] = evaluate(y_test, yhat)
-        predictionsDict['BayesianRidge'] = yhat
+        reg.fit(self.X_train, self.y_train)
+        yhat = reg.predict(self.X_test)
+        self.resultsDict['BayesianRidge'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['BayesianRidge'] = yhat
 
     def lassoRegression(self):
         print("Lasso Model Running...")
         reg = linear_model.Lasso(alpha=0.1)
-        reg.fit(X_train, y_train)
-        yhat = reg.predict(X_test)
-        resultsDict['Lasso'] = evaluate(y_test, yhat)
-        predictionsDict['Lasso'] = yhat
+        reg.fit(self.X_train, self.y_train)
+        yhat = reg.predict(self.X_test)
+        self.resultsDict['Lasso'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['Lasso'] = yhat
 
     def randomForest(self):
         print("Random Forest Running...")
         reg = RandomForestRegressor(max_depth=5, random_state=0)
-        reg.fit(X_train, y_train)
-        yhat = reg.predict(X_test)
-        resultsDict['Randomforest'] = evaluate(y_test, yhat)
-        predictionsDict['Randomforest'] = yhat
+        reg.fit(self.X_train, self.y_train)
+        yhat = reg.predict(self.X_test)
+        self.resultsDict['Randomforest'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['Randomforest'] = yhat
 
     def XGB(self):
         print("XGB Running...")
         reg = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=1000)
-        reg.fit(X_train, y_train,
+        reg.fit(self.X_train, self.y_train,
                 verbose=False)  # Change verbose to True if you want to see it train
-        yhat = reg.predict(X_test)
-        resultsDict['XGBoost'] = evaluate(y_test, yhat)
-        predictionsDict['XGBoost'] = yhat
+        yhat = reg.predict(self.X_test)
+        self.resultsDict['XGBoost'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['XGBoost'] = yhat
 
     def LGBM(self):
         print("LGBM Running...")
         lightGBM = lgb.LGBMRegressor()
-        lightGBM.fit(X_train, y_train)
-        yhat = lightGBM.predict(X_test)
-        resultsDict['Lightgbm'] = evaluate(y_test, yhat)
-        predictionsDict['Lightgbm'] = yhat
+        lightGBM.fit(self.X_train, self.y_train)
+        yhat = lightGBM.predict(self.X_test)
+        self.resultsDict['Lightgbm'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['Lightgbm'] = yhat
 
     def SVM(self):
         print('SVM Running...')
         reg = svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
-        reg.fit(X_train, y_train)
-        yhat = reg.predict(X_test)
-        resultsDict['SVM RBF'] = evaluate(y_test, yhat)
-        predictionsDict['SVM RBF'] = yhat
+        reg.fit(self.X_train, self.y_train)
+        yhat = reg.predict(self.X_test)
+        self.resultsDict['SVM RBF'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['SVM RBF'] = yhat
 
     def KNN(self):
         print("KNN Running...")
         reg = KNeighborsRegressor(n_neighbors=2)
-        reg.fit(X_train, y_train)
-        yhat = reg.predict(X_test)
-        resultsDict['Kneighbors'] = evaluate(y_test, yhat)
-        predictionsDict['Kneighbors'] = yhat
+        reg.fit(self.X_train, self.y_train)
+        yhat = reg.predict(self.X_test)
+        self.resultsDict['Kneighbors'] = evaluate(self.y_test, yhat)
+        self.predictionsDict['Kneighbors'] = yhat
 
     def modeller(self):
         current = time.time()
-        naiveModel()
-        bayesianRegression()
-        lassoRegression()
-        randomForest()
-        XGB()
-        LGBM()
-        SVM()
-        KNN()
+        self.naiveModel()
+        self.bayesianRegression()
+        self.lassoRegression()
+        self.randomForest()
+        self.XGB()
+        self.LGBM()
+        self.SVM()
+        self.KNN()
         print(f'Total Modelling Time Taken : {time.time()-current}')
