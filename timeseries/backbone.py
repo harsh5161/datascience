@@ -9,3 +9,6 @@ def INIT():
         return None
 
     action_list = processIdentifier(df)
+
+    if len(action_list) == 0:
+        return None

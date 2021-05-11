@@ -122,3 +122,29 @@ def processIdentifier(df):
     print(
         f"Various processes can be applied onto the data : \n {perform_list}")
     return perform_list
+
+# Resampling the dataframes if necessary
+# Yearly, Monthly and Daily forecasts if possible will not require any resampling to preserve information.
+
+
+def dataResampler(df, perform_list):
+    resampled_data = {}
+    if 'RQ' in perform_list:
+        quarter_df = df.resample('Q').sum()
+        quarter_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        resampled_data["Quarter"] = quarter_df
+        print(
+            f'Quarterly Resampling done, engineered dataframe size {quarter_df.shape}')
+    if 'RW' in perform_list:
+        weekly_df = df.resample('W').sum()
+        weekly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        resampled_data["Weekly"] = weekly_df
+        print(
+            f'Weekly Resampling done, engineered dataframe size {weekly_df.shape}')
+    if 'RM' in perform_list:
+        monthly_df = df.resample('M').sum()
+        monthly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        resampled_data["Monthly"] = monthly_df
+        print(
+            f'Monthly Resampling done, engineered dataframe size {monthly_df.shape}')
+    return resampled_data
