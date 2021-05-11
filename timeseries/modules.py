@@ -1,5 +1,13 @@
-from modelling import *
-
+from modelling import Modelling
+from userInputs import importFile
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+import statsmodels.tsa.api as smt
+import statsmodels as sm
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 # You want to call this script separately so that we take in a large dataset input by the user and push it out of memory after extracting the two columnss that we need
 
 
@@ -20,8 +28,9 @@ def userInputs():
         df.sort_index(inplace=True)
         df.drop('Datetime', axis=1, inplace=True)
         print(df.head())
-    except:
-        print("Date Column could not be found or Date Column could not be set as Index")
+    except Exception as e:
+        print(
+            f"Date Column could not be found or Date Column could not be set as Index : {e}")
         return None, None
     print("Exploring the different series' present in the DataFrame")
     dataExploration(df)
