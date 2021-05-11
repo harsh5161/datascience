@@ -280,6 +280,7 @@ def featureEngineering(df, target=None):
     return X
 
 
+# Change the logic for this function and also check the logic of resample
 def testPlot(y_test, predictionsDict):
     plt.plot(y_test.values, label='Original')
     for key, value in predictionsDict.items():
