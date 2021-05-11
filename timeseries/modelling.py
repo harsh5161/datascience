@@ -32,7 +32,7 @@ class Modelling:
         predictionsDict['Lasso'] = yhat
 
     def randomForest(self):
-        reg = RandomForestRegressor(max_depth=2, random_state=0)
+        reg = RandomForestRegressor(max_depth=5, random_state=0)
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
         resultsDict['Randomforest'] = evaluate(y_test, yhat)
@@ -52,3 +52,10 @@ class Modelling:
         yhat = lightGBM.predict(X_test)
         resultsDict['Lightgbm'] = evaluate(y_test, yhat)
         predictionsDict['Lightgbm'] = yhat
+
+    def svm(self):
+        reg = svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
+        reg.fit(X_train, y_train)
+        yhat = reg.predict(X_test)
+        resultsDict['SVM RBF'] = evaluate(y_test, yhat)
+        predictionsDict['SVM RBF'] = yhat
