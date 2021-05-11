@@ -221,3 +221,15 @@ def tsplot(y, lags=None):
         std = plt.plot(rolstd, color='black', label='Rolling Std')
         plt.legend(loc='best')
         plt.title('Rolling Mean & Standard Deviation')
+
+
+def findTrainSize(df):
+    return int(len(df)*0.90)
+
+
+def modellingInit(df, resultsDict, predictionsDict):
+    # X = df.values
+    train_size = findTrainSize(df)
+    split_date = df.index[train_size]
+    df_training = df.loc[df.index <= split_date]
+    df_test = df.loc[df.index > split_date]

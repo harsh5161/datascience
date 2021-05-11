@@ -14,6 +14,13 @@ def INIT():
         return None
 
     resampled_frames = dataResampler(df, action_list)
+    # We split our dataset to be able to evaluate our models
+
+    resultsDict = {}
+    predictionsDict = {}
+
+    print(
+        f"We have {len(df_training)} days of training data and {len(df_test)} days of testing data ")
 
     for val in action_list:
         if val == 'Y':
@@ -22,6 +29,7 @@ def INIT():
             seasonalDecompose(df[target][:365])
             stationaryNormalityPlots(df[target], 30, 7)
             tsplot(df[target], lags=30)
+            modellingInit(df, resultsDict, predictionsDict)
         if val == 'M':
             # call function passing df,target and other parameters specific to M
             print("Performing Monthly Analysis")
