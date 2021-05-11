@@ -55,9 +55,9 @@ mpl.rcParams['ytick.labelsize'] = 12
 mpl.rcParams['text.color'] = 'k'
 # print(tf.__version__)
 
-try:
-    start = time.time()
-    INIT()
-    print(f"Total Time taken for successful completion : {time.time()-start}")
-except Exception as e:
-    print(f"The program had errors : {e}")
+start = time.time()
+complete = INIT()
+if complete is None:
+    print("Process Failed")
+
+print(f"Process Success : Time Taken {time.time()-start}")
