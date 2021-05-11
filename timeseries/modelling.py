@@ -53,9 +53,18 @@ class Modelling:
         resultsDict['Lightgbm'] = evaluate(y_test, yhat)
         predictionsDict['Lightgbm'] = yhat
 
-    def svm(self):
+    def SVM(self):
         reg = svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
         resultsDict['SVM RBF'] = evaluate(y_test, yhat)
         predictionsDict['SVM RBF'] = yhat
+
+    def KNN(self):
+        reg = KNeighborsRegressor(n_neighbors=2)
+        reg.fit(X_train, y_train)
+        yhat = reg.predict(X_test)
+        resultsDict['Kneighbors'] = evaluate(y_test, yhat)
+        predictionsDict['Kneighbors'] = yhat
+
+    def modeller(self):
