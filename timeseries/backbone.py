@@ -14,17 +14,12 @@ def INIT():
         return None
 
     resampled_frames = dataResampler(df, action_list)
-    # We split our dataset to be able to evaluate our models
-
-    resultsDict = {}
-    predictionsDict = {}
-
-    print(
-        f"We have {len(df_training)} days of training data and {len(df_test)} days of testing data ")
 
     for val in action_list:
         if val == 'Y':
             # call function passing df,target and other parameters specific to Y
+            resultsDict = {}
+            predictionsDict = {}
             print("Performing Yearly Analysis")
             seasonalDecompose(df[target][:365])
             stationaryNormalityPlots(df[target], 30, 7)

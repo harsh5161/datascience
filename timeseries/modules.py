@@ -1,4 +1,8 @@
+from modelling import *
+
 # You want to call this script separately so that we take in a large dataset input by the user and push it out of memory after extracting the two columnss that we need
+
+
 def userInputs():
     path = input("Enter the path of the dataset :")
     try:
@@ -262,7 +266,8 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     split_date = df.index[train_size]
     df_training = df.loc[df.index <= split_date]
     df_test = df.loc[df.index > split_date]
-
+    print(
+        f"We have {len(df_training)} days of training data and {len(df_test)} days of testing data ")
     X_train_df, y_train = featureEngineering(df_training, target=target)
     X_test_df, y_test = featureEngineering(df_test, target=target)
     scaler = StandardScaler()
@@ -272,3 +277,9 @@ def modellingInit(df, target, resultsDict, predictionsDict):
 
     X_train_df = pd.DataFrame(X_train, columns=X_train_df.columns)
     X_test_df = pd.DataFrame(X_test, columns=X_test_df.columns)
+
+    modelling_obj = Modelling(X_train_df, X_test_df, y_train, _y_test)
+    modelling_obj.modeller()
+
+    print(resultsDict)
+    print(predictionsDict)

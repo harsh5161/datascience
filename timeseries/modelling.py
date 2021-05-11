@@ -1,5 +1,6 @@
 from metrics import evaluate
 from plots import bar_metrics
+import time
 
 
 class Modelling:
@@ -12,12 +13,14 @@ class Modelling:
         self.predictionsDict = predictionsDict
 
     def naiveModel(self):
+        print("Naive Modelling Running...")
         mean = y_test.mean()
         mean = np.array([mean for u in range(len(X_test))])
         resultsDict['Naive mean'] = evaluate(y_test, mean)
         predictionsDict['Naive mean'] = mean
 
     def bayesianRegression(self):
+        print("Bayesian Model Running...")
         reg = linear_model.BayesianRidge()
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
@@ -25,6 +28,7 @@ class Modelling:
         predictionsDict['BayesianRidge'] = yhat
 
     def lassoRegression(self):
+        print("Lasso Model Running...")
         reg = linear_model.Lasso(alpha=0.1)
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
@@ -32,6 +36,7 @@ class Modelling:
         predictionsDict['Lasso'] = yhat
 
     def randomForest(self):
+        print("Random Forest Running...")
         reg = RandomForestRegressor(max_depth=5, random_state=0)
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
@@ -39,6 +44,7 @@ class Modelling:
         predictionsDict['Randomforest'] = yhat
 
     def XGB(self):
+        print("XGB Running...")
         reg = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=1000)
         reg.fit(X_train, y_train,
                 verbose=False)  # Change verbose to True if you want to see it train
@@ -47,6 +53,7 @@ class Modelling:
         predictionsDict['XGBoost'] = yhat
 
     def LGBM(self):
+        print("LGBM Running...")
         lightGBM = lgb.LGBMRegressor()
         lightGBM.fit(X_train, y_train)
         yhat = lightGBM.predict(X_test)
@@ -54,6 +61,7 @@ class Modelling:
         predictionsDict['Lightgbm'] = yhat
 
     def SVM(self):
+        print('SVM Running...')
         reg = svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
@@ -61,6 +69,7 @@ class Modelling:
         predictionsDict['SVM RBF'] = yhat
 
     def KNN(self):
+        print("KNN Running...")
         reg = KNeighborsRegressor(n_neighbors=2)
         reg.fit(X_train, y_train)
         yhat = reg.predict(X_test)
@@ -68,3 +77,13 @@ class Modelling:
         predictionsDict['Kneighbors'] = yhat
 
     def modeller(self):
+        current = time.time()
+        naiveModel()
+        bayesianRegression()
+        lassoRegression()
+        randomForest()
+        XGB()
+        LGBM()
+        SVM()
+        KNN()
+        print(f'Total Modelling Time Taken : {time.time()-current}')
