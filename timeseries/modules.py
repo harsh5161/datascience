@@ -11,6 +11,8 @@ from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from tabulate import tabulate
+from plots import bar_metrics
 # Extra settings
 seed = 42
 np.random.seed(seed)
@@ -324,7 +326,5 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     modelling_obj = Modelling(X_train_df, X_test_df,
                               y_train, y_test, resultsDict, predictionsDict)
     modelling_obj.modeller()
-
-    # print(resultsDict)
-    # print(predictionsDict)
     testPlot(y_test, predictionsDict)
+    bar_metrics(resultsDict)

@@ -44,5 +44,5 @@ def bar_metrics(resultsDict):
     plt.legend()
     plt.title("R2 Metric, higher is better")
     plt.tight_layout()
-    plt.savefig("results/metrics.png")
+    # plt.savefig("results/metrics.png")
     plt.show()

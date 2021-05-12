@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, make_scorer
 import xgboost as xgb
 import lightgbm as lgb
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 
 class Modelling:
@@ -85,6 +86,28 @@ class Modelling:
         self.resultsDict['Kneighbors'] = evaluate(self.y_test, yhat)
         self.predictionsDict['Kneighbors'] = yhat
 
+    def Ensemble(self):
+        print('Trying XGB + Light Ensemble...')
+        self.predictionsDict['EnsembleXG+LIGHT'] = (
+            self.predictionsDict['XGBoost'] + self.predictionsDict['Lightgbm'])/2
+        self.resultsDict['EnsembleXG+LIGHT'] = evaluate(
+            self.y_test.values, self.predictionsDict['EnsembleXG+LIGHT'])
+        print('Trying RF + XGBoost Ensemble...')
+        self.predictionsDict['EnsembleRF+XG'] = (
+            self.predictionsDict['Randomforest'] + self.predictionsDict['XGBoost'])/2
+        self.resultsDict['EnsembleRF+XG'] = evaluate(
+            self.y_test.values, self.predictionsDict['EnsembleRF+XG'])
+        print('Trying RF + Light Ensemble...')
+        self.predictionsDict['EnsembleRF+LIGHT'] = (
+            self.predictionsDict['Randomforest'] + self.predictionsDict['Lightgbm'])/2
+        self.resultsDict['EnsembleRF+LIGHT'] = evaluate(
+            self.y_test.values, self.predictionsDict['EnsembleRF+LIGHT'])
+        print('Trying XG + RF + Light Ensemble...')
+        self.predictionsDict['EnsembleXG+LIGHT+RF'] = (
+            self.predictionsDict['XGBoost'] + self.predictionsDict['Lightgbm'] + self.predictionsDict['Randomforest'])/3
+        self.resultsDict['EnsembleXG+LIGHT+RF'] = evaluate(
+            self.y_test.values, self.predictionsDict['EnsembleXG+LIGHT+RF'])
+
     def modeller(self):
         current = time.time()
         self.naiveModel()
@@ -95,4 +118,5 @@ class Modelling:
         self.LGBM()
         self.SVM()
         self.KNN()
+        self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')
