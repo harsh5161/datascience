@@ -181,7 +181,7 @@ def seasonalDecompose(series, period):
     # Logic to determine freq need to think (?)
     result = seasonal_decompose(
         series, model='multiplicative', period=period)  # freq? period?
-    result.plot()
+    plt.show(result)
 
 # Now we look for white noise by looking at the plots below, if the mean and std histograms are normally distributed then there is white noise present and we cannot predict that part as it is random.
 # If our time series has white noise this will mean we can't predict that component of the series (as is random) and we should aim to produce a model with errors close to this white noise.
@@ -214,6 +214,7 @@ def stationaryNormalityPlots(series, lags, rolling):
     mm = series.rolling(lags).mean()
     mm.plot(ax=mean_ax)
     mean_ax.set_title("Mean over time")
+    plt.show()
 
 
 def tsplot(y, lags=None):
@@ -245,6 +246,8 @@ def tsplot(y, lags=None):
         std = plt.plot(rolstd, color='black', label='Rolling Std')
         plt.legend(loc='best')
         plt.title('Rolling Mean & Standard Deviation')
+
+    plt.show()
 
 
 def findTrainSize(df):
@@ -287,6 +290,7 @@ def testPlot(y_test, predictionsDict):
         yhat = value
         plt.plot(yhat, color='red', label=f'{key}')
     plt.legend()
+    plt.show()
 
 
 def modellingInit(df, target, resultsDict, predictionsDict):

@@ -26,11 +26,8 @@ def INIT():
             predictionsDict = {}
             print("Performing Yearly Analysis")
             seasonalDecompose(df[target][:720], 350)
-            plt.close('all')
             stationaryNormalityPlots(df[target], 30, 7)
-            plt.close('all')
             tsplot(df[target], lags=30)
-            plt.close('all')
             modellingInit(df, target, resultsDict, predictionsDict)
         if val == 'M':
             # call function passing df,target and other parameters specific to M
