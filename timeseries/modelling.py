@@ -11,6 +11,8 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, make_scorer
 import xgboost as xgb
 import lightgbm as lgb
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+from tqdm import tqdm, tqdm_notebook
+import pmdarima as pm
 
 
 class Modelling:
@@ -86,6 +88,30 @@ class Modelling:
         self.resultsDict['Kneighbors'] = evaluate(self.y_test, yhat)
         self.predictionsDict['Kneighbors'] = yhat
 
+    def SARIMAX(self):
+        print("SARIMAX Running...")
+        autoModel = pm.auto_arima(self.y_train, trace=True, error_action='ignore',
+                                  suppress_warnings=True, seasonal=True, m=12, stepwise=True)
+        autoModel.fit(self.y_train)
+
+        order = autoModel.order
+        seasonalOrder = autoModel.seasonal_order
+        yhat = list()
+        for t in tqdm(range(len(self.y_test))):
+            temp_train = self.y_train[:len(self.y_train)+t]
+            model = SARIMAX(temp_train, order=order,
+                            seasonal_order=seasonalOrder)
+            model_fit = model.fit(disp=False)
+            predictions = model_fit.predict(
+                start=len(temp_train), end=len(temp_train), dynamic=False)
+            yhat = yhat + [predictions]
+
+        yhat = pd.concat(yhat)
+        self.resultsDict['AutoSARIMAX {0},{1}'.format(
+            order, seasonalOrder)] = evaluate(self.y_test, yhat.values)
+        self.predictionsDict['AutoSARIMAX {0},{1}'.format(
+            order, seasonalOrder)] = yhat.values
+
     def Ensemble(self):
         print('Trying XGB + Light Ensemble...')
         self.predictionsDict['EnsembleXG+LIGHT'] = (
@@ -118,5 +144,6 @@ class Modelling:
         self.LGBM()
         self.SVM()
         self.KNN()
+        self.SARIMAX()
         self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')
