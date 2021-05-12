@@ -296,7 +296,7 @@ def get_cmap(n, name='hsv'):
 def testPlot(y_test, predictionsDict):
     plt.plot(y_test.values, color='black', label='Original')
     i = 0
-    cmap = get_cmap(8)
+    cmap = get_cmap(20)
     for key, value in predictionsDict.items():
         yhat = value
         plt.plot(yhat, color=cmap(i), label=f'{key}')
