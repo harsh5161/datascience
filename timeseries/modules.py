@@ -283,12 +283,22 @@ def featureEngineering(df, target=None):
     return X
 
 
+def get_cmap(n, name='hsv'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.cm.get_cmap(name, n)
+
 # Change the logic for this function and also check the logic of resample
+
+
 def testPlot(y_test, predictionsDict):
-    plt.plot(y_test.values, label='Original')
+    plt.plot(y_test.values, color='black', label='Original')
+    i = 0
+    cmap = get_cmap(8)
     for key, value in predictionsDict.items():
         yhat = value
-        plt.plot(yhat, color='red', label=f'{key}')
+        plt.plot(yhat, color=cmap(i), label=f'{key}')
+        i += 1
     plt.legend()
     plt.show()
 
