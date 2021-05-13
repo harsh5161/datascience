@@ -61,11 +61,14 @@ def userInputs():
     except:
         print("Target entered does not exist in DataFrame or couldn't be plotted : Please check spelling ")
         return None
-
-    df = pd.DataFrame(df[target].copy())
+    predictors = input(
+        "Do you want to add any other column as a predictor in the timeseries? [Separate by commas if you want to add multiple predictors] ").split(",")
+    result_df = pd.DataFrame(df[target].copy())
+    for col in predictors:
+        result_df[col] = df[col]
     print("Visualising the final DataFrame")
-    print(df.head(10))
-    return df, target
+    print(result_df.head(10))
+    return result_df, target
 # Exploratory DataAnalysis
 
 
@@ -266,12 +269,9 @@ def featureEngineering(df, target=None):
     Creates time series features from datetime index
     """
     df['date'] = df.index
-    try:
-        df['hour'] = df['date'].dt.hour
-        df['minute'] = df['date'].dt.minute
-        df['seconds'] = df['date'].dt.seconds
-    except:
-        pass
+    df['hour'] = df['date'].dt.hour
+    df['minute'] = df['date'].dt.minute
+    df['seconds'] = df['date'].dt.second
     df['dayofweek'] = df['date'].dt.dayofweek
     df['quarter'] = df['date'].dt.quarter
     df['month'] = df['date'].dt.month
