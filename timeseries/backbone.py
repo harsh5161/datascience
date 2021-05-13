@@ -50,34 +50,45 @@ def INIT():
             modellingInit(df, target, resultsDict, predictionsDict)
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
-            resultsDict = {}
-            predictionsDict = {}
-            print("Performing Resampled Quarterly Analysis")
-            seasonalDecompose(resampled_frames['Quarter'][target], 4)
-            stationaryNormalityPlots(
-                resampled_frames['Quarter'][target], 10, 7)
-            tsplot(resampled_frames['Quarter'][target], lags=10)
-            modellingInit(resampled_frames['Quarter'],
-                          target, resultsDict, predictionsDict)
+            try:
+                resultsDict = {}
+                predictionsDict = {}
+                print("Performing Resampled Quarterly Analysis")
+                seasonalDecompose(resampled_frames['Quarter'][target], 4)
+                stationaryNormalityPlots(
+                    resampled_frames['Quarter'][target], 10, 7)
+                tsplot(resampled_frames['Quarter'][target], lags=10)
+                modellingInit(resampled_frames['Quarter'],
+                              target, resultsDict, predictionsDict)
+            except ValueError:
+                print("Not enough Data to perform resampled analysis")
         if val == 'RM':
             # call function passing resampled_frames['Monthly'],target and other parameters specific to RM
-            resultsDict = {}
-            predictionsDict = {}
-            print("Performing Resampled Monthly Analysis")
-            seasonalDecompose(resampled_frames['Month'][target], 10)
-            stationaryNormalityPlots(resampled_frames['Month'][target], 10, 7)
-            tsplot(resampled_frames['Month'][target], lags=10)
-            modellingInit(resampled_frames['Month'],
-                          target, resultsDict, predictionsDict)
+            try:
+                resultsDict = {}
+                predictionsDict = {}
+                print("Performing Resampled Monthly Analysis")
+                seasonalDecompose(resampled_frames['Month'][target], 10)
+                stationaryNormalityPlots(
+                    resampled_frames['Month'][target], 10, 7)
+                tsplot(resampled_frames['Month'][target], lags=10)
+                modellingInit(resampled_frames['Month'],
+                              target, resultsDict, predictionsDict)
+            except ValueError:
+                print("Not enough Data to perform resampled analysis")
         if val == 'RW':
             # call function passing resampled_frames['Daily'],target and other parameters specific to RW
-            resultsDict = {}
-            predictionsDict = {}
-            print("Performing Resampled Weekly Analysis")
-            seasonalDecompose(resampled_frames['Week'][target], 50)
-            stationaryNormalityPlots(resampled_frames['Week'][target], 10, 7)
-            tsplot(resampled_frames['Week'][target], lags=10)
-            modellingInit(resampled_frames['Week'],
-                          target, resultsDict, predictionsDict)
+            try:
+                resultsDict = {}
+                predictionsDict = {}
+                print("Performing Resampled Weekly Analysis")
+                seasonalDecompose(resampled_frames['Week'][target], 50)
+                stationaryNormalityPlots(
+                    resampled_frames['Week'][target], 10, 7)
+                tsplot(resampled_frames['Week'][target], lags=10)
+                modellingInit(resampled_frames['Week'],
+                              target, resultsDict, predictionsDict)
+            except ValueError:
+                print("Not enough Data to perform resampled analysis")
 
     return True
