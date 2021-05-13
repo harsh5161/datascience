@@ -161,6 +161,6 @@ class Modelling:
         self.LGBM()
         self.SVM()
         self.KNN()
-        self.SARIMAX()
+        # self.SARIMAX()
         self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')

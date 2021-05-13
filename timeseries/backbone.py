@@ -32,34 +32,52 @@ def INIT():
             modellingInit(df, target, resultsDict, predictionsDict)
         if val == 'M':
             # call function passing df,target and other parameters specific to M
+            resultsDict = {}
+            predictionsDict = {}
             print("Performing Monthly Analysis")
             seasonalDecompose(df[target][:300], 30)
             stationaryNormalityPlots(df[target], 15, 7)
             tsplot(df[target], lags=15)
+            modellingInit(df, target, resultsDict, predictionsDict)
         if val == 'D':
             # call function passing df,target and other parameters specific to D
+            resultsDict = {}
+            predictionsDict = {}
             print("Performing Daily Analysis")
             seasonalDecompose(df[target][:250], 24)
             stationaryNormalityPlots(df[target], 7, 7)
             tsplot(df[target], lags=7)
+            modellingInit(df, target, resultsDict, predictionsDict)
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
+            resultsDict = {}
+            predictionsDict = {}
             print("Performing Resampled Quarterly Analysis")
             seasonalDecompose(resampled_frames['Quarter'][target], 4)
             stationaryNormalityPlots(
                 resampled_frames['Quarter'][target], 10, 7)
             tsplot(resampled_frames['Quarter'][target], lags=10)
+            modellingInit(resampled_frames['Quarter'],
+                          target, resultsDict, predictionsDict)
         if val == 'RM':
             # call function passing resampled_frames['Monthly'],target and other parameters specific to RM
+            resultsDict = {}
+            predictionsDict = {}
             print("Performing Resampled Monthly Analysis")
             seasonalDecompose(resampled_frames['Month'][target], 10)
             stationaryNormalityPlots(resampled_frames['Month'][target], 10, 7)
             tsplot(resampled_frames['Month'][target], lags=10)
+            modellingInit(resampled_frames['Month'],
+                          target, resultsDict, predictionsDict)
         if val == 'RW':
             # call function passing resampled_frames['Daily'],target and other parameters specific to RW
+            resultsDict = {}
+            predictionsDict = {}
             print("Performing Resampled Weekly Analysis")
             seasonalDecompose(resampled_frames['Week'][target], 50)
             stationaryNormalityPlots(resampled_frames['Week'][target], 10, 7)
             tsplot(resampled_frames['Week'][target], lags=10)
+            modellingInit(resampled_frames['Week'],
+                          target, resultsDict, predictionsDict)
 
     return True
