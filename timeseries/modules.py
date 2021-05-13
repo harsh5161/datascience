@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from tabulate import tabulate
 from plots import bar_metrics
-# Extra settings
+from random import randint
 seed = 42
 np.random.seed(seed)
 plt.style.use('bmh')
@@ -61,11 +61,16 @@ def userInputs():
     except:
         print("Target entered does not exist in DataFrame or couldn't be plotted : Please check spelling ")
         return None
-    predictors = input(
-        "Do you want to add any other column as a predictor in the timeseries? [Separate by commas if you want to add multiple predictors] ").split(",")
+
     result_df = pd.DataFrame(df[target].copy())
-    for col in predictors:
-        result_df[col] = df[col]
+    try:
+        predictors = input(
+            "Do you want to add any other column as a predictor in the timeseries? [Separate by commas if you want to add multiple predictors || Press Enter to Continue without adding Predictors] ").split(",")
+        for col in predictors:
+            result_df[col] = df[col]
+    except Exception as e:
+        print(f"Predictor Could not be added : {e}")
+
     print("Visualising the final DataFrame")
     print(result_df.head(10))
     return result_df, target
@@ -300,12 +305,10 @@ def get_cmap(n, name='hsv'):
 
 def testPlot(y_test, predictionsDict):
     plt.plot(y_test.values, color='black', label='Original')
-    i = 0
-    cmap = get_cmap(20)
+    cmap = get_cmap(50)
     for key, value in predictionsDict.items():
         yhat = value
-        plt.plot(yhat, color=cmap(i), label=f'{key}')
-        i += 1
+        plt.plot(yhat, color=cmap(randint(0, 50)), label=f'{key}')
     plt.legend()
     plt.show()
 
