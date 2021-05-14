@@ -313,6 +313,19 @@ def testPlot(y_test, predictionsDict):
     plt.show()
 
 
+def createResultFrame(resultsDict):
+    result_df = pd.DataFrame(columns=['Model', 'MAE', 'RMSE', 'MAPE', 'R2'])
+    for model, values in resultsDict.items():
+        temp = []
+        temp.append(model)
+        temp.extend(values.values())
+        result_df.loc[len(result_df)] = temp
+        result_df.sort_values(by=['MAPE'], inplace=True)
+    print("\nModel Information Table [sorted by MAPE score]")
+    print(tabulate(result_df, headers=[
+          'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
+
+
 def modellingInit(df, target, resultsDict, predictionsDict):
     # X = df.values
     train_size = findTrainSize(df)
@@ -336,3 +349,4 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     modelling_obj.modeller()
     testPlot(y_test, predictionsDict)
     bar_metrics(resultsDict)
+    createResultFrame(resultsDict)
