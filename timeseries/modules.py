@@ -324,8 +324,8 @@ def createResultFrame(resultsDict, predictionsDict, y_test):
     print("\nModel Information Table [sorted by MAPE score]")
     print(tabulate(result_df, headers=[
           'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
-    print(f"Winner model is {result_df.iloc[1,0]}")
-    testPlot(y_test, {result_df.iloc[1, 0]: predictionsDict[result_df.iloc[1, 0]]})
+    print(f"Winner model is {result_df.iloc[0,0]}")
+    testPlot(y_test, {result_df.iloc[0, 0]: predictionsDict[result_df.iloc[0, 0]]})
 
 
 def modellingInit(df, target, resultsDict, predictionsDict):
