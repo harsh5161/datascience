@@ -320,7 +320,7 @@ def createResultFrame(resultsDict):
         temp.append(model)
         temp.extend(values.values())
         result_df.loc[len(result_df)] = temp
-        result_df.sort_values(by=['MAPE'], inplace=True)
+        result_df.sort_values(by=['MAPE'], inplace=True, ignore_index=True)
     print("\nModel Information Table [sorted by MAPE score]")
     print(tabulate(result_df, headers=[
           'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
