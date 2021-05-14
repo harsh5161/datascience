@@ -152,7 +152,7 @@ class Modelling:
 
     def modeller(self):
         current = time.time()
-        self.naiveModel()
+        # self.naiveModel()
         self.HWES()
         self.bayesianRegression()
         self.lassoRegression()
@@ -161,6 +161,6 @@ class Modelling:
         self.LGBM()
         self.SVM()
         self.KNN()
-        # self.SARIMAX()
+        self.SARIMAX()
         self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')

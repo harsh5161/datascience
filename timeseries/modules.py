@@ -304,13 +304,13 @@ def get_cmap(n, name='hsv'):
 
 
 def testPlot(y_test, predictionsDict):
-    plt.plot(y_test.values, color='black', label='Original')
     cmap = get_cmap(50)
     for key, value in predictionsDict.items():
+        plt.plot(y_test.values, color='black', label='Original')
         yhat = value
         plt.plot(yhat, color=cmap(randint(0, 50)), label=f'{key}')
-    plt.legend()
-    plt.show()
+        plt.legend()
+        plt.show()
 
 
 def createResultFrame(resultsDict, predictionsDict, y_test):
@@ -324,8 +324,8 @@ def createResultFrame(resultsDict, predictionsDict, y_test):
     print("\nModel Information Table [sorted by MAPE score]")
     print(tabulate(result_df, headers=[
           'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
-    print(f"Winner model is {result_df.iloc[2,0]}")
-    testPlot(y_test, {result_df.iloc[2, 0]: predictionsDict[result_df.iloc[2, 0]]})
+    print(f"Winner model is {result_df.iloc[1,0]}")
+    testPlot(y_test, {result_df.iloc[1, 0]: predictionsDict[result_df.iloc[1, 0]]})
 
 
 def modellingInit(df, target, resultsDict, predictionsDict):
