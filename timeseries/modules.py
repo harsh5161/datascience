@@ -313,7 +313,7 @@ def testPlot(y_test, predictionsDict):
     plt.show()
 
 
-def createResultFrame(resultsDict):
+def createResultFrame(resultsDict, predictionsDict, y_test):
     result_df = pd.DataFrame(columns=['Model', 'MAE', 'RMSE', 'MAPE', 'R2'])
     for model, values in resultsDict.items():
         temp = []
@@ -324,6 +324,8 @@ def createResultFrame(resultsDict):
     print("\nModel Information Table [sorted by MAPE score]")
     print(tabulate(result_df, headers=[
           'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
+    print(f"Winner model is {result_df.iloc[2,0]}")
+    testPlot(y_test, {result_df.iloc[2, 0]: predictionsDict[result_df.iloc[2, 0]]})
 
 
 def modellingInit(df, target, resultsDict, predictionsDict):
@@ -349,4 +351,4 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     modelling_obj.modeller()
     testPlot(y_test, predictionsDict)
     bar_metrics(resultsDict)
-    createResultFrame(resultsDict)
+    createResultFrame(resultsDict, predictionsDict, y_test)
