@@ -184,7 +184,7 @@ class Segmentation:
         #storing cluster labels with dataset
         df_new = df.reset_index(drop =True)
         df_new['Segments (Clusters)'] = model.labels_
-        
+        df_new.to_csv(f"KmeansResult.csv",index=False)
         #storing all results
         kmeans_dict['no_of_clusters']=best_n_clusters
         kmeans_dict['sil_score']= selected_score
@@ -210,7 +210,8 @@ class Segmentation:
         df_new['Segments (Clusters)'] = clusters  #storing cluster labels with dataset
         noise= df_new[df_new['Segments (Clusters)']==-1]  
         df_new= df_new[df_new['Segments (Clusters)']!=-1]  # removing noise (where cluster number is -1)
-        
+        df_new.to_csv(f"DBSCANResult.csv",index=False)
+
         if -1 in np.unique(clusters):
             hdbscan_dict['no_of_clusters']=len(np.unique(clusters))-1 #excluding noise if present
         else: 
