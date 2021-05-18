@@ -85,11 +85,11 @@ class classification:
         w_array[i] = class_w[val]
 
       maxval = priorList.max()
-      print(maxval)
+    #   print(maxval)
       minval = priorList.min()
-      print(minval)
+    #   print(minval)
       myval = math.ceil(maxval/minval)
-      print(myval)
+    #   print(myval)
 
       print("PRIOR LIST IS",priorList)
       flag = 1 #initial setting NB and NN will get executed

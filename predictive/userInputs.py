@@ -16,7 +16,7 @@ def importFile(nrows,sheet_name,path):
             df = pd.read_csv(path,low_memory=False,nrows=nrows,error_bad_lines=False)
             if df.shape[1] == 1:
                 df = pd.read_csv(path,low_memory=False,sep=';',nrows=nrows)
-            print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+            # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
             return df
 
         except FileNotFoundError:
@@ -28,14 +28,14 @@ def importFile(nrows,sheet_name,path):
             try:
                 enc = 'unicode_escape'
                 df = pd.read_csv(path,encoding=enc,low_memory=False,nrows=nrows,error_bad_lines=False)
-                print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+                # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                 return df
 
             except UnicodeDecodeError:
                 try:
                     enc = 'ISO-8859-1'
                     df = pd.read_csv(path,encoding=enc,low_memory=False,nrows=nrows,error_bad_lines=False)
-                    print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+                    # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                     return df
                 except:
                     pass
@@ -54,13 +54,13 @@ def importFile(nrows,sheet_name,path):
                     for j in possibleSep:                                   # iterate through possible seprators till we get the correct one
                         df_sep = pd.read_csv(path,sep=j,nrows=nrows,error_bad_lines=False)
                         if len(df_sep.columns)>3:
-                            print('This file has {} columns and {} rows'.format(df_sep.shape[1],df_sep.shape[0]))
+                            # print('This file has {} columns and {} rows'.format(df_sep.shape[1],df_sep.shape[0]))
                             return df_sep
             except:
                 try:
                     if len(pd.read_csv(path,sep=None).columns,nrows=nrows,error_bad_lines=False)>3  :                   # for tab ie "\" tsv files
                         df = pd.read_csv(path,sep=None,nrows=nrows,error_bad_lines=False)
-                        print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+                        # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                         return df
                 except:
                     pass
@@ -70,12 +70,12 @@ def importFile(nrows,sheet_name,path):
         try:
             print('We have a JSON file')
             df = pd.read_json(path)
-            print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+            # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
             return df
         except Exception:
             try:
                 df = pd.read_json(path,lines=True)
-                print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+                # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
                 return df
 
             except ValueError:
@@ -119,7 +119,7 @@ def importFile(nrows,sheet_name,path):
             df = pd.read_table(path,nrows=nrows)
             if df.shape[1] == 1:
                 df = pd.read_table(path,sep=',',nrows=nrows)
-            print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
+            # print('This file has {} columns and {} rows'.format(df.shape[1],df.shape[0]))
             return df
         except FileNotFoundError:
             print('File not found, Check the name, path, spelling mistakes')
