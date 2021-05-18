@@ -63,6 +63,11 @@ def INIT(df, info):
     if not info['graph']:
         if key:
             x = df.drop(key, axis=1)
+            x_obj = list(x.dtypes[x.dtypes == np.object].index)
+            for col in x_obj:
+                if x[col].nunique() >= 6:
+                    x.drop(col,axis=1,inplace=True)
+            del x_obj
             x.to_csv('eda_df.csv', index=False)
         else:
             df.to_csv('eda_df.csv', index=False)
