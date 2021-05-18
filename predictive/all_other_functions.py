@@ -809,7 +809,7 @@ def inputCap(df, target):
         if len(df) > 1000000:
             df_train, _ = train_test_split(
                 df, train_size=1000000, random_state=1, stratify=df[target])
-            print("Dataset size has been capped to 1 million rows for better performance")
+           # print("Dataset size has been capped to 1 million rows for better performance")
             # print("Length of the dataset is now", len(df_train))
             return df_train
         else:
@@ -819,7 +819,7 @@ def inputCap(df, target):
     elif class_or_Reg == 'Regression':
         dfr = df.sample(n=1000000, random_state=1) if len(
             df) > 1000000 else df.copy()
-        print("Dataset size has been capped to 1 million rows for better performance")
+        #print("Dataset size has been capped to 1 million rows for better performance")
         # print("Length of the dataset is now", len(dfr))
         return dfr
     elif class_or_Reg is None:
