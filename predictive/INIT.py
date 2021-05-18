@@ -380,34 +380,35 @@ def INIT(df,info):
     ############# OUTLIER WINSORIZING ###########
 
     ############# PEARSON CORRELATION ############
-    print(f"The shape before Pearson's {num_df.shape}")
-    print('\n #### PEARSON CORRELATION ####')
-    # corr = num_df.corr(method='pearson')
-    corr = np.corrcoef(num_df.values, rowvar=False) 
-    corr = pd.DataFrame(corr, columns = num_df.columns.to_list())
-    # print("Initial correlation matrix",corr)
-    corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
-    # print("The Lower Triangular matrix is \n",corr)
-    col_counter = {}
-    for col in corr.columns:
-        ser =  corr[col].apply(lambda x: findDefaulters(x)).to_list()
-        # print(f"{col} : {ser.count(True)}")
-        if ser.count(True) >0:
-            col_counter[col] = ser.count(True)
-    print("List of columns and how many columns they are corelated to",col_counter)
-    if not col_counter:
-        print("No columns are correlated")
-    else:
-        while col_counter:
-            # print(f"Len of the col_counter",len(col_counter))
-            num_df,col_counter = pearsonmaker(num_df,col_counter)
-
+    if len(num_df.columns) > 1:
+        print(f"The shape before Pearson's {num_df.shape}")
+        print('\n #### PEARSON CORRELATION ####')
+        # corr = num_df.corr(method='pearson')
+        corr = np.corrcoef(num_df.values, rowvar=False) 
+        corr = pd.DataFrame(corr, columns = num_df.columns.to_list())
+        # print("Initial correlation matrix",corr)
+        corr = corr.where(np.tril(np.ones(corr.shape),k=-1).astype(np.bool))
+        # print("The Lower Triangular matrix is \n",corr)
+        col_counter = {}
+        for col in corr.columns:
+            ser =  corr[col].apply(lambda x: findDefaulters(x)).to_list()
+            # print(f"{col} : {ser.count(True)}")
+            if ser.count(True) >0:
+                col_counter[col] = ser.count(True)
+        print("List of columns and how many columns they are corelated to",col_counter)
+        if not col_counter:
+            print("No columns are correlated")
+        else:
+            while col_counter:
+                # print(f"Len of the col_counter",len(col_counter))
+                num_df,col_counter = pearsonmaker(num_df,col_counter)
+        
+        del corr
     # print(f'Pearsons Matrix \n {pd.DataFrame(num_df.corr())}')
     print(f"The shape after Pearson's {num_df.shape}")
     print(' #### DONE ####')
     PearsonsColumns = num_df.columns 
     ############# PEARSON CORRELATION ############
-    del corr
     gc.collect()
     y.reset_index(drop=True, inplace=True)
     num_df.reset_index(drop=True, inplace=True)
