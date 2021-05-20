@@ -22,6 +22,7 @@ from gensim.utils import simple_preprocess
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.stem.porter import *
+import matplotlib.pyplot as plt
 np.random.seed(2018)
 nltk.download('wordnet', quiet=True)
 stemmer = SnowballStemmer('english')
@@ -485,6 +486,15 @@ def preprocess(text):
     return result
 
 
+def preprocessWithoutLematizer(text):
+    result = []
+    for token in gensim.utils.simple_preprocess(text):
+        # removes stopwords and tokens with len>3
+        if token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3:
+            result.append(token)
+    return result
+
+
 def topicExtraction(df, validation=False, lda_model_tfidf=None):
 
     data_text = df.copy()
@@ -578,76 +588,63 @@ def returnCountSum(x, val):
         return np.nan
 
 
-def text_analytics(polarity, review, mode, target, LE):
-    for col in polarity.columns:  # Dropping Subjectivity from sentiment_frame
-        if "Subjectivity" in col:
-            polarity.drop(col, axis=1, inplace=True)
+def sentenceRecalibration(text):
+    nlp = spacy.load('en_core_web_sm')  # you can use other methods
+    # excluded tags
+    excluded_tags = {"NOUN", "VERB", "ADJ", "ADV"}
+    temp_text = []
+    for token in nlp(text):
+        if token.pos_ not in excluded_tags:
+            temp_text.append(token.text)
+    return " ".join(temp_text)
 
-    for col in review.columns:
-        temp = []
-        oxford = {}
-        req = pd.DataFrame()
-        for pol_col in polarity.columns:
-            if str(col) in pol_col:
-                req['Review'] = review[col]
-                req['Polarity'] = polarity[pol_col]
 
-        processed_docs = req['Review'].map(preprocess)
-        req['Review'] = processed_docs
-        req['Polarity_s'] = req['Polarity'].apply(lambda x: returnPol(x))
-        req['Target'] = target
-        req.drop('Polarity', axis=1, inplace=True)
-        req['Target'].fillna(req['Target'].mode()[0], inplace=True)
-        req['Target'] = req['Target'].astype('int')
-        # print(req)
-        if mode == 'Classification':
-            target_vals = list(set(req['Target'].tolist()))
-            # target_vals = LE.inverse_transform(target_vals)
-        trem = req.groupby('Polarity_s')
-        # groups = [trem.get_group(x) for x in ['Negative','Neutral','Positive']] # for x in trem.groups
-        # print(groups)
-        for i in ['Negative', 'Neutral', 'Positive']:
-            l2 = []
-            temp_df = pd.DataFrame(trem.get_group(i))
-            temp_one = []
-            temp_one.extend(temp_df['Review'])
-            flat_list = [item for sublist in temp_one for item in sublist]
-            common = Counter(flat_list).most_common(20)
-            output_df = pd.DataFrame()
-            output_df['Top Words'] = np.array([item[0] for item in common[:]])
-            output_df['Polarity'] = np.array([i for j in range(20)])
-            for val in [item[0] for item in common[:]]:
-                l3 = []
-                if mode == 'Regression':
-                    ser = req.apply(lambda x: returnCountSum(
-                        x, val), axis=1).to_list()
-                    l2.append(np.nanmean(ser))
-                elif mode == 'Classification':
-                    ser = req.apply(lambda x: returnCountSum(
-                        x, val), axis=1).to_list()
-                    for k in target_vals:
-                        l3.append(ser.count(k))
-                    l2.append(l3)
-            m = 0
-            if mode == 'Regression':
-                output_df['Influence of Word on Target (Mean)'] = l2
-            elif mode == 'Classification':
-                for k in LE.inverse_transform(target_vals).tolist()[:]:
-                    if m <= len(target_vals):
-                        output_df[f'Influence of Word on Target [{k}] (Count)'] = [
-                            item[m] for item in l2]
-                        m = m+1
-                        continue
-            oxford[f'{i}'] = output_df
-        req_list = []
-        for key, value in oxford.items():
-            req_list.append(value)
-        output_df = pd.concat(req_list, axis=1)
-        print("Text Analytics Completed")
-        print(">>>>>>[[Text Engineering]]>>>>>")
-        print("\n\n")
-        # print(output_df)
-        # output_df.to_csv("output_df.csv")
+def text_analytics(review, col, mode, target, LE, topic_frame):
+    analyticsFrame = topic_frame.copy()
+    topicColumn = analyticsFrame.columns[0]
+    analyticsFrame['Review'] = review[col]
+    print("Removing Nouns, Verbs, Adjectives and Adverbs...")
+    analyticsFrame['Review'] = analyticsFrame['Review'].apply(
+        lambda x: sentenceRecalibration(x))
+    processed_docs = analyticsFrame['Review'].map(preprocessWithoutLematizer)
+    analyticsFrame['Review'] = processed_docs
+    groupByTopic = analyticsFrame.groupby(topicColumn)
+    groups = [groupByTopic.get_group(x) for x in groupByTopic.groups]
+    group_keys = list(groupByTopic.groups.keys())
+    i = 0
+    resultDict = {}
+    for groupFrame in groups:
+        # currentGroupKey = group_keys[i]
+        temporaryFrame = groupFrame
+        reviewList = []
+        reviewList.extend(temporaryFrame['Review'])
+        flatList = [item for sublist in reviewList for item in sublist]
+        mostCommonWords = Counter(flatList).most_common(10)
+        tempDict = {}
+        for words in mostCommonWords:
+            word, count = words
+            tempDict[word] = count
+        resultDict[i] = tempDict
+        i += 1
+    i = 1
+    for key in resultDict:
+        if not resultDict[key]:
+            del resultDict[key]
+            continue
+        currentTopicDict = resultDict[key]
+        print(f"Topic {i}")
+        # plt.bar(list(currentTopicDict.keys()),
+        #         currentTopicDict.values(), color='g')
+        # plt.xticks(rotation=45)
+
+        # Uncomment the above two lines are run messy8.csv to understand how the output looks, but implement these plots in the front end using plotly so that it looks better. It goes into the new text analytics tab, users will have an option to select the topic. extract resultDict after this for loop runs so that there aren't any empty dictionaries,then you can use the length of resultDict as the different topics that is present.
+        plt.show()
+        i += 1
+    print("Text Analytics Completed")
+    print(">>>>>>[[Text Engineering]]>>>>>")
+    print("\n\n")
+    # print(output_df)
+    # output_df.to_csv("output_df.csv")
 
 ############################################
 ############## EMAIL ENGINEERING ##############

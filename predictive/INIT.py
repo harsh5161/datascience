@@ -66,7 +66,7 @@ def INIT(df, info):
             x_obj = list(x.dtypes[x.dtypes == np.object].index)
             for col in x_obj:
                 if x[col].nunique() >= 6:
-                    x.drop(col,axis=1,inplace=True)
+                    x.drop(col, axis=1, inplace=True)
             del x_obj
             x.to_csv('eda_df.csv', index=False)
         else:
@@ -344,12 +344,14 @@ def INIT(df, info):
             new_frame.fillna(value="None", inplace=True)
             lda_models = pd.DataFrame(index=range(5), columns=['Model'])
             ind = 0
-            text_analytics(sentiment_frame, new_frame, class_or_Reg, y, LE)
+            # text_analytics(sentiment_frame, new_frame, class_or_Reg, y, LE)
             for col in new_frame.columns:
                 topic_frame, lda_model = topicExtraction(new_frame[[col]])
                 topic_frame.rename(
                     columns={0: str(col)+"_Topic"}, inplace=True)
                 # print(topic_frame)
+                text_analytics(new_frame, col,
+                               class_or_Reg, y, LE, topic_frame)
                 topic_frame.reset_index(drop=True, inplace=True)
                 TEXT_DF = pd.concat([TEXT_DF, topic_frame], axis=1, sort=False)
                 lda_models['Model'][ind] = lda_model
