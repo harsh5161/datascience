@@ -45,12 +45,13 @@ styls = [dict(props=[('border-collapse', 'collapse'), ('border-spacing', '0px')]
 
 
 # function to plot scatter plot showing clusters
-def clusters_scatter_plot(pca_components, cluster_labels):
+def clusters_scatter_plot(pca_components, cluster_labels,modelName):
     colors = ['royalblue', 'maroon', 'forestgreen', 'mediumorchid', 'tan', 'deeppink',
               'olive', 'goldenrod', 'lightcyan', 'navy', 'coral', 'olive', 'turquoise']
     vectorizer = np.vectorize(lambda x: colors[x % len(colors)])
     plt.scatter(pca_components.iloc[:, 0], pca_components.iloc[:, 1], c=vectorizer(
         cluster_labels), s=5)
+    plt.title(f"{modelName}")
     plt.show()
 
 
