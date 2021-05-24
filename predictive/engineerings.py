@@ -589,9 +589,9 @@ def returnCountSum(x, val):
 
 
 def sentenceRecalibration(text):
-    nlp = spacy.load('en_core_web_sm')  # you can use other methods
+    nlp = spacy.load('en_core_web_sm')
     # excluded tags
-    excluded_tags = {"NOUN", "VERB", "ADJ", "ADV"}
+    excluded_tags = {"AUX", "ADP"}
     temp_text = []
     for token in nlp(text):
         if token.pos_ not in excluded_tags:
@@ -599,15 +599,7 @@ def sentenceRecalibration(text):
     return " ".join(temp_text)
 
 
-def text_analytics(review, col, mode, target, LE, topic_frame):
-    analyticsFrame = topic_frame.copy()
-    topicColumn = analyticsFrame.columns[0]
-    analyticsFrame['Review'] = review[col]
-    print("Removing Nouns, Verbs, Adjectives and Adverbs...")
-    analyticsFrame['Review'] = analyticsFrame['Review'].apply(
-        lambda x: sentenceRecalibration(x))
-    processed_docs = analyticsFrame['Review'].map(preprocessWithoutLematizer)
-    analyticsFrame['Review'] = processed_docs
+def topicWordVisualiser(analyticsFrame, topicColumn):
     groupByTopic = analyticsFrame.groupby(topicColumn)
     groups = [groupByTopic.get_group(x) for x in groupByTopic.groups]
     group_keys = list(groupByTopic.groups.keys())
@@ -633,13 +625,43 @@ def text_analytics(review, col, mode, target, LE, topic_frame):
             continue
         currentTopicDict = resultDict[key]
         print(f"Topic {i}")
-        # plt.bar(list(currentTopicDict.keys()),
-        #         currentTopicDict.values(), color='g')
-        # plt.xticks(rotation=45)
+        plt.bar(list(currentTopicDict.keys()),
+                currentTopicDict.values(), color='g')
+        plt.xticks(rotation=45)
 
         # Uncomment the above two lines are run messy8.csv to understand how the output looks, but implement these plots in the front end using plotly so that it looks better. It goes into the new text analytics tab, users will have an option to select the topic. extract resultDict after this for loop runs so that there aren't any empty dictionaries,then you can use the length of resultDict as the different topics that is present.
         plt.show()
         i += 1
+
+
+def text_analytics(review, col, mode, target, LE, topic_frame):
+    analyticsFrame = topic_frame.copy()
+    topicColumn = analyticsFrame.columns[0]
+    analyticsFrame['Review'] = review[col]
+    print("Removing Auxillary's...")
+    analyticsFrame['Review'] = analyticsFrame['Review'].apply(
+        lambda x: sentenceRecalibration(x))
+    processed_docs = analyticsFrame['Review'].map(preprocessWithoutLematizer)
+    analyticsFrame['Review'] = processed_docs
+    if mode == 'Classification':
+        analyticsFrame['Target'] = target
+        analyticsFrame['Target'].fillna(
+            analyticsFrame['Target'].mode()[0], inplace=True)
+        analyticsFrame['Target'] = analyticsFrame['Target'].astype('int')
+        analyticsFrame['Target'] = LE.inverse_transform(
+            analyticsFrame['Target'])
+
+        groupByClass = analyticsFrame.groupby('Target')
+        groups = [groupByClass.get_group(x) for x in groupByClass.groups]
+        group_keys = list(groupByClass.groups.keys())
+        i = 0
+        for groupFrame in groups:
+            print(f"Class: {group_keys[i]}")
+            topicWordVisualiser(groupFrame, topicColumn)
+            i += 1
+    else:
+        topicWordVisualiser(analyticsFrame, topicColumn)
+
     print("Text Analytics Completed")
     print(">>>>>>[[Text Engineering]]>>>>>")
     print("\n\n")
