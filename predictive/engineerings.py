@@ -638,9 +638,9 @@ def text_analytics(review, col, mode, target, LE, topic_frame):
     analyticsFrame = topic_frame.copy()
     topicColumn = analyticsFrame.columns[0]
     analyticsFrame['Review'] = review[col]
-    print("Removing Auxillary's...")
-    analyticsFrame['Review'] = analyticsFrame['Review'].apply(
-        lambda x: sentenceRecalibration(x))
+    # print("Removing Auxillary's...")
+    # analyticsFrame['Review'] = analyticsFrame['Review'].apply(
+    #     lambda x: sentenceRecalibration(x))
     processed_docs = analyticsFrame['Review'].map(preprocessWithoutLematizer)
     analyticsFrame['Review'] = processed_docs
     if mode == 'Classification':
