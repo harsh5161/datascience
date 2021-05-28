@@ -599,7 +599,7 @@ def sentenceRecalibration(text):
     return " ".join(temp_text)
 
 
-def topicWordVisualiser(analyticsFrame, topicColumn):
+def topicWordVisualiser(analyticsFrame, topicColumn,topicClass=None,topicNumber=None):
     groupByTopic = analyticsFrame.groupby(topicColumn)
     groups = [groupByTopic.get_group(x) for x in groupByTopic.groups]
     group_keys = list(groupByTopic.groups.keys())
@@ -657,7 +657,7 @@ def text_analytics(review, col, mode, target, LE, topic_frame):
         i = 0
         for groupFrame in groups:
             print(f"Class: {group_keys[i]}")
-            topicWordVisualiser(groupFrame, topicColumn)
+            topicWordVisualiser(groupFrame, topicColumn,group_keys[i],i)
             i += 1
     else:
         topicWordVisualiser(analyticsFrame, topicColumn)
