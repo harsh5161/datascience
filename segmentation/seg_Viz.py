@@ -123,6 +123,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df, algorithm):
         print("\nThe following table shows the mean of each numeric variable in the overall dataset as well as in the formed clusters. If the mean of a variable is significantly higher in a cluster than the overall dataset, then it indicates that, that cluster has more percentage of high values for that variable as compared to the overall dataset.")
         # before scaling # can be used for testing
         display(num_cp.style.set_table_styles(styls).set_precision(2))
+        num_cp = num_cp.round(decimals=2)
         num_cp.to_csv(f"{algorithm}_NumCP.csv", index=False)
 
         # scaling overall dataset row to 100 for easy comparison
@@ -204,6 +205,7 @@ def ClusterProfiling_Tables(segdata, num_df, disc_df, algorithm):
                 col) + "\033[0m in a cluster. It also shows the percentage of each category present in the overall dataset. For example, if there is variable 'Grade' which contains the categories 'A', 'B' and 'C', and for cluster 0 the value of category 'A' is 40 that means 40% of all the data points in cluster 0 belong to catgery 'A'. If the percentage of category 'A' in the overall dataset is 20% then that means cluster 0 has disproportionately larger share of category 'A'.")
             display(cat_cp.style.set_table_styles(styls).set_caption(
                 str(col)+" (%)").set_precision(2))  # before scaling # can be used for testing
+            cat_cp = cat_cp.round(decimals=2)
             cat_cp.to_csv(f"{algorithm}_CatCP_{str(col)}.csv", index=False)
 
             # dropping row total column
