@@ -333,6 +333,23 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
 ############################################
 ############## TEXT ANALYTICS ##############
 ############################################
+def returnAddressCounter(string):
+    try:
+        numbers = re.findall("\d+",string)
+        for number in numbers:
+            if len(number) >= 5:
+                return True
+        return False
+    except:
+            return False
+        
+def findAddressColumns(df):
+    possibleAddressColumns = []
+    for col in df.columns:
+        temp = df[col].apply(lambda x: returnAddressCounter(x)).to_list()
+        if temp.count(True) > 0.50*len(df):
+            possibleAddressColumns.append(col)
+    return possibleAddressColumns
 
 def findReviewColumns(df):  # input main dataframe
     print("\n\n")
@@ -371,8 +388,14 @@ def findReviewColumns(df):  # input main dataframe
             # print("dropping column",col)
             rf.drop(col, axis=1, inplace=True)
 
+    #Additional logic to find and drop columns that may be address!
+    possibleAddressColumns = findAddressColumns(rf)
+    for col in possibleAddressColumns:
+        col_list.append(col)
+        rf.drop(col,axis=1,inplace=True)
+
     start = time.time()
-    print(rf.shape)
+    # print(rf.shape)
     nlp = spacy.load('en_core_web_sm', disable=['tagger', 'parser', 'textcat'])
     sf = pd.DataFrame()
     for col in rf.columns:
