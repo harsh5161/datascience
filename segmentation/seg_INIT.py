@@ -110,13 +110,19 @@ def INIT(df, info):
     if possible_datecols:
         date_cols = date_cols + possible_datecols
 
-    print('Date Columns found are {}'.format(date_cols))
+    print('Date Columns impacted are {}'.format(date_cols))
     if date_cols:
         print('Respective columns will undergo date engineering and will be imputed in the function itself')
         print('\n#### DATE ENGINEERING RUNNING WAIT ####')
         try:
-            DATE_DF = date_engineering(X[date_cols], possible_datecols)
-            print(DATE_DF.shape)
+            DATE_DF, dropped_cols, possibleDateTimeCols = date_engineering(
+                X[date_cols], possible_datecols)
+            if dropped_cols:
+                for val in dropped_cols:
+                    if val in date_cols[:]:
+                        date_cols.remove(val)
+                    if val in possible_datecols[:]:
+                        possible_datecols.remove(val)
             DATE_DF.index = X.index
             X.drop(date_cols, axis=1, inplace=True)
         except Exception as exceptionMessage:
