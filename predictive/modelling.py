@@ -1121,6 +1121,7 @@ class classification:
 
       df.dropna(axis=0,thresh=10,inplace=True)
       print("Shape of ModelDF",df.shape)
+      print(df)
       drop = 0
       if check == 1 and imbalance==0:
           y_val = pd.Series(y_test)
@@ -1132,7 +1133,7 @@ class classification:
               for key in y_val.unique():
                   f1 = f1_score(y_test,pred,pos_label=key) #dont add any parameters to this
                   if(f1 == 0):
-                      print(f'Dropping model {name} because of poor performance')
+                      print(f'Dropping model {name} because of poor performance when target is {key}')
                       drop = 1
                       df.drop(index=i,inplace=True,axis=0)
                       break

@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from imblearn.over_sampling import RandomOverSampler
 import gc
 
-
 def score(df, init_info, validation=False):
     print(">>>>>>[[VALIDATION AND SCORING]]>>>>>")
 
@@ -244,7 +243,7 @@ def score(df, init_info, validation=False):
         mod, model_info, exp_mod, exp_name, feat_mod, feat_name = model_training(
             X_train, y_train, X_test, y_test, init_info['ML'], priorList, init_info['q_s'])
         rule_result = ruleTesting(
-            X_rt, y_rt, init_info['ML'], init_info['rule_model'], init_info['TargetLabelEncoder'])
+            X_rt, y_rt, init_info['ML'], init_info['rule_model'], init_info['TargetLabelEncoder'],init_info['features_created'])
         # print('Printing Rule Tree Model Information')
         # This needs to be embedded in the WebApp right below the text-rule tree image
         # print(rule_result)

@@ -21,6 +21,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, export_t
 import shap
 from engineerings import numeric_engineering
 import gc
+from sklearn import tree
 
 
 def targetAnalysis(df):
@@ -252,11 +253,20 @@ def DatasetSelection(X, Y):
         return X2, Y
 
 
-def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat):
+def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat,features_created):
     # collect all 'category' columns
+    X = X.copy()
     obj_df = pd.DataFrame(X[disc_df_columns])
-    for col in obj_df.columns:                 # convert numeric category column type from object to numeric
-        obj_df[col] = pd.to_numeric(obj_df[col], errors='ignore')
+    for col in features_created:
+        if col in obj_df.columns:
+            obj_df.drop(col,axis=1,inplace=True)
+        if col in X.columns:
+            X.drop(col,axis=1,inplace=True)
+    try:
+        for col in obj_df.columns:                 # convert numeric category column type from object to numeric
+            obj_df[col] = pd.to_numeric(obj_df[col], errors='ignore')
+    except:
+        pass
     num = obj_df._get_numeric_data().columns
     obj = list(set(obj_df.columns)-set(num))
     feat = list(set(feat[:])-set(num))
@@ -301,8 +311,8 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat):
             for i in range(len(model.coef_)):
                 s = ""
                 for j in range(len(model.coef_[i])):
-                    s = s+str(model.coef_[i][j])+"*"+X.columns[j]+" + "
-                s = s+str(model.intercept_[i])
+                    s = s+str(round(model.coef_[i][j],6))+"*"+X.columns[j]+" + "
+                s = s+str(round(model.intercept_[i],6))
 
                 # to display class names of target instead of numbers
                 lbls = LE.inverse_transform([1])
@@ -320,8 +330,8 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat):
             for i in range(len(model.coef_)):
                 s = ""
                 for j in range(len(model.coef_[i])):
-                    s = s+str((model.coef_[i][j]))+"*"+X.columns[j]+" + "
-                s = s+str(model.intercept_[i])
+                    s = s+str(round(model.coef_[i][j],6))+"*"+X.columns[j]+" + "
+                s = s+str(round(model.intercept_[i],6))
                 # to display class names of target instead of numbers
                 lbls = LE.inverse_transform(model.classes_)
                 print("Prediction of class " + str(lbls[i])+":\n")
@@ -354,8 +364,8 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat):
         coeff = model.coef_
         equation = ""
         for i in range(len(coeff)):
-            equation = equation+str(coeff[i])+"*"+X.columns[i]+" + "
-        equation = equation+str(model.intercept_)
+            equation = equation+str(round(coeff[i],6))+"*"+X.columns[i]+" + "
+        equation = equation+str(round(model.intercept_,6))
         print("Generating Regression Equation...")
         print('Predicted value = {}'.format(equation))
         print("\nR squared =", round(model.score(X, Y), 3))
@@ -713,22 +723,29 @@ def format_y_labels(x, stored_labels):
         return np.nan
 
 
-def rules_tree(X, y, mode, X_transformed, LE):
+def rules_tree(X, y, mode, X_transformed, LE,features_created):
+    X_inside = X.copy()
+    X_transformed_inside = X_transformed.copy()
+    for col in features_created:
+     if col in X_inside.columns:
+        X_inside.drop(col,axis=1,inplace=True)
+     if col in X_transformed_inside:
+        X_transformed_inside.drop(col,axis=1,inplace=True)
     # print('Trying to generate a rule tree...')
     if mode == 'Classification':
         text_selector = DecisionTreeClassifier(class_weight='balanced', max_depth=4, min_samples_split=int(
-            0.05*len(X_transformed)), ccp_alpha=0.001)
+            0.05*len(X_transformed_inside)), ccp_alpha=0.001)
         y.fillna(y.mode()[0], inplace=True)
         y = y.astype('int')
         y = LE.inverse_transform(y)
     else:
         text_selector = DecisionTreeRegressor(
-            max_depth=4, min_samples_split=int(0.05*len(X_transformed)), ccp_alpha=0.001)
+            max_depth=4, min_samples_split=int(0.05*len(X_transformed_inside)), ccp_alpha=0.001)
     for i in tqdm(range(10)):
-        text_selector.fit(X_transformed, y)
+        text_selector.fit(X_transformed_inside, y)
 
     text_rules = export_text(
-        text_selector, feature_names=X.columns.to_list(), show_weights=True, decimals=2)
+        text_selector, feature_names=X_inside.columns.to_list(), show_weights=True, decimals=2)
     joblib.dump(text_rules, 'text_rule.txt')
     return text_rules, text_selector
 
@@ -765,7 +782,12 @@ def featureimportance(exp_mod, exp_name, num_features, features):
     return [features[i] for i in indices[-num_features:]]
 
 
-def ruleTesting(X_test, y_test, mode, model, LE):
+def ruleTesting(X_test, y_test, mode, model, LE,features_created):
+    X_test = X_test.copy()
+    y_test = y_test.copy()
+    for col in features_created:
+        if col in X_test:
+            X_test.drop(col,axis=1,inplace=True)
     if mode == 'Classification':
         result = pd.DataFrame(index=range(1), columns=[
                               'Machine Learning Model', 'Accuracy%', 'Precision', 'Recall', 'Weighted F1'])

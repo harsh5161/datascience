@@ -20,7 +20,12 @@ grdevices = importr('grDevices')
 # utils.install_packages('RColorBrewer',repos="https://mirror.niser.ac.in/cran/")
 
 
-def cart_decisiontree(df, target_variable_name, class_or_Reg, priors):
+def cart_decisiontree(df, target_variable_name, class_or_Reg, priors,features_created):
+    # removing the columns that were created during engineering
+    df = df.copy()
+    for col in features_created:
+        if col in df.columns:
+            df.drop(col,axis=1,inplace=True)
     # converting all category type columns to object type
     cat_df = df.select_dtypes('category')
     if not cat_df.empty:

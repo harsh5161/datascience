@@ -15,6 +15,7 @@ import gc
 def INIT(df, info):
     init_feat_len = len(df.columns)
     num_features_created = 0
+    features_created = []
     print("\n\n")
     print("Number of Rows entering process: ", df.shape[0])
     print("Number of Columns entering process: ", df.shape[1])
@@ -101,10 +102,11 @@ def INIT(df, info):
         df[target] = LE.fit_transform(df[target])
         try:
             train, validation = train_test_split(
-                df, test_size=0.2, random_state=1, stratify=df[target])
-        except:
+                df, test_size=0.2, random_state=42, stratify=df[target])
+        except Exception as e:
+            print(f"Exception {e} prevented stratification in train test split")
             train, validation = train_test_split(
-                df, test_size=0.2, random_state=1)
+                df, test_size=0.2, random_state=42)
     else:
         LE = None
         df[target] = df[target].astype(float)
@@ -112,10 +114,10 @@ def INIT(df, info):
             0.1), upper=df[target].quantile(0.9), inplace=True)
         try:
             train, validation = train_test_split(
-                df, test_size=0.2, random_state=1, stratify=df[target])
+                df, test_size=0.2, random_state=42, stratify=df[target])
         except:
             train, validation = train_test_split(
-                df, test_size=0.2, random_state=1)
+                df, test_size=0.2, random_state=42)
     ############# TRAIN VALIDATION SPLIT ###########
 
     init_cols = df.columns
@@ -199,6 +201,8 @@ def INIT(df, info):
         lon = []
         lat_lon_cols = []
     num_features_created += len(LAT_LONG_DF.columns)
+    if len(LAT_LONG_DF):
+        features_created.extend(LAT_LONG_DF.columns.tolist())
     ######## DATE ENGINEERING #######
 #     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
     date_cols, possible_datecols = getDateColumns(
@@ -234,6 +238,8 @@ def INIT(df, info):
         possibleDateTimeCols = []
     ######## DATE ENGINEERING #######
     num_features_created += len(DATE_DF.columns)
+    if len(DATE_DF):
+        features_created.extend(DATE_DF.columns.tolist())
     ######## EMAIL URL ENGINEERING ########
     obj_df = X.select_dtypes('object')  # Sending in only object dtype columns
     short_obj_df = obj_df.astype(str).sample(3000).dropna(how='all') if len(
@@ -259,7 +265,8 @@ def INIT(df, info):
         EMAIL_DF = pd.DataFrame(None)
         email_cols = []
     num_features_created += len(EMAIL_DF.columns)
-
+    if len(EMAIL_DF):
+        features_created.extend(EMAIL_DF.columns.tolist())
     # print('\n#### URL ENGINEERING RUNNING WAIT ####')
     url_cols = findURLS(short_obj_df)
     if len(url_cols) > 0:
@@ -281,6 +288,8 @@ def INIT(df, info):
         URL_DF = pd.DataFrame(None)
         url_cols = []
     num_features_created += len(URL_DF.columns)
+    if len(URL_DF):
+        features_created.extend(URL_DF.columns.tolist())
     ######## EMAIL URL ENGINEERING ########
     # Additional Logic below because EMAIL and URL Engineering can choose not to work if  there's a lot of missing column
     if EMAIL_DF.empty:
@@ -397,6 +406,8 @@ def INIT(df, info):
                     [num_df, pd.DataFrame(TEXT_DF[col])], axis=1)
 
     num_features_created += len(TEXT_DF.columns)
+    if len(TEXT_DF):
+        features_created.extend(TEXT_DF.columns.tolist())
     ############# OUTLIER WINSORIZING ###########
     print('print(">>>>>>[[Outlier Winsorizing]]>>>>>")')
     bef_out = num_df.shape[0]
@@ -541,7 +552,7 @@ def INIT(df, info):
             cart_list = [X_cart, y_cart]
             cart_df = pd.concat(cart_list, axis=1)
         try:
-            cart_decisiontree(cart_df, target, class_or_Reg, passingList)
+            cart_decisiontree(cart_df, target, class_or_Reg, passingList,features_created)
             if class_or_Reg == 'Classification':
                 print(
                     f'{target_unique[0]} is alphabetically lower so its [0] and {target_unique[-1]} is alphabetically higher so its [1]')
@@ -560,14 +571,20 @@ def INIT(df, info):
     if class_or_Reg == 'Classification':
         ros = RandomOverSampler(sampling_strategy='minority')
         X_rt, y_rt = ros.fit_resample(X, y)
-        rule_val, rule_model = rules_tree(X_old, y_rt, class_or_Reg, X_rt, LE)
+        for col in features_created:
+            if col in X_rt:
+                X_rt.drop(col,axis=1,inplace=True)
+        rule_val, rule_model = rules_tree(X_old, y_rt, class_or_Reg, X_rt, LE,features_created)
         feat = X_rt.columns.tolist()
         del X_rt
         del y_rt
         gc.collect()
     else:
-        rule_val, rule_model = rules_tree(X_old, y, class_or_Reg, X, LE)
-        feat = X.columns.tolist()
+        rule_val, rule_model = rules_tree(X_old, y, class_or_Reg, X, LE,features_created)
+        feat = X.columns.tolist()[:]
+        for elements in features_created:
+            if elements in feat:
+                feat.remove(elements)
 
     imps = rule_model.feature_importances_
     indices = np.argsort(imps)
@@ -606,7 +623,7 @@ def INIT(df, info):
             if col in X.columns:
                 vis_disc_cols.append(col)
         selected_obj_cols = SampleEquation(
-            X_old, y, class_or_Reg, vis_disc_cols, LE, feat)
+            X_old, y, class_or_Reg, vis_disc_cols, LE, feat,features_created)
 
     except Exception as e:
         print(e)
@@ -672,7 +689,6 @@ def INIT(df, info):
     features_info['Training Features'] = len(X.columns)
     print("\n\n\n\n")
     print(f"Features Created Info : {features_info}")
-
     ############# FEATURES INFO ####################
     print('\n #### SAVING INIT INFORMATION ####')
     init_info = {'NumericColumns': NumColumns, 'NumericMean': NumMean, 'DiscreteColumns': DiscColumns, 'StoredLabels': stored_labels,
@@ -682,6 +698,7 @@ def INIT(df, info):
                  'TrainingColumns': TrainingColumns, 'init_cols': init_cols,
                  'ML': class_or_Reg, 'KEY': key, 'X_train': X, 'y_train': y, 'disc_cat': disc_cat, 'q_s': info['q_s'],
                  'some_list': some_list, 'remove_list': remove_list, 'lda_models': lda_models, 'lat': lat, 'lon': lon, 'lat_lon_cols': lat_lon_cols,
-                 'email_cols': email_cols, 'url_cols': url_cols, 'EMAIL_STATUS': EMAIL_STATUS, 'rule_model': rule_model, 'encoded_disc': encoded_disc, 'possibleDateTimeCols': possibleDateTimeCols}
+                 'email_cols': email_cols, 'url_cols': url_cols, 'EMAIL_STATUS': EMAIL_STATUS, 'rule_model': rule_model, 'encoded_disc': encoded_disc, 'possibleDateTimeCols': possibleDateTimeCols,
+                 'features_created':features_created}
     print(' #### DONE ####')
     return init_info, validation
