@@ -17,7 +17,7 @@ print("running API...")
 lda_models = joblib.load("model_info")["lda_models"]
 
 
-@app.route('/numeric', methods=['POST'])
+@app.route('/numeric/<int:report_id', methods=['POST'])
 def numericengineering():
     res = request.get_json()
     data = json.loads(res['data'])
@@ -27,7 +27,7 @@ def numericengineering():
     return X_test.to_json(orient="records")
 
 
-@app.route('/latlong', methods=['GET', 'POST'])
+@app.route('/latlong/<int:report_id', methods=['GET', 'POST'])
 def latlongengineering():
     res = request.get_json()
     data = json.loads(res['data'])
@@ -46,8 +46,8 @@ def latlongengineering():
     # return json.dumps(dataframe)
 
 
-@app.route('/url', methods=['POST'])
-def urlengineering():
+@app.route('/url/<int:report_id', methods=['POST'])
+def urlengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     X_test = pd.DataFrame.from_dict(data)
@@ -57,8 +57,8 @@ def urlengineering():
     return result
 
 
-@app.route('/date', methods=['POST'])
-def dateengineering():
+@app.route('/date/<int:report_id>', methods=['POST'])
+def dateengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     possible_datecols = json.loads(res['possible_datecols'])
@@ -71,8 +71,8 @@ def dateengineering():
     return result
 
 
-@app.route('/email', methods=['POST'])
-def emailengineering():
+@app.route('/email/<int:report_id>', methods=['POST'])
+def emailengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     X_test = pd.DataFrame.from_dict(data)
@@ -83,8 +83,8 @@ def emailengineering():
     return result
 
 
-@app.route('/sentiment', methods=['POST'])
-def sentiment():
+@app.route('/sentiment/<int:report_id>', methods=['POST'])
+def sentiment(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     X_test = pd.DataFrame.from_dict(data)
@@ -94,8 +94,8 @@ def sentiment():
     return result
 
 
-@app.route('/topic', methods=['POST'])
-def topicextraction():
+@app.route('/topic/<int:report_id>', methods=['POST'])
+def topicextraction(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     index = json.loads(res['index'])
