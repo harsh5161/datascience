@@ -203,7 +203,7 @@ class Segmentation:
         e=time.time()
         print("\n  Time taken to perform hdbscan ", time.strftime("%H:%M:%S", time.gmtime(e-s)))
         s=time.time()        
-        val_index= hdbscan.validity_index(np.array(pca_components), clusters)
+        # val_index= hdbscan.validity_index(np.array(pca_components), clusters)
         e=time.time()
         print("\n  Time taken to calculate validity index ", time.strftime("%H:%M:%S", time.gmtime(e-s)))
         df_new = df.reset_index(drop=True)
@@ -216,7 +216,7 @@ class Segmentation:
             hdbscan_dict['no_of_clusters']=len(np.unique(clusters))-1 #excluding noise if present
         else: 
             hdbscan_dict['no_of_clusters']=len(np.unique(clusters))
-        hdbscan_dict['val_index_score']= val_index
+        # hdbscan_dict['val_index_score']= val_index
         hdbscan_dict['cluster_labels'] = clusters #includes noise (cluster_label = -1)
         hdbscan_dict['segdata'] = df_new
         hdbscan_dict['noise']= noise
@@ -264,7 +264,7 @@ class Segmentation:
         clustering_algos['HDBSCAN']['cluster_percentages']=ClusterMags(clustering_algos['HDBSCAN']['segdata'],'HDBSCAN')
         print('Scatter plot showing the formed clusters: ')
         clusters_scatter_plot(pca_components, clustering_algos['HDBSCAN']['cluster_labels'],"HDBSCAN")
-        print("\nValidity index(higher the better, ranges from -1 to 1): ",clustering_algos['HDBSCAN']['val_index_score'])
+        # print("\nValidity index(higher the better, ranges from -1 to 1): ",clustering_algos['HDBSCAN']['val_index_score'])
         print("**Validity index only is used in density-based clustering, works well with arbitrarily shaped clusters")
         print("**Silhoutte score does not work well with arbitrarily shaped clusters.")
         if not clustering_algos['HDBSCAN']['noise'].empty:

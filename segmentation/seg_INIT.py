@@ -11,8 +11,8 @@ from seg_modelling import *
 from imblearn.over_sampling import RandomOverSampler
 import time
 
-
 def INIT(df, info):
+    df = randomSample(df) if len(df) > 50000 else df
     key = info['key']
     cols = info['cols']
     prof_cols = info['profile_cols']
@@ -44,6 +44,7 @@ def INIT(df, info):
 
     init_cols = df.columns
     print("Init columns are as follows", init_cols)
+    print("Init rows are as follows", len(df))
     X = df
     if key:
         X.drop(key, axis=1, inplace=True)

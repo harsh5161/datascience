@@ -446,3 +446,7 @@ def pearsonmaker(numeric_df,column_counter): #LowerTriangularMatrix, Dictionary 
     numeric_df.drop(drop_col,axis=1,inplace=True)
     del column_counter[drop_col]
     return numeric_df,column_counter
+
+def randomSample(df):
+    data = df.copy()
+    return df.sample(n=50000,random_state=42)
