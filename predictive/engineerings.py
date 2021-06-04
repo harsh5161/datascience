@@ -527,7 +527,7 @@ def topicExtraction(df, validation=False, lda_model_tfidf=None):
     headline = list(documents.columns)[0]  # review column
 
     processed_docs = documents[headline].map(
-        preprocess)  # preprocessing review column
+        preprocessWithoutLematizer)  # preprocessing review column
 
     #print("Processed Docs are as follows",processed_docs[:10])
 
