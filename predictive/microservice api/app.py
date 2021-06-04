@@ -18,7 +18,7 @@ lda_models = joblib.load("model_info")["lda_models"]
 
 
 @app.route('/numeric/<int:report_id', methods=['POST'])
-def numericengineering():
+def numericengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     X_test = pd.DataFrame.from_dict(data)
@@ -28,7 +28,7 @@ def numericengineering():
 
 
 @app.route('/latlong/<int:report_id', methods=['GET', 'POST'])
-def latlongengineering():
+def latlongengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
     lat = json.loads(res['lat'])
