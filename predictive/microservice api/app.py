@@ -17,7 +17,7 @@ print("running API...")
 lda_models = joblib.load("model_info")["lda_models"]
 
 
-@app.route('/numeric/<int:report_id', methods=['POST'])
+@app.route('/<int:report_id>/numeric/', methods=['POST'])
 def numericengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
@@ -27,7 +27,7 @@ def numericengineering(report_id):
     return X_test.to_json(orient="records")
 
 
-@app.route('/latlong/<int:report_id', methods=['GET', 'POST'])
+@app.route('/<int:report_id>/latlong/', methods=['GET', 'POST'])
 def latlongengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
@@ -46,7 +46,7 @@ def latlongengineering(report_id):
     # return json.dumps(dataframe)
 
 
-@app.route('/url/<int:report_id', methods=['POST'])
+@app.route('/<int:report_id/url/', methods=['POST'])
 def urlengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
@@ -57,7 +57,7 @@ def urlengineering(report_id):
     return result
 
 
-@app.route('/date/<int:report_id>', methods=['POST'])
+@app.route('/<int:report_id>/date/', methods=['POST'])
 def dateengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
@@ -71,7 +71,7 @@ def dateengineering(report_id):
     return result
 
 
-@app.route('/email/<int:report_id>', methods=['POST'])
+@app.route('/<int:report_id>/email/', methods=['POST'])
 def emailengineering(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
@@ -83,7 +83,7 @@ def emailengineering(report_id):
     return result
 
 
-@app.route('/sentiment/<int:report_id>', methods=['POST'])
+@app.route('/<int:report_id>/sentiment/', methods=['POST'])
 def sentiment(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
@@ -94,7 +94,7 @@ def sentiment(report_id):
     return result
 
 
-@app.route('/topic/<int:report_id>', methods=['POST'])
+@app.route('/<int:report_id>/topic/', methods=['POST'])
 def topicextraction(report_id):
     res = request.get_json()
     data = json.loads(res['data'])
