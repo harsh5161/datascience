@@ -76,7 +76,10 @@ def numeric_engineering(df):
     print('done ...')
 
     drop_list = []
-    sampled_df = df.sample(100).dropna(how='all')
+    try:
+        sampled_df = df.sample(100).dropna(how='all') if len(df) > 100 else df.copy().dropna(how='all')
+    except:
+        sampled_df = df.copy()
     for col in sampled_df.columns:
         counter = sampled_df[col].apply(lambda x: list_or_dict(x)).to_list()
         if counter.count("List") > 0.50*len(sampled_df) or counter.count("Dict") > 0.50*len(sampled_df):
