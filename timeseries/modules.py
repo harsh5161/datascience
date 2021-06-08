@@ -93,6 +93,7 @@ def dataExploration(df):
 
 # takes an input of a dataframe with one column and of index DatetimeIndex type
 def seriesIdentifier(df):
+    df = df.copy()
     formats = []
     ind = df.index
     years = pd.Series(ind.year, name='years', index=df.index)
@@ -327,9 +328,28 @@ def createResultFrame(resultsDict, predictionsDict, y_test):
     print(f"Winner model is {result_df.iloc[0,0]}")
     testPlot(y_test, {result_df.iloc[0, 0]: predictionsDict[result_df.iloc[0, 0]]})
 
+def generatingTargetLags(data,target, n_in=1, n_out=1, dropnan=True):
+    df = data.copy()
+    cols = []
+    # input sequence (t-n, ... t-1)
+    for i in range(n_in, 0, -1):
+        new_input_column = pd.Series(df[target].shift(i),name=f"{target}_lags{i}")
+        cols.append(new_input_column)
+    # forecast sequence (t, t+1, ... t+n)
+    for i in range(0, n_out):
+        for j in range(len(cols)):
+    	    cols[j] = cols[j].shift(-i)
+    # put it all together
+    agg = pd.concat(cols, axis=1)
+    agg = pd.concat([df,agg],axis=1)
+	# drop rows with NaN values
+    if dropnan:
+        agg.dropna(inplace=True)
+    return agg
 
 def modellingInit(df, target, resultsDict, predictionsDict):
     # X = df.values
+    df = generatingTargetLags(df,target)
     train_size = findTrainSize(df)
     split_date = df.index[train_size]
     df_training = df.loc[df.index <= split_date]
@@ -352,3 +372,4 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     testPlot(y_test, predictionsDict)
     bar_metrics(resultsDict)
     createResultFrame(resultsDict, predictionsDict, y_test)
+

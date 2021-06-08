@@ -25,6 +25,12 @@ class Modelling:
         self.resultsDict = resultsDict
         self.predictionsDict = predictionsDict
 
+    def getForecasts(self,model,train,trainY,testX):
+        # print(train.dtypes)
+        model.fit(train,trainY)
+        yhat = model.predict(testX)
+        return yhat[0]
+    
     def naiveModel(self):
         print("Naive Modelling Running...")
         mean = self.y_test.mean()
@@ -33,20 +39,44 @@ class Modelling:
         self.predictionsDict['Naive mean'] = mean
 
     def bayesianRegression(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print("Bayesian Model Running...")
         reg = linear_model.BayesianRidge()
-        reg.fit(self.X_train, self.y_train)
-        yhat = reg.predict(self.X_test)
-        self.resultsDict['BayesianRidge'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['BayesianRidge'] = yhat
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(reg,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['BayesianRidge'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['BayesianRidge'] = predictions
 
     def lassoRegression(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print("Lasso Model Running...")
         reg = linear_model.Lasso(alpha=0.1)
-        reg.fit(self.X_train, self.y_train)
-        yhat = reg.predict(self.X_test)
-        self.resultsDict['Lasso'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['Lasso'] = yhat
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(reg,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['Lasso'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['Lasso'] = predictions
 
     def randomForest(self):
         print("Random Forest Running...")
@@ -149,7 +179,7 @@ class Modelling:
             self.predictionsDict['XGBoost'] + self.predictionsDict['Lightgbm'] + self.predictionsDict['Randomforest'])/3
         self.resultsDict['EnsembleXG+LIGHT+RF'] = evaluate(
             self.y_test.values, self.predictionsDict['EnsembleXG+LIGHT+RF'])
-
+            
     def modeller(self):
         current = time.time()
         # self.naiveModel()
@@ -161,6 +191,6 @@ class Modelling:
         self.LGBM()
         self.SVM()
         self.KNN()
-        self.SARIMAX()
+        # self.SARIMAX()
         self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')
