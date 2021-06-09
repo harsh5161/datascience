@@ -79,45 +79,104 @@ class Modelling:
         self.predictionsDict['Lasso'] = predictions
 
     def randomForest(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print("Random Forest Running...")
-        reg = RandomForestRegressor(max_depth=5, random_state=0)
-        reg.fit(self.X_train, self.y_train)
-        yhat = reg.predict(self.X_test)
-        self.resultsDict['Randomforest'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['Randomforest'] = yhat
+        reg = RandomForestRegressor(max_depth=5, random_state=42,n_estimators=50)
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(reg,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['Randomforest'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['Randomforest'] = predictions
 
     def XGB(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print("XGB Running...")
-        reg = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=1000)
-        reg.fit(self.X_train, self.y_train,
-                verbose=False)  # Change verbose to True if you want to see it train
-        yhat = reg.predict(self.X_test)
-        self.resultsDict['XGBoost'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['XGBoost'] = yhat
+        reg = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=50,)
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(reg,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['XGBoost'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['XGBoost'] = predictions
 
     def LGBM(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print("LGBM Running...")
-        lightGBM = lgb.LGBMRegressor()
-        lightGBM.fit(self.X_train, self.y_train)
-        yhat = lightGBM.predict(self.X_test)
-        self.resultsDict['Lightgbm'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['Lightgbm'] = yhat
+        lightGBM = lgb.LGBMRegressor(n_estimators=50)
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(lightGBM,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['Lightgbm'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['Lightgbm'] = predictions
 
     def SVM(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print('SVM Running...')
-        reg = svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
-        reg.fit(self.X_train, self.y_train)
-        yhat = reg.predict(self.X_test)
-        self.resultsDict['SVM RBF'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['SVM RBF'] = yhat
+        reg = svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1,max_iter=2)
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(reg,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['SVM RBF'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['SVM RBF'] = predictions
 
     def KNN(self):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        X_test = self.X_test.copy()
+        y_test = self.y_test.copy()
         print("KNN Running...")
-        reg = KNeighborsRegressor(n_neighbors=2)
-        reg.fit(self.X_train, self.y_train)
-        yhat = reg.predict(self.X_test)
-        self.resultsDict['Kneighbors'] = evaluate(self.y_test, yhat)
-        self.predictionsDict['Kneighbors'] = yhat
+        reg = KNeighborsRegressor(n_neighbors=2,)
+        predictions = list()
+        X_history = X_train.to_numpy()
+        print(X_history)
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)):
+            yhat = self.getForecasts(reg,X_history,y_history,X_test[i].reshape(1,-1))
+            predictions.append(yhat)
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([y_test[i]]),axis=0)
+        self.resultsDict['Kneighbors'] = evaluate(self.y_test, predictions)
+        self.predictionsDict['Kneighbors'] = predictions
 
     def HWES(self):
         print("HWES Running...")
@@ -182,15 +241,15 @@ class Modelling:
             
     def modeller(self):
         current = time.time()
-        # self.naiveModel()
+        self.naiveModel()
         self.HWES()
         self.bayesianRegression()
         self.lassoRegression()
         self.randomForest()
         self.XGB()
         self.LGBM()
-        self.SVM()
+        # self.SVM()
         self.KNN()
         # self.SARIMAX()
-        self.Ensemble()
+        # self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')
