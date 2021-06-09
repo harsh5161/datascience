@@ -327,6 +327,7 @@ def createResultFrame(resultsDict, predictionsDict, y_test):
           'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
     print(f"Winner model is {result_df.iloc[0,0]}")
     testPlot(y_test, {result_df.iloc[0, 0]: predictionsDict[result_df.iloc[0, 0]]})
+    return result_df.iloc[0,0]
 
 def generatingTargetLags(data,target, n_in=1, n_out=1, dropnan=True):
     df = data.copy()
@@ -349,13 +350,14 @@ def generatingTargetLags(data,target, n_in=1, n_out=1, dropnan=True):
 
 def modellingInit(df, target, resultsDict, predictionsDict):
     # X = df.values
+    df = df.copy()
     df = generatingTargetLags(df,target)
     train_size = findTrainSize(df)
     split_date = df.index[train_size]
     df_training = df.loc[df.index <= split_date]
     df_test = df.loc[df.index > split_date]
     print(
-        f"We have {len(df_training)} days of training data and {len(df_test)} days of testing data ")
+        f"We have {len(df_training)} days of training data and {len(df_test)} days of validation data ")
     X_train_df, y_train = featureEngineering(df_training, target=target)
     X_test_df, y_test = featureEngineering(df_test, target=target)
     scaler = StandardScaler()
@@ -371,5 +373,18 @@ def modellingInit(df, target, resultsDict, predictionsDict):
     modelling_obj.modeller()
     testPlot(y_test, predictionsDict)
     bar_metrics(resultsDict)
-    createResultFrame(resultsDict, predictionsDict, y_test)
+    winnerModelName = createResultFrame(resultsDict, predictionsDict, y_test)
+    return winnerModelName
 
+def winnerModelTrainer(df,target, winnerModelName):
+    df = df.copy()
+    df = generatingTargetLags(df,target)
+    X,y = featureEngineering(df,target=target)
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X_train = scaler.transform(X)
+    X_train = pd.DataFrame(X_train,columns = X.columns)
+    modelling_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,None)
+    modelling_obj.winnerTrainer(winnerModelName)
+    
+    

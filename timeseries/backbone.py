@@ -29,7 +29,8 @@ def INIT():
             seasonalDecompose(df[target][:720], 350)
             stationaryNormalityPlots(df[target], 30, 7)
             tsplot(df[target], lags=30)
-            modellingInit(df, target, resultsDict, predictionsDict)
+            winnerModel = modellingInit(df, target, resultsDict, predictionsDict)
+            winnerModelTrainer(df,target,winnerModel)
         if val == 'M':
             # call function passing df,target and other parameters specific to M
             resultsDict = {}
@@ -38,7 +39,8 @@ def INIT():
             seasonalDecompose(df[target][:300], 30)
             stationaryNormalityPlots(df[target], 15, 7)
             tsplot(df[target], lags=15)
-            modellingInit(df, target, resultsDict, predictionsDict)
+            winnerModel = modellingInit(df, target, resultsDict, predictionsDict)
+            winnerModelTrainer(df,target,winnerModel)
         if val == 'D':
             # call function passing df,target and other parameters specific to D
             resultsDict = {}
@@ -47,7 +49,8 @@ def INIT():
             seasonalDecompose(df[target][:250], 24)
             stationaryNormalityPlots(df[target], 7, 7)
             tsplot(df[target], lags=7)
-            modellingInit(df, target, resultsDict, predictionsDict)
+            winnerModel = modellingInit(df, target, resultsDict, predictionsDict)
+            winnerModelTrainer(df,target,winnerModel)
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
             try:
@@ -58,8 +61,9 @@ def INIT():
                 stationaryNormalityPlots(
                     resampled_frames['Quarter'][target], 10, 7)
                 tsplot(resampled_frames['Quarter'][target], lags=10)
-                modellingInit(resampled_frames['Quarter'],
+                winnerModel = modellingInit(resampled_frames['Quarter'],
                               target, resultsDict, predictionsDict)
+                winnerModelTrainer(resampled_frames['Quarter'],target,winnerModel)
             except ValueError:
                 print("Not enough Data to perform resampled analysis")
         if val == 'RM':
@@ -72,8 +76,9 @@ def INIT():
                 stationaryNormalityPlots(
                     resampled_frames['Month'][target], 10, 7)
                 tsplot(resampled_frames['Month'][target], lags=10)
-                modellingInit(resampled_frames['Month'],
+                winnerModel = modellingInit(resampled_frames['Month'],
                               target, resultsDict, predictionsDict)
+                winnerModelTrainer(resampled_frames['Month'],target,winnerModel)
             except ValueError:
                 print("Not enough Data to perform resampled analysis")
         if val == 'RW':
@@ -86,8 +91,9 @@ def INIT():
                 stationaryNormalityPlots(
                     resampled_frames['Week'][target], 10, 7)
                 tsplot(resampled_frames['Week'][target], lags=10)
-                modellingInit(resampled_frames['Week'],
+                winnerModel = modellingInit(resampled_frames['Week'],
                               target, resultsDict, predictionsDict)
+                winnerModelTrainer(resampled_frames['Week'],target,winnerModel)
             except ValueError:
                 print("Not enough Data to perform resampled analysis")
 
