@@ -344,7 +344,7 @@ def generatingTargetLags(data,target, n_in=1, n_out=1, dropnan=True):
     	    cols[j] = cols[j].shift(-i)   
     # put it all together
     agg = pd.concat(cols, axis=1)
-    agg = pd.concat([df,agg],axis=1)
+    agg = pd.concat([agg,df],axis=1)
 	# drop rows with NaN values
     if dropnan:
         agg.dropna(inplace=True)
@@ -358,6 +358,7 @@ def modellingInit(df, target, resultsDict, predictionsDict,period):
     df.to_csv("modellingINitcheck.csv",index=False)
     train_size = findTrainSize(df)
     split_date = df.index[train_size]
+    print("Index is split at",split_date)
     df_training = df.loc[df.index <= split_date]
     df_test = df.loc[df.index > split_date]
     print("Train Size",len(df_training))
@@ -365,6 +366,7 @@ def modellingInit(df, target, resultsDict, predictionsDict,period):
     print(
         f"We have {len(df_training)} days of training data and {len(df_test)} days of validation data ")
     X_train_df, y_train = featureEngineering(df_training, target=target)
+    print(X_train_df.head(5))
     X_test_df, y_test = featureEngineering(df_test, target=target)
     scaler = StandardScaler()
     scaler.fit(X_train_df)  # No cheating, never scale on the training+test!
@@ -380,23 +382,42 @@ def modellingInit(df, target, resultsDict, predictionsDict,period):
     testPlot(y_test, predictionsDict)
     bar_metrics(resultsDict)
     winnerModelName = createResultFrame(resultsDict, predictionsDict, y_test)
+    # for col in X_train.columns:
+    #     if 'lags' in col:
+    #         lagColumnName = col
     del df,df_training,df_test,X_train_df,y_train,X_test_df,y_test,X_train,X_test
     return winnerModelName
 
-def winnerModelTrainer(df,target, winnerModelName):
+def winnerModelTrainer(df,target, winnerModelName,period,typeOf):
     df = df.copy()
     print("Inside Winner Trainer",len(df))
     df = generatingTargetLags(df,target)
-    X,y = featureEngineering(df,target=target)
+    X,y = featureEngineering(df,target)
+    scoringLag = int(y.iloc[-1])
+    print(type(scoringLag),scoringLag)
     print("After winner engineering",len(X))
+    # print(X.head(5))
+    
+    
+    scoring_start_idx = df.index[len(X)-1]
+    scoring_df = pd.DataFrame(pd.date_range(scoring_start_idx,periods=period,freq=typeOf),columns=['Datetime'])
+    scoring_df.set_index(pd.DatetimeIndex(scoring_df['Datetime']), inplace=True)
+    scoring_df.drop('Datetime',axis=1,inplace=True)
+    scoring_df = featureEngineering(scoring_df)
+    scoring_df[f"{target}_lags1"] = ""
+    scoring_df = scoring_df[X.columns]
+    scoring_df.iloc[0,scoring_df.columns.get_loc(f"{target}_lags1")] = scoringLag
+    print(scoring_df)
+    scoring_df.to_csv("scoring.csv")
+    
     scaler = StandardScaler()
     scaler.fit(X)
     X_train = scaler.transform(X)
     X_train = pd.DataFrame(X_train,columns = X.columns)
-    winner_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,None)
+    winner_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,None,None)
     winnerModel = winner_obj.getWinnerModel(winnerModelName)
     winnerPredictionsDict = {}
-    scoring_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,winnerPredictionsDict)
+    scoring_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,winnerPredictionsDict,None)
     
     #I will need to get the last few rows from the main dataset, generate the lags, scale it, make predictions
     #Use that prediction as the lag for the next one 

@@ -31,7 +31,7 @@ def INIT():
             stationaryNormalityPlots(df[target], 30, 7)
             tsplot(df[target], lags=30)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
-            winnerModelTrainer(df,target,winnerModel)
+            winnerModelTrainer(df,target,winnerModel,period,'Y')
         if val == 'M':
             # call function passing df,target and other parameters specific to M
             period = 30
@@ -42,7 +42,7 @@ def INIT():
             stationaryNormalityPlots(df[target], 15, 7)
             tsplot(df[target], lags=15)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
-            winnerModelTrainer(df,target,winnerModel)
+            winnerModelTrainer(df,target,winnerModel,period,'M')
         if val == 'D':
             # call function passing df,target and other parameters specific to D
             period = 24
@@ -53,7 +53,7 @@ def INIT():
             stationaryNormalityPlots(df[target], 7, 7)
             tsplot(df[target], lags=7)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
-            winnerModelTrainer(df,target,winnerModel)
+            winnerModelTrainer(df,target,winnerModel,period,'D')
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
             try:
@@ -67,7 +67,7 @@ def INIT():
                 tsplot(resampled_frames['Quarter'][target], lags=10)
                 winnerModel = modellingInit(resampled_frames['Quarter'],
                               target, resultsDict, predictionsDict,period)
-                winnerModelTrainer(resampled_frames['Quarter'],target,winnerModel)
+                winnerModelTrainer(resampled_frames['Quarter'],target,winnerModel,period,'QS')
             except ValueError:
                 print("Not enough Data to perform resampled analysis")
         if val == 'RM':
@@ -83,7 +83,7 @@ def INIT():
                 tsplot(resampled_frames['Month'][target], lags=10)
                 winnerModel = modellingInit(resampled_frames['Month'],
                               target, resultsDict, predictionsDict,period)
-                winnerModelTrainer(resampled_frames['Month'],target,winnerModel)
+                winnerModelTrainer(resampled_frames['Month'],target,winnerModel,period,'MS')
             except ValueError:
                 print("Not enough Data to perform resampled analysis")
         if val == 'RW':
@@ -99,7 +99,7 @@ def INIT():
                 tsplot(resampled_frames['Week'][target], lags=10)
                 winnerModel = modellingInit(resampled_frames['Week'],
                               target, resultsDict, predictionsDict,period)
-                winnerModelTrainer(resampled_frames['Week'],target,winnerModel)
+                winnerModelTrainer(resampled_frames['Week'],target,winnerModel,period,'W')
             except ValueError:
                 print("Not enough Data to perform resampled analysis")
 
