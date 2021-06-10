@@ -17,13 +17,14 @@ import pmdarima as pm
 
 
 class Modelling:
-    def __init__(self, X_train, X_test, y_train, y_test, resultsDict, predictionsDict):
+    def __init__(self, X_train, X_test, y_train, y_test, resultsDict, predictionsDict,period):
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
         self.resultsDict = resultsDict
         self.predictionsDict = predictionsDict
+        self.period = period
 
     def getForecasts(self,model,train,trainY,testX):
         # print(train.dtypes)
@@ -212,7 +213,7 @@ class Modelling:
     def SARIMAX(self):
         print("SARIMAX Running...")
         autoModel = pm.auto_arima(self.y_train, trace=True, error_action='ignore',
-                                  suppress_warnings=True, seasonal=True, m=12, stepwise=True)
+                                  suppress_warnings=True, seasonal=True, m=self.period, stepwise=True)
         autoModel.fit(self.y_train)
 
         order = autoModel.order
@@ -269,7 +270,7 @@ class Modelling:
         # self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')
 
-    def winnerTrainer(self,winnerName):
+    def getWinnerModel(self,winnerName):
         switcher = {
             'Naive Mean' : self.naiveModel(winner=True),
             'Lasso' : self.lassoRegression(winner=True),
@@ -279,4 +280,11 @@ class Modelling:
             'Kneighbours' : self.KNN(winner=True),
             'BayesianRidge' : self.bayesianRegression(winner=True)
         }
-        print(type(switcher[winnerName]))
+        return switcher[winnerName]
+    
+    def scoring(self,model,predictions):
+        X_train = self.X_train.copy()
+        y_train = self.y_train.copy()
+        # X_test = self.X_test.copy()
+        # y_test = self.y_test.copy()
+        
