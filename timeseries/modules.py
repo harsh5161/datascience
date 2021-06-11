@@ -304,10 +304,11 @@ def get_cmap(n, name='hsv'):
 # Change the logic for this function and also check the logic of resample
 
 
-def testPlot(y_test, predictionsDict):
+def testPlot(y_test=None, predictionsDict={}):
     cmap = get_cmap(50)
     for key, value in predictionsDict.items():
-        plt.plot(y_test.values, color='black', label='Original')
+        if y_test is not None:
+            plt.plot(y_test.values, color='black', label='Original')
         yhat = value
         plt.plot(yhat, color=cmap(randint(0, 50)), label=f'{key}')
         plt.legend()
@@ -355,7 +356,6 @@ def modellingInit(df, target, resultsDict, predictionsDict,period):
     df = df.copy()
     print("Length before generating lags",len(df))
     df = generatingTargetLags(df,target)
-    df.to_csv("modellingINitcheck.csv",index=False)
     train_size = findTrainSize(df)
     split_date = df.index[train_size]
     print("Index is split at",split_date)
@@ -390,15 +390,13 @@ def modellingInit(df, target, resultsDict, predictionsDict,period):
 
 def winnerModelTrainer(df,target, winnerModelName,period,typeOf):
     df = df.copy()
-    print("Inside Winner Trainer",len(df))
+    # print("Inside Winner Trainer",len(df))
     df = generatingTargetLags(df,target)
     X,y = featureEngineering(df,target)
     scoringLag = int(y.iloc[-1])
-    print(type(scoringLag),scoringLag)
-    print("After winner engineering",len(X))
     # print(X.head(5))
     
-    
+    # generating X_test to loop over
     scoring_start_idx = df.index[len(X)-1]
     scoring_df = pd.DataFrame(pd.date_range(scoring_start_idx,periods=period,freq=typeOf),columns=['Datetime'])
     scoring_df.set_index(pd.DatetimeIndex(scoring_df['Datetime']), inplace=True)
@@ -407,18 +405,24 @@ def winnerModelTrainer(df,target, winnerModelName,period,typeOf):
     scoring_df[f"{target}_lags1"] = ""
     scoring_df = scoring_df[X.columns]
     scoring_df.iloc[0,scoring_df.columns.get_loc(f"{target}_lags1")] = scoringLag
-    print(scoring_df)
-    scoring_df.to_csv("scoring.csv")
     
+    #scaling and retraining winner model on the entire dataset!
     scaler = StandardScaler()
     scaler.fit(X)
     X_train = scaler.transform(X)
     X_train = pd.DataFrame(X_train,columns = X.columns)
     winner_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,None,None)
     winnerModel = winner_obj.getWinnerModel(winnerModelName)
-    winnerPredictionsDict = {}
-    scoring_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,winnerPredictionsDict,None)
     
-    #I will need to get the last few rows from the main dataset, generate the lags, scale it, make predictions
-    #Use that prediction as the lag for the next one 
+    #actual scoring-logic
+    scoring_obj = Modelling(X_train,scoring_df,y,pd.DataFrame(),None,None,None)
+    winnerPredictionsList = scoring_obj.scoring(winnerModel,scaler)
+    scoring_df = scoring_df.iloc[1:]
+    scoring_df.drop(scoring_df.columns,axis=1,inplace=True)
+    scoring_df[f'Forecasted {target}'] = list(np.around(np.array(winnerPredictionsList),2))
+    print(len(scoring_df))
+    print(len(winnerPredictionsList))
+    testPlot(None,{f'Forecasted {target}': scoring_df[f'Forecasted {target}']})
+    scoring_df.to_csv("scoring.csv")
+    return
     

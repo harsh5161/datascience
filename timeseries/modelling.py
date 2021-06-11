@@ -25,7 +25,7 @@ class Modelling:
         self.resultsDict = resultsDict
         self.predictionsDict = predictionsDict
         self.period = period
-
+        
     def getForecasts(self,model,train,trainY,testX):
         # print(train.dtypes)
         model.fit(train,trainY)
@@ -52,7 +52,6 @@ class Modelling:
         print("Bayesian Model Running...")
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -74,7 +73,6 @@ class Modelling:
         print("Lasso Model Running...")
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -96,7 +94,6 @@ class Modelling:
         print("Random Forest Running...")
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -118,7 +115,6 @@ class Modelling:
         print("XGB Running...")
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -140,7 +136,6 @@ class Modelling:
         print("LGBM Running...")
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -162,7 +157,6 @@ class Modelling:
         print('SVM Running...')
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -184,7 +178,6 @@ class Modelling:
         print("KNN Running...")
         predictions = list()
         X_history = X_train.to_numpy()
-        print(X_history)
         y_history = y_train.to_numpy()
         X_test = X_test.to_numpy()
         for i in range(len(X_test)):
@@ -282,9 +275,21 @@ class Modelling:
         }
         return switcher[winnerName]
     
-    def scoring(self,model,predictions):
-        X_train = self.X_train.copy()
-        y_train = self.y_train.copy()
-        # X_test = self.X_test.copy()
-        # y_test = self.y_test.copy()
+    def scoring(self,model,scaler):
+        X_train = self.X_train.copy() #history
+        y_train = self.y_train.copy() #y history
+        X_test = self.X_test.copy() #scoring_df
         
+        print("Running Scoring...")
+        predictions = list()
+        X_history = X_train.to_numpy()
+        y_history = y_train.to_numpy()
+        X_test = X_test.to_numpy()
+        for i in range(len(X_test)-1):
+            scaled_x_test_i = scaler.transform(X_test[i].reshape(1,-1))
+            yhat = self.getForecasts(model,X_history,y_history,scaled_x_test_i)
+            predictions.append(yhat)
+            X_test[i+1][0] = yhat
+            X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
+            y_history = np.append(y_history,np.array([yhat]),axis=0)
+        return predictions
