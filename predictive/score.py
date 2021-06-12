@@ -274,10 +274,11 @@ def score(df, init_info, validation=False):
                 y_test = pd.Series(
                     init_info['TargetLabelEncoder'].inverse_transform(y_test))
             except IndexError:
+                print("Index error triggered")
                 y_test = pd.Series(
                     init_info['TargetLabelEncoder'].inverse_transform(y_test.astype(int)))
             y_probs_cols = ['Class ' +
-                            str(x) + ' Probabilities' for x in y_pred.unique()]
+                            str(x) + ' Probabilities' for x in init_info['TargetLabelEncoder'].inverse_transform(mod.classes_)]
             init_info['y_probs_cols'] = y_probs_cols
         else:
             y_probs_cols = init_info['y_probs_cols']
@@ -286,6 +287,8 @@ def score(df, init_info, validation=False):
         # print("YPRED IS AS FOLLOWS",y_pred)
         # print("YPROBSCOLUMNS ARE AS FOLLOWS",y_probs_cols)
         # print("!!!!!!!!!!!!!!!!!!!!!!!")
+        
+            
         y_probas = pd.DataFrame(y_probas, columns=y_probs_cols)
 
         if validation:
@@ -494,6 +497,7 @@ def score(df, init_info, validation=False):
             for col in ['Actual Values', 'Predicted Values']:
                 if preview[col].dtype == np.float64:
                     preview[col] = preview[col].astype(int)
+
         else:
             # to convert '1.0' and '0.0' to '1' and '0'
             for col in ['Predicted Values']:
