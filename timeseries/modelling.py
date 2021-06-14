@@ -189,19 +189,28 @@ class Modelling:
         self.predictionsDict['Kneighbors'] = predictions
 
     def HWES(self,winner=False):
-        print("HWES Running...")
         yhat = list()
-        for t in tqdm(range(len(self.y_test))):
+        if not winner:
+            y_test = self.y_test
+            length = len(y_test)
+            print("HWES Running...")
+        else:
+            length = self.period #it's just for the length
+            
+        for t in tqdm(range(length)):
             temp_train = self.y_train[:len(self.y_train)+t]
             model = ExponentialSmoothing(self.y_train)
             model_fit = model.fit()
             predictions = model_fit.predict(
                 start=len(temp_train), end=len(temp_train))
-            yhat = yhat + [predictions]
+            yhat.append(predictions)
 
-        yhat = pd.concat(yhat)
-        self.resultsDict['HWES'] = evaluate(self.y_test, yhat.values)
-        self.predictionsDict['HWES'] = yhat.values
+        if not winner:
+            yhat = pd.concat(yhat)
+            self.resultsDict['HWES'] = evaluate(y_test, yhat.values)
+            self.predictionsDict['HWES'] = yhat.values
+        else:
+            return [item for sublist in yhat for item in sublist]
 
     def SARIMAX(self):
         print("SARIMAX Running...")
@@ -271,7 +280,9 @@ class Modelling:
             'Randomforest' : self.randomForest(winner=True),
             'XGBoost' : self.XGB(winner=True),
             'Kneighbours' : self.KNN(winner=True),
-            'BayesianRidge' : self.bayesianRegression(winner=True)
+            'BayesianRidge' : self.bayesianRegression(winner=True),
+            'HWES' : None,
+            'SARIMAX': None
         }
         return switcher[winnerName]
     
@@ -293,3 +304,7 @@ class Modelling:
             X_history = np.append(X_history,np.array([X_test[i]]),axis=0)
             y_history = np.append(y_history,np.array([yhat]),axis=0)
         return predictions
+    
+    def univariateScoring(self,modelName):
+        if modelName == 'HWES':
+            return self.HWES(winner=True)

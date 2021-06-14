@@ -326,9 +326,10 @@ def createResultFrame(resultsDict, predictionsDict, y_test):
     print("\nModel Information Table [sorted by MAPE score]")
     print(tabulate(result_df, headers=[
           'Model', 'MAE', 'RMSE', 'MAPE', 'R2'], tablefmt="fancy_grid"))
-    print(f"Winner model is {result_df.iloc[0,0]}")
-    testPlot(y_test, {result_df.iloc[0, 0]: predictionsDict[result_df.iloc[0, 0]]})
-    return result_df.iloc[0,0]
+    result = result_df.iloc[0,0] if 'Naive mean' != result_df.iloc[0,0] else result_df.iloc[1,0]
+    print(f"Winner model is {result}")
+    testPlot(y_test, {result: predictionsDict[result]})
+    return result
 
 def generatingTargetLags(data,target, n_in=1, n_out=1, dropnan=True):
     df = data.copy()
@@ -406,7 +407,7 @@ def winnerModelTrainer(df,target, winnerModelName,period,typeOf):
     scoring_df = scoring_df[X.columns]
     scoring_df.iloc[0,scoring_df.columns.get_loc(f"{target}_lags1")] = scoringLag
     
-    #scaling and retraining winner model on the entire dataset!
+    #scaling and getting winner model object
     scaler = StandardScaler()
     scaler.fit(X)
     X_train = scaler.transform(X)
@@ -414,15 +415,26 @@ def winnerModelTrainer(df,target, winnerModelName,period,typeOf):
     winner_obj = Modelling(X_train,pd.DataFrame(),y,pd.DataFrame(),None,None,None)
     winnerModel = winner_obj.getWinnerModel(winnerModelName)
     
-    #actual scoring-logic
-    scoring_obj = Modelling(X_train,scoring_df,y,pd.DataFrame(),None,None,None)
-    winnerPredictionsList = scoring_obj.scoring(winnerModel,scaler)
+    #retraining winner model on the entire dataset! + actual scoring-logic
+    if winnerModelName not in ['HWES','SARIMAX']:
+        print("Tree Based Models")
+        scoring_obj = Modelling(X_train,scoring_df,y,pd.DataFrame(),None,None,None)
+        winnerPredictionsList = scoring_obj.scoring(winnerModel,scaler)
+    else:
+        print("Non-Tree Based Models")
+        scoring_obj = Modelling(pd.DataFrame(),pd.DataFrame(),y,pd.DataFrame(),None,None,period)
+        winnerPredictionsList = scoring_obj.univariateScoring(winnerModelName)
+        print("Length of winner predictions",len(winnerPredictionsList))
+        
     scoring_df = scoring_df.iloc[1:]
     scoring_df.drop(scoring_df.columns,axis=1,inplace=True)
-    scoring_df[f'Forecasted {target}'] = list(np.around(np.array(winnerPredictionsList),2))
+    print(scoring_df)
+    print(len(scoring_df))
+    scoring_df[f'Forecasted {target}'] = list(np.around(np.array(winnerPredictionsList),2)) if winnerModelName not in ['HWES','SARIMAX'] else list(np.around(np.array(winnerPredictionsList)[:-1],2))
     print(len(scoring_df))
     print(len(winnerPredictionsList))
     testPlot(None,{f'Forecasted {target}': scoring_df[f'Forecasted {target}']})
+        
     scoring_df.to_csv("scoring.csv")
     return
     
