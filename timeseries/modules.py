@@ -63,13 +63,13 @@ def userInputs():
         return None
 
     result_df = pd.DataFrame(df[target].copy())
-    try:
-        predictors = input(
-            "Do you want to add any other column as a predictor in the timeseries? [Separate by commas if you want to add multiple predictors || Press Enter to Continue without adding Predictors] ").split(",")
-        for col in predictors:
-            result_df[col] = df[col]
-    except Exception as e:
-        print(f"Predictor Could not be added : {e}")
+    # try:
+    #     predictors = input(
+    #         "Do you want to add any other column as a predictor in the timeseries? [Separate by commas if you want to add multiple predictors || Press Enter to Continue without adding Predictors] ").split(",")
+    #     for col in predictors:
+    #         result_df[col] = df[col]
+    # except Exception as e:
+    #     print(f"Predictor Could not be added : {e}")
 
     print("Visualising the final DataFrame")
     print(result_df.head(10))
@@ -416,20 +416,18 @@ def winnerModelTrainer(df,target, winnerModelName,period,typeOf):
     winnerModel = winner_obj.getWinnerModel(winnerModelName)
     
     #retraining winner model on the entire dataset! + actual scoring-logic
-    if winnerModelName not in ['HWES','SARIMAX']:
-        print("Tree Based Models")
+    if isinstance(winnerModel,list) or winnerModelName not in ['HWES','SARIMAX']:
+        print("Tree Based Model Scoring Running...")
         scoring_obj = Modelling(X_train,scoring_df,y,pd.DataFrame(),None,None,None)
         winnerPredictionsList = scoring_obj.scoring(winnerModel,scaler)
     else:
-        print("Non-Tree Based Models")
+        print("Univariate Model Scoring Running...")
         scoring_obj = Modelling(pd.DataFrame(),pd.DataFrame(),y,pd.DataFrame(),None,None,period)
         winnerPredictionsList = scoring_obj.univariateScoring(winnerModelName)
-        print("Length of winner predictions",len(winnerPredictionsList))
+        # print("Length of winner predictions",len(winnerPredictionsList))
         
     scoring_df = scoring_df.iloc[1:]
     scoring_df.drop(scoring_df.columns,axis=1,inplace=True)
-    print(scoring_df)
-    print(len(scoring_df))
     scoring_df[f'Forecasted {target}'] = list(np.around(np.array(winnerPredictionsList),2)) if winnerModelName not in ['HWES','SARIMAX'] else list(np.around(np.array(winnerPredictionsList)[:-1],2))
     print(len(scoring_df))
     print(len(winnerPredictionsList))
