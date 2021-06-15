@@ -14,7 +14,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing, ExponentialSmoothing
 from tqdm import tqdm, tqdm_notebook
 import pmdarima as pm
-
+from sklearn.ensemble import VotingRegressor
 
 class Modelling:
     def __init__(self, X_train, X_test, y_train, y_test, resultsDict, predictionsDict,period):
@@ -238,23 +238,31 @@ class Modelling:
 
     def Ensemble(self):
         print('Trying XGB + Light Ensemble...')
+        temp = zip(self.predictionsDict['XGBoost'],self.predictionsDict['Lightgbm'])
+        tempSum = [x+y for (x,y) in temp]
         self.predictionsDict['EnsembleXG+LIGHT'] = (
-            self.predictionsDict['XGBoost'] + self.predictionsDict['Lightgbm'])/2
+            [result/2 for result in tempSum])
         self.resultsDict['EnsembleXG+LIGHT'] = evaluate(
             self.y_test.values, self.predictionsDict['EnsembleXG+LIGHT'])
         print('Trying RF + XGBoost Ensemble...')
+        temp = zip(self.predictionsDict['Randomforest'],self.predictionsDict['XGBoost'])
+        tempSum = [x+y for (x,y) in temp]
         self.predictionsDict['EnsembleRF+XG'] = (
-            self.predictionsDict['Randomforest'] + self.predictionsDict['XGBoost'])/2
+            [result/2 for result in tempSum])
         self.resultsDict['EnsembleRF+XG'] = evaluate(
             self.y_test.values, self.predictionsDict['EnsembleRF+XG'])
         print('Trying RF + Light Ensemble...')
+        temp = zip(self.predictionsDict['Randomforest'],self.predictionsDict['Lightgbm'])
+        tempSum = [x+y for (x,y) in temp]
         self.predictionsDict['EnsembleRF+LIGHT'] = (
-            self.predictionsDict['Randomforest'] + self.predictionsDict['Lightgbm'])/2
+            [result/2 for result in tempSum])
         self.resultsDict['EnsembleRF+LIGHT'] = evaluate(
             self.y_test.values, self.predictionsDict['EnsembleRF+LIGHT'])
         print('Trying XG + RF + Light Ensemble...')
+        temp = zip(self.predictionsDict['XGBoost'],self.predictionsDict['Lightgbm'],self.predictionsDict['Randomforest'])
+        tempSum = [x+y+z for (x,y,z) in temp]
         self.predictionsDict['EnsembleXG+LIGHT+RF'] = (
-            self.predictionsDict['XGBoost'] + self.predictionsDict['Lightgbm'] + self.predictionsDict['Randomforest'])/3
+            [result/3 for result in tempSum])
         self.resultsDict['EnsembleXG+LIGHT+RF'] = evaluate(
             self.y_test.values, self.predictionsDict['EnsembleXG+LIGHT+RF'])
             
@@ -267,9 +275,9 @@ class Modelling:
         self.randomForest()
         self.XGB()
         self.LGBM()
-        self.KNN()
+        # self.KNN()
         # self.SARIMAX()
-        # self.Ensemble()
+        self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')
 
     def getWinnerModel(self,winnerName):
@@ -282,9 +290,18 @@ class Modelling:
             'Kneighbours' : self.KNN(winner=True),
             'BayesianRidge' : self.bayesianRegression(winner=True),
             'HWES' : None,
-            'SARIMAX': None
+            'SARIMAX': None,
+            'EnsembleXG+LIGHT': ['XGBoost','Lightgbm'],
+            'EnsembleRF+XG': ['Randomforest','XGBoost'],
+            'EnsembleRF+LIGHT': ['Randomforest','Lightgbm'],
+            'EnsembleXG+LIGHT+RF': ['XGBoost','Lightgbm','Randomforest']
+            
         }
         return switcher[winnerName]
+    
+    def getVotingRegressor(self,votingModels):
+        reg = VotingRegressor(votingModels)
+        return reg
     
     def scoring(self,model,scaler):
         X_train = self.X_train.copy() #history
@@ -292,6 +309,14 @@ class Modelling:
         X_test = self.X_test.copy() #scoring_df
         
         print("Running Scoring...")
+        
+        if isinstance(model,list):
+            votingModels = []
+            for value in model:
+                votingModels.append((value,self.getWinnerModel(value)))
+            
+            model = self.getVotingRegressor(votingModels)
+
         predictions = list()
         X_history = X_train.to_numpy()
         y_history = y_train.to_numpy()
