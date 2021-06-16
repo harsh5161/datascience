@@ -275,7 +275,7 @@ class Modelling:
         self.randomForest()
         self.XGB()
         self.LGBM()
-        # self.KNN()
+        self.KNN()
         # self.SARIMAX()
         self.Ensemble()
         print(f'Total Modelling Time Taken : {time.time()-current}')

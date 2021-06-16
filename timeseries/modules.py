@@ -171,19 +171,28 @@ def dataResampler(df, perform_list):
     resampled_data = {}
     if 'RQ' in perform_list:
         quarter_df = df.resample('Q').sum()
-        quarter_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        try:
+            quarter_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        except:
+            pass
         resampled_data["Quarter"] = quarter_df
         print(
             f'Quarterly Resampling done, engineered dataframe size {quarter_df.shape}')
     if 'RW' in perform_list:
         weekly_df = df.resample('W').sum()
-        weekly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        try:
+            weekly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        except:
+            pass
         resampled_data["Week"] = weekly_df
         print(
             f'Weekly Resampling done, engineered dataframe size {weekly_df.shape}')
     if 'RM' in perform_list:
         monthly_df = df.resample('M').sum()
-        monthly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        try:
+            monthly_df.drop(['years', 'months', 'days'], axis=1, inplace=True)
+        except:
+            pass
         resampled_data["Month"] = monthly_df
         print(
             f'Monthly Resampling done, engineered dataframe size {monthly_df.shape}')

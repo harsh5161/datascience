@@ -23,7 +23,7 @@ def INIT():
     for val in action_list:
         if val == 'Y':
             # call function passing df,target and other parameters specific to Y
-            period = 350 #sometimes there are holes in the dataset, but we shouldn't perform yearly analysis if there isn't at least 2 * 350 days of data in it
+            period = 360 #sometimes there are holes in the dataset, but we shouldn't perform yearly analysis if there isn't at least 2 * 350 days of data in it
             resultsDict = {}
             predictionsDict = {}
             print("Performing Yearly Analysis")
@@ -31,7 +31,7 @@ def INIT():
             stationaryNormalityPlots(df[target], 30, 7)
             tsplot(df[target], lags=30)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
-            winnerModelTrainer(df,target,winnerModel,period,'Y')
+            winnerModelTrainer(df,target,winnerModel,period,'D')
         if val == 'M':
             # call function passing df,target and other parameters specific to M
             period = 30
@@ -42,7 +42,7 @@ def INIT():
             stationaryNormalityPlots(df[target], 15, 7)
             tsplot(df[target], lags=15)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
-            winnerModelTrainer(df,target,winnerModel,period,'M')
+            winnerModelTrainer(df,target,winnerModel,period,'D')
         if val == 'D':
             # call function passing df,target and other parameters specific to D
             period = 24
@@ -53,7 +53,7 @@ def INIT():
             stationaryNormalityPlots(df[target], 7, 7)
             tsplot(df[target], lags=7)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
-            winnerModelTrainer(df,target,winnerModel,period,'D')
+            winnerModelTrainer(df,target,winnerModel,period,'H')
         if val == 'RQ':
             # call function passing resampled_frames['Quarter'],target and other parameters specific to RQ
             try:
