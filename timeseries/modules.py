@@ -127,33 +127,33 @@ def processIdentifier(df):
     print("Hint: Performing Resampling will decrease the size of your dataset, the higher the degree of resampling;\nThe smaller the dataset. For optimal performance only choose to resample when you have sufficient data or choose to perform the forecast in the period that the data was originally collected")
     if 'Yearly' in process_list:
         q = input(
-            'Do you want to perform Yearly forecasts[y if Yes, anything else if no]')
+            'Do you want to perform Yearly forecasts?[y if Yes, anything else if no]')
         if 'y' in q:
             perform_list.append('Y')
             return perform_list
     if 'Monthly' in process_list:
         q = input(
-            'Do you want to perform Monthly forecasts[y if Yes, anything else if no]')
+            'Do you want to perform Monthly forecasts?[y if Yes, anything else if no]')
         if 'y' in q:
             perform_list.append('M')
         q = input(
-            'Do you also want to perform Quarterly forecasts with resampled data [y if Yes, anything else if no]')
+            'Do you also want to perform Quarterly forecasts with resampled data? [y if Yes, anything else if no]')
         if 'y' in q:
             perform_list.append('RQ')
         if len(perform_list) > 0:
             return perform_list
     if 'Daily' in process_list:
         q = input(
-            'Do you want to perform Daily forecasts[y if Yes, anything else if no]')
+            'Do you want to perform Daily forecasts?[y if Yes, anything else if no]')
         if 'y' in q:
             perform_list.append('D')
         q = input(
-            'Do you want to perform Weekly forecasts with resampled data [y if Yes, anything else if no]')
+            'Do you want to perform Weekly forecasts with resampled data? [y if Yes, anything else if no]')
         if 'y' in q:
             perform_list.append('RW')
         if 'M' not in perform_list:
             q = input(
-                'Do you want to perform Monthly forecasts with resampled data [y if Yes, anything else if no]')
+                'Do you want to perform Monthly forecasts with resampled data? [y if Yes, anything else if no]')
             if 'y' in q:
                 perform_list.append('RM')
         if len(perform_list) > 0:
