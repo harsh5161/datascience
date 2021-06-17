@@ -357,7 +357,7 @@ def findAddressColumns(df):
 def findReviewColumns(df):  # input main dataframe
     print("\n\n")
     print(">>>>>>[[Text Engineering]]>>>>>")
-    rf = df.sample(n=150, random_state=1).dropna(axis=0) if len(
+    rf = df.sample(n=300, random_state=1).dropna(axis=0) if len(
         df) > 150 else df.dropna(axis=0)  # use frac=0.25 to get 25% of the data
 
     # df.dropna(axis=0,inplace=True) #dropping all rows with null values
@@ -368,6 +368,7 @@ def findReviewColumns(df):  # input main dataframe
         if df[col].nunique() < 100:
             # define threshold for removing unique values #replace with variable threshold
             col_list.append(col)
+            # print(f"dropping {col} based on unique logic")
             # here df contains object columns, no null rows, no string-categorical,
             rf.drop(col, axis=1, inplace=True)
 
@@ -388,11 +389,12 @@ def findReviewColumns(df):  # input main dataframe
 
         if count1+count2+count3+count4 >= 0.75*len(rf):
             col_list.append(col)
-            # print("dropping column",col)
+            # print("dropping column because of count logic",col)
             rf.drop(col, axis=1, inplace=True)
 
     #Additional logic to find and drop columns that may be address!
     possibleAddressColumns = findAddressColumns(rf)
+    # print(f"removing cols based on address logic {possibleAddressColumns}")
     for col in possibleAddressColumns:
         col_list.append(col)
         rf.drop(col,axis=1,inplace=True)
@@ -419,7 +421,7 @@ def findReviewColumns(df):  # input main dataframe
         entity_list = []
         # converting one column into tokens
         tokens = nlp(''.join(str(sf[col].tolist())))
-        #print("the tokens of each column are:", tokens)
+        # print("the tokens of each column are:", tokens)
         token_len = sum(1 for x in tokens.ents)
         # print("Length of token entities",token_len)                                    #create two lists that hold the value of actual token entities and matched token entities respectively
         if token_len > 0:
@@ -432,7 +434,7 @@ def findReviewColumns(df):  # input main dataframe
             entity_counter = Counter(
                 entity_list).elements()  # counts the match
             counter_length = sum(1 for x in entity_counter)
-        #   print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
+            print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
             if (counter_length >= 0.60*token_len):
                 col_list.append(col)
         else:
