@@ -752,20 +752,23 @@ def rules_tree(X, y, mode, X_transformed, LE,features_created):
 
 def featureimportance(exp_mod, exp_name, num_features, features):
     print(">>>>>>[[Feature Importance Plot]]>>>>>")
+    # print("printing features",features)
+    # print("printing num features",num_features)
     r = random.random()
     b = random.random()
     g = random.random()
     colors = (r, g, b)
     importances = exp_mod.feature_importances_
-#    print("Inside feature importance printing feature importance",importances)
+    # print("Inside feature importance printing feature importance",importances)
     indices = np.argsort(importances)
-    # print(indices)
+    # print("printing argstorted indices",indices)
     feature_importances = (exp_mod.feature_importances_ /
                            sum(exp_mod.feature_importances_))*100
-    # print(feature_importances)
+    # print("printing feature importances",feature_importances)
     results = pd.DataFrame(
         {'Features': features, 'Importances': feature_importances})
     results.sort_values(by='Importances', inplace=True)
+    results = results.iloc[len(results)-10:,:] if len(results) > 10 else results.copy()
     plt.figure(figsize=(10, 10))
     plt.title(
         f'Feature Importances for {exp_name} Explainable Model based on Test Data')

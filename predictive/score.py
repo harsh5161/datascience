@@ -387,10 +387,12 @@ def score(df, init_info, validation=False):
         try:
             top_ten = featureimportance(
                 feat_mod, feat_name, num_features, features)
+            # print(top_ten)
         except:
             try:
                 top_ten = featureimportance(
                     exp_mod, exp_name, num_features, features)
+                # print(top_ten)
             except Exception as e:
                 print(f"{e}")
 
