@@ -77,7 +77,7 @@ def numeric_engineering(df):
 
     drop_list = []
     try:
-        sampled_df = df.sample(100).dropna(how='all') if len(df) > 100 else df.copy().dropna(how='all')
+        sampled_df = df.sample(100,random_state=42).dropna(how='all') if len(df) > 100 else df.copy().dropna(how='all')
     except:
         sampled_df = df.copy()
     for col in sampled_df.columns:
@@ -224,7 +224,7 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
     if validation == False:
         # Extracting Time and Date columns separately from Date Time columns
         possibleDateTime = []
-        date_sample = df.sample(n=100)
+        date_sample = df.sample(n=100,random_state=42)
         for col in date_cols:
             try:
                 ser = date_sample[col].dt.hour
@@ -357,7 +357,7 @@ def findAddressColumns(df):
 def findReviewColumns(df):  # input main dataframe
     print("\n\n")
     print(">>>>>>[[Text Engineering]]>>>>>")
-    rf = df.sample(n=300, random_state=1).dropna(axis=0) if len(
+    rf = df.sample(n=300, random_state=42).dropna(axis=0) if len(
         df) > 150 else df.dropna(axis=0)  # use frac=0.25 to get 25% of the data
 
     # df.dropna(axis=0,inplace=True) #dropping all rows with null values

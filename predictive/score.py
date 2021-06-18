@@ -216,7 +216,7 @@ def score(df, init_info, validation=False):
     # joblib.dump(y_test,'Yt')
     if validation:
         if init_info['ML'] == 'Classification':
-            ros = RandomOverSampler(sampling_strategy='minority')
+            ros = RandomOverSampler(sampling_strategy='minority',random_state=42)
             X_rt, y_rt = ros.fit_resample(X_test, y_test)
         else:
             X_rt, y_rt = X_test, y_test
@@ -396,8 +396,8 @@ def score(df, init_info, validation=False):
 
         shap.initjs()
         if len(X_test) > 20000:
-            samp = X_test.sample(n=20000, axis=0)
-            samp_X = shapely_X.sample(n=20000, axis=0)
+            samp = X_test.sample(n=20000, axis=0,random_state=42)
+            samp_X = shapely_X.sample(n=20000, axis=0,random_state=42)
         else:
             samp = X_test
             samp_X = shapely_X
@@ -519,7 +519,7 @@ def score(df, init_info, validation=False):
         sort_col = preview['Predicted Values']
         try:
             preview, _ = train_test_split(
-                preview, train_size=preview_length, random_state=1, stratify=sort_col)
+                preview, train_size=preview_length, random_state=42, stratify=sort_col)
         except:
             preview = preview[:preview_length]
 

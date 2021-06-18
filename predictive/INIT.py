@@ -206,7 +206,7 @@ def INIT(df, info):
     ######## DATE ENGINEERING #######
 #     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
     date_cols, possible_datecols = getDateColumns(
-        X.sample(1500) if len(X) > 1500 else X)
+        X.sample(1500,random_state=42) if len(X) > 1500 else X)
 
     if possible_datecols:
         date_cols = date_cols + possible_datecols
@@ -242,7 +242,7 @@ def INIT(df, info):
         features_created.extend(DATE_DF.columns.tolist())
     ######## EMAIL URL ENGINEERING ########
     obj_df = X.select_dtypes('object')  # Sending in only object dtype columns
-    short_obj_df = obj_df.astype(str).sample(3000).dropna(how='all') if len(
+    short_obj_df = obj_df.astype(str).sample(3000,random_state=42).dropna(how='all') if len(
         obj_df) > 3000 else obj_df.astype(str).dropna(how='all')
     email_cols = identifyEmailColumns(short_obj_df)
     if len(email_cols) > 0:
@@ -538,7 +538,7 @@ def INIT(df, info):
         if class_or_Reg == 'Classification':
             # print("Length of X_cart and y_cart",
             #   len(X_cart), "---", len(y_cart))
-            ros = RandomOverSampler(sampling_strategy='minority')
+            ros = RandomOverSampler(sampling_strategy='minority',random_state=42)
             X_cart_res, y_cart_res = ros.fit_resample(X_cart, y_cart)
             # print("Length of X_cart_res and y_cart_res",
             #   len(X_cart_res), "---", len(y_cart_res))
@@ -569,7 +569,7 @@ def INIT(df, info):
     print("\n\n\n\n")
     print(">>>>>>[[Rule Tree]]>>>>>")
     if class_or_Reg == 'Classification':
-        ros = RandomOverSampler(sampling_strategy='minority')
+        ros = RandomOverSampler(sampling_strategy='minority',random_state=42)
         X_rt, y_rt = ros.fit_resample(X, y)
         for col in features_created:
             if col in X_rt:

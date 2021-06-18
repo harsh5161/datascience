@@ -434,7 +434,7 @@ def FeatureSelection(X, y, class_or_Reg):
 #             else: impact_ratio = k[1]/k[0]
 #             selector = XGBClassifier(n_estimators =100, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
             selector = lgb.LGBMClassifier(class_weight='balanced', max_depth=16,
-                                          num_leaves=30, n_estimators=100, random_state=1, objective='binary')
+                                          num_leaves=30, n_estimators=100, random_state=42, objective='binary')
         else:
             print("\nMulticlass Classification Selector Used")
 
@@ -447,13 +447,13 @@ def FeatureSelection(X, y, class_or_Reg):
 
 #             selector = XGBClassifier(n_estimators =100, sample_weight = w_array, max_depth= 5, n_jobs=-1);
             selector = lgb.LGBMClassifier(class_weight='balanced', max_depth=16, num_leaves=30, n_estimators=100,
-                                          random_state=1, objective='multiclass', num_class=classes_num, metric='multi_logloss')
+                                          random_state=42, objective='multiclass', num_class=classes_num, metric='multi_logloss')
 
         print("Classifer Selector Done...")
     else:
         #         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
         selector = lgb.LGBMRegressor(boosting_type='gbdt', learning_rate=0.01,
-                                     n_estimators=1000, random_state=1, subsample=0.8, num_leaves=30, max_depth=16)
+                                     n_estimators=1000, random_state=42, subsample=0.8, num_leaves=30, max_depth=16)
 
         print("Regression Selector Done...")
     for i in tqdm(range(10)):
@@ -539,16 +539,16 @@ def data_model_select(X_train, y_train):
         input_y_train = y_train
         print('Less than 10k rows, no sampling needed')
     elif len(X_train) > 10000 and len(X_train) <= 100000:
-        input_X_train = X_train.sample(frac=0.8, random_state=1)
-        input_y_train = y_train.sample(frac=0.8, random_state=1)
+        input_X_train = X_train.sample(frac=0.8, random_state=42)
+        input_y_train = y_train.sample(frac=0.8, random_state=42)
         print('Sampling 80% of the data')
     elif len(X_train) > 100000 and len(X_train) <= 1000000:
-        input_X_train = X_train.sample(frac=0.7, random_state=1)
-        input_y_train = y_train.sample(frac=0.7, random_state=1)
+        input_X_train = X_train.sample(frac=0.7, random_state=42)
+        input_y_train = y_train.sample(frac=0.7, random_state=42)
         print('Sampling 70% of the data')
     elif len(X_train) > 1000000:
-        input_X_train = X_train.sample(frac=0.5, random_state=1)
-        input_y_train = y_train.sample(frac=0.5, random_state=1)
+        input_X_train = X_train.sample(frac=0.5, random_state=42)
+        input_y_train = y_train.sample(frac=0.5, random_state=42)
         print('Sampling 50% of the data')
     return input_X_train, input_y_train
 
@@ -734,13 +734,13 @@ def rules_tree(X, y, mode, X_transformed, LE,features_created):
     # print('Trying to generate a rule tree...')
     if mode == 'Classification':
         text_selector = DecisionTreeClassifier(class_weight='balanced', max_depth=4, min_samples_split=int(
-            0.05*len(X_transformed_inside)), ccp_alpha=0.001)
+            0.05*len(X_transformed_inside)), ccp_alpha=0.001,random_state=42)
         y.fillna(y.mode()[0], inplace=True)
         y = y.astype('int')
         y = LE.inverse_transform(y)
     else:
         text_selector = DecisionTreeRegressor(
-            max_depth=4, min_samples_split=int(0.05*len(X_transformed_inside)), ccp_alpha=0.001)
+            max_depth=4, min_samples_split=int(0.05*len(X_transformed_inside)), ccp_alpha=0.001,random_state=42)
     for i in tqdm(range(10)):
         text_selector.fit(X_transformed_inside, y)
 
@@ -822,7 +822,7 @@ def inputCap(df, target):
 
     # print("###Performing Initial Numeric Engineering for Capping Purposes###")
     #                 print("Initial columns",df.columns.to_list())
-    dfsamp = df.sample(n=1000, random_state=1) if len(df) > 1000 else df.copy()
+    dfsamp = df.sample(n=1000, random_state=42) if len(df) > 1000 else df.copy()
     dfsamp = numeric_engineering(dfsamp)
     dfsamp = dfsamp.dropna(axis=0, subset=[target])
     # print("###Estimating the type of target for Capping Purposes###")
@@ -830,7 +830,7 @@ def inputCap(df, target):
     if class_or_Reg == 'Classification':
         if len(df) > 1000000:
             df_train, _ = train_test_split(
-                df, train_size=1000000, random_state=1, stratify=df[target])
+                df, train_size=1000000, random_state=42, stratify=df[target])
            # print("Dataset size has been capped to 1 million rows for better performance")
             # print("Length of the dataset is now", len(df_train))
             return df_train
@@ -839,7 +839,7 @@ def inputCap(df, target):
             # print("Length of the dataset is same as original", len(df))
             return df
     elif class_or_Reg == 'Regression':
-        dfr = df.sample(n=1000000, random_state=1) if len(
+        dfr = df.sample(n=1000000, random_state=42) if len(
             df) > 1000000 else df.copy()
         #print("Dataset size has been capped to 1 million rows for better performance")
         # print("Length of the dataset is now", len(dfr))

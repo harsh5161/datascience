@@ -119,9 +119,9 @@ class classification:
             #######################################################################
             df.loc[ind,'Machine Learning Model']='XGBoost'
             if check == 1:
-                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss')
+                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,scale_pos_weight=1,eval_metric='logloss',random_state=42)
             elif check ==0:
-                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList))
+                df.loc[ind,'model']=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=16,min_child_weight=2,gamma=5,subsample=0.1,objective="multi:softmax",scale_pos_weight=1,eval_metric='mlogloss',num_class=len(priorList),random_state=42)
 
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -157,9 +157,9 @@ class classification:
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='CatBoost'
             if check==1:
-                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced")
+                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",random_state=42)
             elif check==0:
-                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass')
+                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train,eval_set=eval_set,verbose=False)
@@ -190,9 +190,9 @@ class classification:
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
             if check==1:
-                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='binary')
+                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=42,subsample=1.0,num_leaves=31,max_depth=16,objective='binary')
             elif check==0:
-                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=1,subsample=1.0,num_leaves=31,max_depth=16,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
+                df['model'][ind]=lgb.LGBMClassifier(boosting_type='gbdt',class_weight='balanced',learning_rate=0.1,n_estimators=100,random_state=42,subsample=1.0,num_leaves=31,max_depth=16,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
             df.loc[ind,'param']= str(best)
             Start=time.time()
             if check==1:
@@ -224,7 +224,7 @@ class classification:
             ##Random forest
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Random Forest'
-            df['model'][ind]=RandomForestClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
+            df['model'][ind]=RandomForestClassifier(n_estimators=100,max_depth=16,class_weight='balanced',random_state=42)
             df.loc[ind,'param']= str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -255,7 +255,7 @@ class classification:
             ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Extra Trees Classifier'
-            df['model'][ind]=ExtraTreesClassifier(n_estimators=100,max_depth=16,class_weight='balanced')
+            df['model'][ind]=ExtraTreesClassifier(n_estimators=100,max_depth=16,class_weight='balanced',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -316,7 +316,7 @@ class classification:
             ##########################################################################################################
 
             df.loc[ind,'Machine Learning Model']='Logistic Regression'
-            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
+            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=42,max_iter=1000,multi_class ='auto')
             df.loc[ind,'param']=""
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -378,7 +378,7 @@ class classification:
             #########################################################################################################
 
             df.loc[ind,'Machine Learning Model']='Support Vector Machine'
-            df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
+            df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=42)
             df.loc[ind,'param']= str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -411,7 +411,7 @@ class classification:
             #EasyEnsemble AdaBoost
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='AdaBoost Classifier'
-            df['model'][ind]= EasyEnsembleClassifier(sampling_strategy='not minority',random_state=1)
+            df['model'][ind]= EasyEnsembleClassifier(sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -441,10 +441,10 @@ class classification:
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='LightGBM AdaBoosted Classifier'
             if check==1:
-                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=1,num_leaves=50,max_depth=20,objective='binary')
+                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=42,num_leaves=50,max_depth=20,objective='binary')
             elif check==0:
-                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=200,random_state=1,num_leaves=50,max_depth=20,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
-            df['model'][ind]= EasyEnsembleClassifier(base_estimator=light_model,sampling_strategy='not minority',random_state=1)
+                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=200,random_state=42,num_leaves=50,max_depth=20,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
+            df['model'][ind]= EasyEnsembleClassifier(base_estimator=light_model,sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             if check==1:
@@ -480,7 +480,7 @@ class classification:
                 xgb_model=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=20,eval_metric='logloss')
             elif check ==0:
                 xgb_model=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=20,objective="multi:softmax",eval_metric='mlogloss',num_class=len(priorList))
-            df['model'][ind]= EasyEnsembleClassifier(base_estimator=xgb_model,sampling_strategy='not minority',random_state=1)
+            df['model'][ind]= EasyEnsembleClassifier(base_estimator=xgb_model,sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             if check ==1:
@@ -513,7 +513,7 @@ class classification:
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='Random Forest AdaBoosted Classifier'
             random_model=RandomForestClassifier(n_estimators=100,max_depth=20)
-            df['model'][ind]= EasyEnsembleClassifier(base_estimator=random_model,sampling_strategy='not minority',random_state=1)
+            df['model'][ind]= EasyEnsembleClassifier(base_estimator=random_model,sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -591,6 +591,7 @@ class classification:
                 best['objective'] = 'multi:softmax'
 
             best['subsample'] = float(best['subsample'])
+            best['random_state'] = 42
             if check ==1:
                 if myval >2:
                     wea = [1,myval-1,myval,myval+1]
@@ -640,9 +641,9 @@ class classification:
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='CatBoost'
             if check==1:
-                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced")
+                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",random_state=42)
             elif check==0:
-                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass')
+                df.loc[ind,'model']=cb.CatBoostClassifier(depth=10,iterations=1000,learning_rate=0.1,rsm=1.0,auto_class_weights="Balanced",loss_function='MultiClass',random_state=42)
 
             df.loc[ind,'param']=str(best)
             Start=time.time()
@@ -689,7 +690,7 @@ class classification:
                     'learning_rate': hp.uniform('learning_rate',0.01,0.2),
                     'class_weight': 'balanced',
                     'n_estimators': 100, #scope.int(hp.quniform('n_estimators',50,1250,75)),
-                    'random_state':1,
+                    'random_state':42,
                     'subsample': hp.uniform('subsample',  0.1,1.0  ),
                     'num_leaves': scope.int(hp.quniform('num_leaves',29,43,1)),
                     'max_depth': 16, # scope.int(hp.quniform('max_depth',2,16,1 )),
@@ -712,11 +713,11 @@ class classification:
             best['learning_rate'] = float(best['learning_rate'])
             best['class_weight'] = 'balanced'
             best['n_estimators'] = 100 #int(best['n_estimators'])
-            best['random_state'] = 1
             best['subsample'] = float(best['subsample'])
             best['num_leaves'] = int(best['num_leaves'])
             best['min_child_weight']=int(best['min_child_weight'])
             best['max_depth'] = 16 #int(best['max_depth'])
+            best['random_state'] = 42
             if check==1:
                 best['objective'] = 'binary'
             elif check==0:
@@ -802,6 +803,7 @@ class classification:
                 boot=[True, False]
                 best['bootstrap']=boot[best['bootstrap']]
                 best['class_weight']='balanced'
+                best['random_state'] = 42
                 print("HyperOP done for RF")
 
 
@@ -903,7 +905,7 @@ class classification:
             #Logistic regression
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Logistic Regression'
-            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=1,max_iter=1000,multi_class ='auto')
+            df.loc[ind,'model']=LogisticRegression(class_weight='balanced',solver='saga',penalty='l2',random_state=42,max_iter=1000,multi_class ='auto')
             df.loc[ind,'param']=""
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -962,7 +964,7 @@ class classification:
             ########################################################################################################
 
             df.loc[ind,'Machine Learning Model']='Support Vector Machine'
-            df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=1)
+            df.loc[ind,'model']= svm.SVC(kernel='linear',max_iter=1000,class_weight='balanced',probability=True,random_state=42)
             df.loc[ind,'param']= str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -994,7 +996,7 @@ class classification:
             #EasyEnsemble AdaBoost
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='AdaBoost Ensemble Classifier'
-            df['model'][ind]= EasyEnsembleClassifier(sampling_strategy='not minority',random_state=1)
+            df['model'][ind]= EasyEnsembleClassifier(sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -1024,10 +1026,10 @@ class classification:
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='LightGBM Ensemble Classifier'
             if check==1:
-                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=1,num_leaves=50,max_depth=20,objective='binary')
+                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=100,random_state=42,num_leaves=50,max_depth=20,objective='binary')
             elif check==0:
-                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=200,random_state=1,num_leaves=50,max_depth=20,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
-            df['model'][ind]= EasyEnsembleClassifier(base_estimator=light_model,sampling_strategy='not minority',random_state=1)
+                light_model=lgb.LGBMClassifier(boosting_type='gbdt',learning_rate=0.1,n_estimators=200,random_state=42,num_leaves=50,max_depth=20,objective='multiclass',num_class=len(priorList),metric='multi_logloss')
+            df['model'][ind]= EasyEnsembleClassifier(base_estimator=light_model,sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             if check==1:
@@ -1063,7 +1065,7 @@ class classification:
                 xgb_model=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=20,eval_metric='logloss')
             elif check ==0:
                 xgb_model=xgb.XGBClassifier(n_estimators=100,eta= 0.1,max_depth=20,objective="multi:softmax",eval_metric='mlogloss',num_class=len(priorList))
-            df['model'][ind]= EasyEnsembleClassifier(base_estimator=xgb_model,sampling_strategy='not minority',random_state=1)
+            df['model'][ind]= EasyEnsembleClassifier(base_estimator=xgb_model,sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             if check ==1:
@@ -1095,7 +1097,7 @@ class classification:
             #########################################################################################################################
             df.loc[ind,'Machine Learning Model']='Random Forest Ensemble Classifier'
             random_model=RandomForestClassifier(n_estimators=100,max_depth=20)
-            df['model'][ind]= EasyEnsembleClassifier(base_estimator=random_model,sampling_strategy='not minority',random_state=1)
+            df['model'][ind]= EasyEnsembleClassifier(base_estimator=random_model,sampling_strategy='not minority',random_state=42)
             df.loc[ind,'param']=str(best)
             Start=time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -1121,7 +1123,6 @@ class classification:
 
       df.dropna(axis=0,thresh=10,inplace=True)
       print("Shape of ModelDF",df.shape)
-      print(df)
       drop = 0
       if check == 1 and imbalance==0:
           y_val = pd.Series(y_test)
@@ -1345,7 +1346,7 @@ class Regression:
         #XGBoost
         #######################################################################
         df.loc[ind,'Machine Learning Model']='XGBoost'
-        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=100,eta=0.01,max_depth=16,min_child_weight=2,gamma=5,subsample=0.8,objective="reg:squarederror",eval_metric='rmse')
+        df.loc[ind,'model']=xgb.XGBRegressor(n_estimators=100,eta=0.01,max_depth=16,min_child_weight=2,gamma=5,subsample=0.8,objective="reg:squarederror",eval_metric='rmse',random_state=42)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1370,7 +1371,7 @@ class Regression:
         ##Catboost
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='CatBoost'
-        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=100,learning_rate=0.01,rsm=1.0,silent=True)
+        df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=100,learning_rate=0.01,rsm=1.0,silent=True,random_state=42)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1394,7 +1395,7 @@ class Regression:
         ########################################################################################################
         eval_set = [(X_test, y_test)]
         df.loc[ind,'Machine Learning Model']='Light Gradient Boosting Model'
-        df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=1,subsample=0.8,num_leaves=31,max_depth=16)
+        df['model'][ind]=lgb.LGBMRegressor(boosting_type='gbdt',learning_rate=0.01,n_estimators=1000,random_state=42,subsample=0.8,num_leaves=31,max_depth=16)
         df.loc[ind,'param']= str(best)
         Start=time.time()
         df.loc[ind,'model'].fit(X_train, y_train,verbose=False)
@@ -1417,7 +1418,7 @@ class Regression:
         ##Random forest
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='Random Forest'
-        df['model'][ind]=RandomForestRegressor(n_estimators=50,max_depth=10)
+        df['model'][ind]=RandomForestRegressor(n_estimators=50,max_depth=10,random_state=42)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1440,7 +1441,7 @@ class Regression:
         ##ExtraTreesClassifier(2) Finding out accuracy on the test dataset
         ########################################################################################################
         df.loc[ind,'Machine Learning Model']='ExtraTrees Regressor'
-        df['model'][ind]=ExtraTreesRegressor(n_estimators=50,max_depth=10)
+        df['model'][ind]=ExtraTreesRegressor(n_estimators=50,max_depth=10,random_state=42)
         df.loc[ind,'param']=str(best)
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1486,7 +1487,7 @@ class Regression:
         ##########################################################################################################
 
         df.loc[ind,'Machine Learning Model']='Ridge Regression'
-        df.loc[ind,'model']=Ridge()
+        df.loc[ind,'model']=Ridge(random_state=42)
         df.loc[ind,'param']=None
         Start = time.time()
         df.loc[ind,'model'].fit(X_train, y_train)
@@ -1591,6 +1592,7 @@ class Regression:
             best['min_child_weight']=int(best['min_child_weight'])
             best['objective']='reg:squarederror'
             best['eval_metric']='rmse'
+            best['random_state'] = 42
             ########################################################################################################
 
 
@@ -1624,7 +1626,7 @@ class Regression:
             ##Catboost
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='CatBoost'
-            df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True)
+            df.loc[ind,'model']=cb.CatBoostRegressor(depth=10,iterations=1000,learning_rate=0.01,rsm=1.0,silent=True,random_state=42)
             df.loc[ind,'param']=str(best)
             Start = time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
@@ -1661,7 +1663,7 @@ class Regression:
                 'boosting_type': 'gbdt',
                 'learning_rate': hp.uniform('learning_rate',0.01,0.1),
                 'n_estimators': 100, # scope.int(hp.quniform('n_estimators',50,1250,75)),
-                'random_state':1,
+                'random_state':42,
                 'subsample': hp.uniform('subsample',  0.7,1.0  ),
                 'num_leaves': scope.int(hp.quniform('num_leaves',29,43,1)),
                 'max_depth': 16, #scope.int(hp.quniform('max_depth',2,16,1 )),
@@ -1676,11 +1678,12 @@ class Regression:
             best['boosting_type'] = 'gbdt'
             best['learning_rate'] = float(best['learning_rate'])
             best['n_estimators'] = 100 #int(best['n_estimators'])
-            best['random_state'] = 1
+            best['random_state'] = 42
             best['subsample'] = float(best['subsample'])
             best['num_leaves'] = int(best['num_leaves'])
             best['min_child_weight']=int(best['min_child_weight'])
             best['max_depth'] = 16 #int(best['max_depth'])
+            best['random_state'] = 42
 
             print("LGBM done")
 
@@ -1745,6 +1748,7 @@ class Regression:
                 best['oob_score']= False
                 boot=[True, False]
                 best['bootstrap']=boot[best['bootstrap']]
+                best['random_state'] = 42
                 print("RF Hyperop done")
 
             print("RF done")
@@ -1800,7 +1804,7 @@ class Regression:
             #Ridge Regression
             ########################################################################################################
             df.loc[ind,'Machine Learning Model']='Ridge Regression'
-            df.loc[ind,'model']=Ridge()
+            df.loc[ind,'model']=Ridge(random_state=42)
             df.loc[ind,'param']=None
             Start = time.time()
             df.loc[ind,'model'].fit(X_train, y_train)
