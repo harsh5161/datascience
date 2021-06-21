@@ -47,7 +47,8 @@ def INIT(df, info):
     print("Init rows are as follows", len(df))
     X = df
     if key:
-        X.drop(key, axis=1, inplace=True)
+        X.set_index(key,inplace=True)
+        # X.drop(key, axis=1, inplace=True)
     print(X.head(10))
     del df
 
@@ -148,7 +149,7 @@ def INIT(df, info):
             EMAIL_DF = emailUrlEngineering(X[email_cols], email=True)
             # If any email columns found, we drop it after engineering
             X.drop(email_cols, axis=1, inplace=True)
-            EMAIL_DF.reset_index(drop=True)
+            # EMAIL_DF.reset_index(drop=True)
             print(EMAIL_DF)
             print(EMAIL_DF.shape)
             short_obj_df.drop(email_cols, axis=1, inplace=True)
@@ -163,13 +164,15 @@ def INIT(df, info):
         EMAIL_DF = pd.DataFrame(None)
         email_cols = []
 
+    short_obj_df = obj_df.astype(str).sample(500).dropna(how='all') if len(
+        obj_df) > 500 else obj_df.astype(str).dropna(how='all')
     url_cols = findURLS(short_obj_df)
     if len(url_cols) > 0:
         try:
             URL_DF = URlEngineering(X[url_cols])
             # If any email columns found, we drop it post engineering
             X.drop(url_cols, axis=1)
-            URL_DF.reset_index(drop=True)
+            # URL_DF.reset_index(drop=True)
             print(URL_DF)
             print(URL_DF.shape)
         except Exception as e:
@@ -184,11 +187,11 @@ def INIT(df, info):
         url_cols = []
     ######## EMAIL URL ENGINEERING ########
 
-    X.reset_index(drop=True, inplace=True)
-    DATE_DF.reset_index(drop=True, inplace=True)
-    LAT_LONG_DF.reset_index(drop=True, inplace=True)
-    EMAIL_DF.reset_index(drop=True, inplace=True)
-    URL_DF.reset_index(drop=True, inplace=True)
+    # X.reset_index(drop=True, inplace=True)
+    # DATE_DF.reset_index(drop=True, inplace=True)
+    # LAT_LONG_DF.reset_index(drop=True, inplace=True)
+    # EMAIL_DF.reset_index(drop=True, inplace=True)
+    # URL_DF.reset_index(drop=True, inplace=True)
     concat_list = [X, DATE_DF, LAT_LONG_DF, EMAIL_DF, URL_DF]
     X = pd.concat(concat_list, axis=1)
 
@@ -232,7 +235,7 @@ def INIT(df, info):
             print(sentiment_frame)
             #TEXT_DF = pd.concat([df, sentiment_frame], axis=1, sort=False)
             TEXT_DF = sentiment_frame.copy()
-            TEXT_DF.reset_index(drop=True, inplace=True)
+            # TEXT_DF.reset_index(drop=True, inplace=True)
             end = time.time()
             print("Sentiment time", end-start)
             start = time.time()
@@ -246,7 +249,7 @@ def INIT(df, info):
                 topic_frame.rename(
                     columns={0: str(col)+"_Topic"}, inplace=True)
                 print(topic_frame)
-                topic_frame.reset_index(drop=True, inplace=True)
+                # topic_frame.reset_index(drop=True, inplace=True)
                 TEXT_DF = pd.concat([TEXT_DF, topic_frame], axis=1, sort=False)
                 lda_models['Model'][ind] = lda_model
                 ind = ind+1
@@ -275,9 +278,9 @@ def INIT(df, info):
 
     ########################### TEXT ENGINEERING #############################
 
-    disc_df.reset_index(drop=True, inplace=True)
-    num_df.reset_index(drop=True, inplace=True)
-    TEXT_DF.reset_index(drop=True, inplace=True)
+    # disc_df.reset_index(drop=True, inplace=True)
+    # num_df.reset_index(drop=True, inplace=True)
+    # TEXT_DF.reset_index(drop=True, inplace=True)
     if not TEXT_DF.empty:
         for col in TEXT_DF.columns:
             if col.find("_Topic") != -1:
@@ -289,6 +292,7 @@ def INIT(df, info):
 
     ############# OUTLIER WINSORIZING ###########
     print('\n#### OUTLIER WINSORIZING ####')
+    num_df_X_df = num_df.copy()
     num_df.clip(lower=num_df.quantile(0.1),
                 upper=num_df.quantile(0.9), inplace=True, axis=1)
     print(' #### DONE ####')
@@ -322,8 +326,8 @@ def INIT(df, info):
     print(' #### DONE ####')
     ############# PEARSON CORRELATION ############
 
-    num_df.reset_index(drop=True, inplace=True)
-    disc_df.reset_index(drop=True, inplace=True)
+    # num_df.reset_index(drop=True, inplace=True)
+    # disc_df.reset_index(drop=True, inplace=True)
     print('num_df - {}'.format(num_df.shape))
     print('disc_df - {}'.format(disc_df.shape))
     print('DATE_DF - {}'.format(DATE_DF.shape))
@@ -333,7 +337,8 @@ def INIT(df, info):
     print('URL_DF -  {}'.format(URL_DF.shape))
     concat_list = [num_df, disc_df]
     X = pd.concat(concat_list, axis=1)
-
+    X_df = pd.concat([num_df_X_df,disc_df],axis=1) #creating X_df here so that we don't add numerical winsorising to the the output csv's
+    del num_df_X_df
     # print("This is what the data looks like before going into transformations and encoding",X)
     # change this part to accomodate for the changes in num_df
     single_vals = drop_single_valued_features(X)
@@ -354,9 +359,9 @@ def INIT(df, info):
             URL_DF.drop(single, axis=1, inplace=True)
 
         X.drop(single, axis=1, inplace=True)
-
+        X_df.drop(single,axis=1,inplace=True)
     # Making a copy of the dataframe that will required in cluster profiling   #Position 1
-    X_df = X.copy()
+    # X_df = X.copy()
     ############# ENCODING ############
     if not disc_df.empty:
         print("\nEncoding categorical variables")

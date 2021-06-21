@@ -368,7 +368,7 @@ def findReviewColumns(df):  # input main dataframe
             # here df contains object columns, no null rows, no string-categorical,
             rf.drop(col, axis=1, inplace=True)
 
-    rf.reset_index(drop=True, inplace=True)
+    # rf.reset_index(drop=True, inplace=True)
     for col in rf.columns:
         count1, count2, count3, count4 = 0, 0, 0, 0
         for i in range(len(rf)):
@@ -766,7 +766,7 @@ def emailUrlEngineering(df, email=True, validation=False):
         domain_name = column + '_domain'
         if email is True:
             ser = df[column].apply(lambda x: rformatter(x))
-            ser.reset_index(drop=True, inplace=True)
+            # ser.reset_index(drop=True, inplace=True)
             df[domain_name] = ser.apply(getEmailDomainName)
         else:
             df[domain_name] = df[column].apply(getUrlDomainName)

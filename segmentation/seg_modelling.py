@@ -182,9 +182,10 @@ class Segmentation:
         model.fit(pca_components)
         
         #storing cluster labels with dataset
-        df_new = df.reset_index(drop =True)
+        # df_new = df.reset_index(drop =True)
+        df_new = df.copy()
         df_new['Segments (Clusters)'] = model.labels_
-        df_new.to_csv(f"KmeansResult.csv",index=False)
+        df_new.to_csv(f"KmeansResult.csv")
         #storing all results
         kmeans_dict['no_of_clusters']=best_n_clusters
         kmeans_dict['sil_score']= selected_score
@@ -206,11 +207,12 @@ class Segmentation:
         # val_index= hdbscan.validity_index(np.array(pca_components), clusters)
         e=time.time()
         print("\n  Time taken to calculate validity index ", time.strftime("%H:%M:%S", time.gmtime(e-s)))
-        df_new = df.reset_index(drop=True)
+        # df_new = df.reset_index(drop=True)
+        df_new = df.copy()
         df_new['Segments (Clusters)'] = clusters  #storing cluster labels with dataset
         noise= df_new[df_new['Segments (Clusters)']==-1]  
         df_new= df_new[df_new['Segments (Clusters)']!=-1]  # removing noise (where cluster number is -1)
-        df_new.to_csv(f"DBSCANResult.csv",index=False)
+        df_new.to_csv(f"DBSCANResult.csv")
 
         if -1 in np.unique(clusters):
             hdbscan_dict['no_of_clusters']=len(np.unique(clusters))-1 #excluding noise if present

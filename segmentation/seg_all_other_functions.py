@@ -16,8 +16,8 @@ import prince
 import operator 
 def ForestImputer(num_df,disc_df):
     print("Check",disc_df)
-    num_df.reset_index(drop=True,inplace=True)
-    disc_df.reset_index(drop=True, inplace=True)
+    # num_df.reset_index(drop=True,inplace=True)
+    # disc_df.reset_index(drop=True, inplace=True)
     concat_list = [num_df,disc_df]
     df = pd.concat(concat_list,axis=1)
     #testing purposes
