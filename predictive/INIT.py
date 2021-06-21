@@ -268,6 +268,8 @@ def INIT(df, info):
     if len(EMAIL_DF):
         features_created.extend(EMAIL_DF.columns.tolist())
     # print('\n#### URL ENGINEERING RUNNING WAIT ####')
+    short_obj_df = obj_df.astype(str).sample(500,random_state=42).dropna(how='all') if len(
+        obj_df) > 500 else obj_df.astype(str).dropna(how='all')
     url_cols = findURLS(short_obj_df)
     if len(url_cols) > 0:
         try:
