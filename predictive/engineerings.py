@@ -434,7 +434,7 @@ def findReviewColumns(df):  # input main dataframe
             entity_counter = Counter(
                 entity_list).elements()  # counts the match
             counter_length = sum(1 for x in entity_counter)
-            print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
+            # print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
             if (counter_length >= 0.60*token_len):
                 col_list.append(col)
         else:
@@ -705,6 +705,8 @@ def text_analytics(review, col, mode, target, LE, topic_frame):
 
 def identifier(x):
     try:
+        if x[0] == '@':
+            return False
         if x.split('@'):
             if x.split('@')[1].split('.'):
                 return True
