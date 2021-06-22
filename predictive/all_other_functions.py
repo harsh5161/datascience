@@ -466,7 +466,6 @@ def FeatureSelection(X, y, class_or_Reg):
     k = k.reshape(X.shape[1], 1)
     k = pd.DataFrame(k)
     # print("k", k)
-    del selector
     gc.collect()
     # threshold one(This thres is able to select only top best features which are very few)
     thresh1 = k.mean()
@@ -492,7 +491,7 @@ def FeatureSelection(X, y, class_or_Reg):
     rejected_cols = set(X.columns) - set(new_2.col_name)
     print('\n{} columns are eliminated during Feature Selection which are:\n{}' .format(
         len(rejected_cols), rejected_cols))
-    return list(rejected_cols), new_2.drop(['t/f'], axis=1)
+    return list(rejected_cols), new_2.drop(['t/f'], axis=1),selector,X.columns.tolist()
 
 
 def removeLowClass(df, target):
@@ -764,7 +763,7 @@ def featureimportance(exp_mod, exp_name, num_features, features):
     # print("printing argstorted indices",indices)
     feature_importances = (exp_mod.feature_importances_ /
                            sum(exp_mod.feature_importances_))*100
-    # print("printing feature importances",feature_importances)
+    print("printing feature importances",len(feature_importances))
     results = pd.DataFrame(
         {'Features': features, 'Importances': feature_importances})
     results.sort_values(by='Importances', inplace=True)

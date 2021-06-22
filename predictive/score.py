@@ -389,12 +389,18 @@ def score(df, init_info, validation=False):
                 feat_mod, feat_name, num_features, features)
             # print(top_ten)
         except:
+            print(feat_name,"did not work")
             try:
                 top_ten = featureimportance(
                     exp_mod, exp_name, num_features, features)
                 # print(top_ten)
-            except Exception as e:
-                print(f"{e}")
+            except:
+                print(exp_name,"did not work")
+                try:
+                    top_ten = featureimportance(
+                            init_info['feature_selection_model'], 'LightGBM Tree Classifier', num_features, init_info['feature_selection_features'])
+                except Exception as e:  
+                    print(f"{e}")
 
         shap.initjs()
         if len(X_test) > 20000:

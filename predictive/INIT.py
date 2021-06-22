@@ -489,7 +489,7 @@ def INIT(df, info):
         print("\n\n\n\n")
         print(">>>>>>[[SELECTING VARIABLES THAT ARE GOOD PREDICTORS]]>>>>>")
         fe_s = time.time()
-        rem, feat_df = FeatureSelection(X, y, class_or_Reg)
+        rem, feat_df,feature_selection_model,feature_selection_features = FeatureSelection(X, y, class_or_Reg)
         fe_e = time.time()
         # print(X.shape)
         # print(y.shape)
@@ -509,7 +509,8 @@ def INIT(df, info):
         # print(y.shape)
     else:
         # print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
-        pass
+        feature_selection_model = None
+        feature_selection_features = []
     ############# FEATURE SELECTION AND PLOTS #####################
     ##################### Checking for constant columns ###################
     print("\n\n\n\n")
@@ -701,6 +702,6 @@ def INIT(df, info):
                  'ML': class_or_Reg, 'KEY': key, 'X_train': X, 'y_train': y, 'disc_cat': disc_cat, 'q_s': info['q_s'],
                  'some_list': some_list, 'remove_list': remove_list, 'lda_models': lda_models, 'lat': lat, 'lon': lon, 'lat_lon_cols': lat_lon_cols,
                  'email_cols': email_cols, 'url_cols': url_cols, 'EMAIL_STATUS': EMAIL_STATUS, 'rule_model': rule_model, 'encoded_disc': encoded_disc, 'possibleDateTimeCols': possibleDateTimeCols,
-                 'features_created':features_created}
+                 'features_created':features_created,'feature_selection_model': feature_selection_model,'feature_selection_features':feature_selection_features}
     print(' #### DONE ####')
     return init_info, validation
