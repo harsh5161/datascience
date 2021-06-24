@@ -23,6 +23,7 @@ from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.stem.porter import *
 import matplotlib.pyplot as plt
+from userInputs import *
 np.random.seed(2018)
 nltk.download('wordnet', quiet=True)
 stemmer = SnowballStemmer('english')
@@ -46,6 +47,25 @@ def list_or_dict(x):
     else:
         return np.nan
 
+def possibleDollarsOrEuros(x):
+    temp = str(x).lower()
+    flag = 0
+    
+    if '$' in str(x)[0]:
+        flag = 1
+    elif '€' in str(x)[0]:
+        flag = 1 
+    elif 'k' in temp[-1]:
+        flag = 1 
+    elif 'm' in temp[-1]:
+        flag = 1
+    elif 'b' in temp[-1]:
+        flag = 1
+    
+    if flag == 1:
+        return True
+    else:
+        return False
 
 def numeric_engineering(df):
     print("\n\n")
@@ -89,6 +109,28 @@ def numeric_engineering(df):
             f"Dropping columns {drop_list} because they either contain lists or dicts")
         df.drop(drop_list, axis=1, inplace=True)
 
+    #Adding logic to remove and replace currency characteristics from certain datasets
+    try:
+        sampled_df = df.sample(100,random_state=42).dropna(how='all') if len(df) > 100 else df.copy().dropna(how='all')
+    except: #because there can be datasets where there are no non-null rows
+        sampled_df = df.copy()
+    possibleDollarsOrEuroColumns = []
+    for col in obj_columns:
+        if sampled_df[col].nunique() > 5 :
+            ser = sampled_df[col].apply(lambda x: possibleDollarsOrEuros(x)).to_list()
+            if ser.count(True) > 0.80* len(sampled_df):
+                possibleDollarsOrEuroColumns.append(col)
+    if len(possibleDollarsOrEuroColumns) > 0 :
+            print("Removing Special Characters from Object Columns to generate Numeric Columns...")
+            for col in possibleDollarsOrEuroColumns:
+                df[col] = df[col].apply(lambda x: removeSpecialCharacters(x))
+                try:
+                    df[col] = pd.to_numeric(df[col])
+                    if str(df[col].dtype) != 'object':
+                        df[col] = df[col].astype(float)
+                except Exception as e:
+                    print(f'Error in removing Dollars, Commas, Euros Logic: {e}')
+    
     obj_columns = list(df.dtypes[df.dtypes == np.object].index)
     df1 = df[obj_columns].copy()
     print(f'\t\t Finding Numeric Columns')
