@@ -23,6 +23,7 @@ from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.stem.porter import *
 import matplotlib.pyplot as plt
+from userInputs import *
 np.random.seed(2018)
 nltk.download('wordnet', quiet=True)
 stemmer = SnowballStemmer('english')
@@ -46,6 +47,25 @@ def list_or_dict(x):
     else:
         return np.nan
 
+def possibleDollarsOrEuros(x):
+    temp = str(x).lower()
+    flag = 0
+    
+    if '$' in str(x)[0]:
+        flag = 1
+    elif '€' in str(x)[0]:
+        flag = 1 
+    elif 'k' in temp[-1]:
+        flag = 1 
+    elif 'm' in temp[-1]:
+        flag = 1
+    elif 'b' in temp[-1]:
+        flag = 1
+    
+    if flag == 1:
+        return True
+    else:
+        return False
 
 def numeric_engineering(df):
     print("\n\n")
@@ -76,7 +96,10 @@ def numeric_engineering(df):
     print('done ...')
 
     drop_list = []
-    sampled_df = df.sample(100).dropna(how='all')
+    try:
+        sampled_df = df.sample(100,random_state=42).dropna(how='all') if len(df) > 100 else df.copy().dropna(how='all')
+    except:
+        sampled_df = df.copy()
     for col in sampled_df.columns:
         counter = sampled_df[col].apply(lambda x: list_or_dict(x)).to_list()
         if counter.count("List") > 0.50*len(sampled_df) or counter.count("Dict") > 0.50*len(sampled_df):
@@ -86,6 +109,28 @@ def numeric_engineering(df):
             f"Dropping columns {drop_list} because they either contain lists or dicts")
         df.drop(drop_list, axis=1, inplace=True)
 
+    #Adding logic to remove and replace currency characteristics from certain datasets
+    try:
+        sampled_df = df.sample(100,random_state=42).dropna(how='all') if len(df) > 100 else df.copy().dropna(how='all')
+    except: #because there can be datasets where there are no non-null rows
+        sampled_df = df.copy()
+    possibleDollarsOrEuroColumns = []
+    for col in obj_columns:
+        if sampled_df[col].nunique() > 5 :
+            ser = sampled_df[col].apply(lambda x: possibleDollarsOrEuros(x)).to_list()
+            if ser.count(True) > 0.80* len(sampled_df):
+                possibleDollarsOrEuroColumns.append(col)
+    if len(possibleDollarsOrEuroColumns) > 0 :
+            print("Removing Special Characters from Object Columns to generate Numeric Columns...")
+            for col in possibleDollarsOrEuroColumns:
+                df[col] = df[col].apply(lambda x: removeSpecialCharacters(x))
+                try:
+                    df[col] = pd.to_numeric(df[col])
+                    if str(df[col].dtype) != 'object':
+                        df[col] = df[col].astype(float)
+                except Exception as e:
+                    print(f'Error in removing Dollars, Commas, Euros Logic: {e}')
+    
     obj_columns = list(df.dtypes[df.dtypes == np.object].index)
     df1 = df[obj_columns].copy()
     print(f'\t\t Finding Numeric Columns')
@@ -221,7 +266,7 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
     if validation == False:
         # Extracting Time and Date columns separately from Date Time columns
         possibleDateTime = []
-        date_sample = df.sample(n=100)
+        date_sample = df.sample(n=100,random_state=42)
         for col in date_cols:
             try:
                 ser = date_sample[col].dt.hour
@@ -354,7 +399,7 @@ def findAddressColumns(df):
 def findReviewColumns(df):  # input main dataframe
     print("\n\n")
     print(">>>>>>[[Text Engineering]]>>>>>")
-    rf = df.sample(n=150, random_state=1).dropna(axis=0) if len(
+    rf = df.sample(n=300, random_state=42).dropna(axis=0) if len(
         df) > 150 else df.dropna(axis=0)  # use frac=0.25 to get 25% of the data
 
     # df.dropna(axis=0,inplace=True) #dropping all rows with null values
@@ -365,6 +410,7 @@ def findReviewColumns(df):  # input main dataframe
         if df[col].nunique() < 100:
             # define threshold for removing unique values #replace with variable threshold
             col_list.append(col)
+            # print(f"dropping {col} based on unique logic")
             # here df contains object columns, no null rows, no string-categorical,
             rf.drop(col, axis=1, inplace=True)
 
@@ -385,11 +431,12 @@ def findReviewColumns(df):  # input main dataframe
 
         if count1+count2+count3+count4 >= 0.75*len(rf):
             col_list.append(col)
-            # print("dropping column",col)
+            # print("dropping column because of count logic",col)
             rf.drop(col, axis=1, inplace=True)
 
     #Additional logic to find and drop columns that may be address!
     possibleAddressColumns = findAddressColumns(rf)
+    # print(f"removing cols based on address logic {possibleAddressColumns}")
     for col in possibleAddressColumns:
         col_list.append(col)
         rf.drop(col,axis=1,inplace=True)
@@ -416,7 +463,7 @@ def findReviewColumns(df):  # input main dataframe
         entity_list = []
         # converting one column into tokens
         tokens = nlp(''.join(str(sf[col].tolist())))
-        #print("the tokens of each column are:", tokens)
+        # print("the tokens of each column are:", tokens)
         token_len = sum(1 for x in tokens.ents)
         # print("Length of token entities",token_len)                                    #create two lists that hold the value of actual token entities and matched token entities respectively
         if token_len > 0:
@@ -429,7 +476,7 @@ def findReviewColumns(df):  # input main dataframe
             entity_counter = Counter(
                 entity_list).elements()  # counts the match
             counter_length = sum(1 for x in entity_counter)
-        #   print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
+            # print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
             if (counter_length >= 0.60*token_len):
                 col_list.append(col)
         else:
@@ -527,7 +574,7 @@ def topicExtraction(df, validation=False, lda_model_tfidf=None):
     headline = list(documents.columns)[0]  # review column
 
     processed_docs = documents[headline].map(
-        preprocess)  # preprocessing review column
+        preprocessWithoutLematizer)  # preprocessing review column
 
     #print("Processed Docs are as follows",processed_docs[:10])
 
@@ -700,6 +747,8 @@ def text_analytics(review, col, mode, target, LE, topic_frame):
 
 def identifier(x):
     try:
+        if x[0] == '@':
+            return False
         if x.split('@'):
             if x.split('@')[1].split('.'):
                 return True
