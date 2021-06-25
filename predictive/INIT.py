@@ -10,7 +10,7 @@ from Viz import *
 from imblearn.over_sampling import RandomOverSampler
 from tabulate import tabulate
 import gc
-
+from openpyxl import Workbook
 
 def INIT(df, info):
     init_feat_len = len(df.columns)
@@ -645,41 +645,56 @@ def INIT(df, info):
     encoded_disc = []
     print("\n\n\n\n")
     print(">>>>>>[[Model Explainer Encoding]]>>>>>")
-    for col in temp:
-        try:
+    # wb = Workbook()
+    # wb.save('shapely_encodings.xlsx')
+    with pd.ExcelWriter('shapely_encodings.xlsx') as writer:
+        for col in temp:
+            try:
 
-            encoding_df = pd.DataFrame()
-            encoding_df[f'{col}'] = X_1[col].unique()
-            encoding_df['Encoding'] = X_2[col].unique()
-            encoding_df['Encoding'] = encoding_df['Encoding'].round(decimals=2)
-            encoding_df = encoding_df.sort_values(
-                'Encoding', ignore_index=True, ascending=True)
-            # print(tabulate(encoding_df, headers='keys', tablefmt='psql',
-            #       showindex=False))  # to output on python not for webapp
-            if len(encoding_df) < 5:
-                encoded_disc.append(encoding_df)
-        except:
-            pass
+                encoding_df = pd.DataFrame()
+                encoding_df[f'{col}'] = X_1[col].unique()
+                encoding_df = encoding_df.iloc[0:len(X_2[col].unique()),:]
+                encoding_df['Encoding'] = X_2[col].unique()
+                encoding_df['Encoding'] = encoding_df['Encoding'].round(decimals=4)
+                encoding_df = encoding_df.sort_values(
+                    'Encoding', ignore_index=True, ascending=True)
+                # print(tabulate(encoding_df, headers='keys', tablefmt='psql',
+                #     showindex=False))  # to output on python not for webapp
+                encoding_df.to_excel(writer, sheet_name = f'{col}')
+                writer.save()
+                if len(encoding_df) < 5:
+                    encoded_disc.append(encoding_df)
+            except Exception as e:
+                print(e)
+                # pass
+
     ############# SHAP ENCODINGS #####################
 
     ############# RT ENCODINGS #####################
     print("\n\n\n\n")
     print(">>>>>>[[Rule Tree Encoding]]>>>>>")
+    # wb = Workbook()
+    # wb.save('sampleeqn_encodings.xlsx')
     # print(selected_obj_cols)
-    for val in selected_obj_cols:
-        try:
-            rule_df = pd.DataFrame()
-            rule_df[f'{val}'] = X_1[val].unique()
-            rule_df['Encoding'] = X_2[val].unique()
-            rule_df['Encoding'] = rule_df['Encoding'].round(decimals=2)
-            rule_df = rule_df.sort_values(
-                'Encoding', ignore_index=True, ascending=True)
-            # extract rule_df here and embed onto webapp under ruletree
-            # to output on python not for webapp
-            # print(tabulate(rule_df, headers='keys',
-            #       tablefmt='psql', showindex=False))
-        except:
-            pass
+    with pd.ExcelWriter('sampleeqn_encodings.xlsx') as writer:
+        for val in selected_obj_cols:
+            try:
+                rule_df = pd.DataFrame()
+                rule_df[f'{val}'] = X_1[val].unique()
+                rule_df = rule_df.iloc[0:len(X_2[val].unique()),:]
+                rule_df['Encoding'] = X_2[val].unique()
+                rule_df['Encoding'] = rule_df['Encoding'].round(decimals=4)
+                rule_df = rule_df.sort_values(
+                    'Encoding', ignore_index=True, ascending=True)
+                # extract rule_df here and embed onto webapp under ruletree
+                # to output on python not for webapp
+                # print(tabulate(rule_df, headers='keys',
+                #     tablefmt='psql', showindex=False))
+                rule_df.to_excel(writer, sheet_name = f'{val}')
+                writer.save()
+            except Exception as e:
+                print(e)
+                # pass
     ############# RT ENCODINGS #####################
     del X_1
     del X_2
