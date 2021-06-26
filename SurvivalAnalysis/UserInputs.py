@@ -296,7 +296,7 @@ def get_censor(columns):
         cen_col = input('Enter censor indicating column : ')
         if cen_col in columns:
             return cen_col
-    elif censor_ in ['Left', 'Right', 'Mixed', 'Interval', 'Uncensored']:
+    elif censor_ in ['Left', 'Right', 'Interval', 'Uncensored']:
         return censor_
     else:
         return None
