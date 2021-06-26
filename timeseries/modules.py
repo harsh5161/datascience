@@ -201,12 +201,13 @@ def dataResampler(df, perform_list):
 
 def seasonalDecompose(series, period):
     mpl.rcParams['figure.figsize'] = 18, 8
-    plt.figure(num=None, figsize=(50, 20), dpi=80,
+    plt.figure(figsize=(50, 20), dpi=80,
                facecolor='w', edgecolor='k')
     # Logic to determine freq need to think (?)
     result = seasonal_decompose(
         series, model='multiplicative', period=period)  # freq? period?
-    plt.show(result)
+    result.plot()
+    plt.show()
 
 # Now we look for white noise by looking at the plots below, if the mean and std histograms are normally distributed then there is white noise present and we cannot predict that part as it is random.
 # If our time series has white noise this will mean we can't predict that component of the series (as is random) and we should aim to produce a model with errors close to this white noise.

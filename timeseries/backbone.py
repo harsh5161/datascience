@@ -27,7 +27,7 @@ def INIT():
             resultsDict = {}
             predictionsDict = {}
             print("Performing Yearly Analysis")
-            seasonalDecompose(df[target][:720], period)
+            seasonalDecompose(df[target][:700], period)
             stationaryNormalityPlots(df[target], 30, 7)
             tsplot(df[target], lags=30)
             winnerModel = modellingInit(df, target, resultsDict, predictionsDict,period)
