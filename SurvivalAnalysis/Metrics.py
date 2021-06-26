@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.metrics import r2_score
-from lifelines.utils import concordance_index
+from lifelines import utils
+from pysurvival.utils.metrics import concordance_index
 
 EPSILON = 1e-10
 
@@ -11,7 +12,7 @@ def _error(actual: np.ndarray, predicted: np.ndarray):
 
 
 # Survival Analysis metric for model comparison
-def _concordance_index(time_events, predicted, actual=None):
+def _concordance_index(time_events, predicted, actual):
     """
     Concordance index
     :param time_events: a length-n iterable of observed survival times.
@@ -23,12 +24,27 @@ def _concordance_index(time_events, predicted, actual=None):
         1. Value between 0 and 1
         2. If value is negative, multiply predictions by -1
     """
-    c_score = concordance_index(time_events, predicted, actual)
+    c_score = utils.concordance_index(time_events, predicted, actual)
     if c_score < 0:
-        c_score = concordance_index(time_events, -1 * predicted, actual)
+        c_score = utils.concordance_index(time_events, -1 * predicted, actual)
         return c_score
     else:
         return c_score
+
+
+def simple_cindex(model):
+    """ Concordance index attribute for certain models """
+    return model.concordance_index_
+
+
+def pysurv_cindex(model, X, time_events, actual):
+    """ Concordance Index for Pysurvival models """
+    return concordance_index(model, X, time_events, actual)
+
+
+def aic(model):
+    """ AIC score attribute for Multivariate interval censoring """
+    return model.AIC_
 
 
 def _percentage_error(actual: np.ndarray, predicted: np.ndarray):
@@ -369,6 +385,29 @@ METRICS = {
     "bias": bias,
     "r2": r2_score,
 }
+
+surv_metric1 = {'_concordance_index': _concordance_index}
+surv_metric2 = {'simple_cindex': simple_cindex,
+                'pysurv_cindex': pysurv_cindex}
+surv_metric3 = {'aic': aic}
+
+
+def evaluate_2(model, X, time_events, actual):
+    try:
+        results = {'simple_cindex': surv_metric2['simple_cindex'](model)}
+    except:
+        results = {'simple_cindex': surv_metric2['pysurv_cindex'](model, X, time_events, actual)}
+    return results
+
+
+def evaluate_3(model):
+    results = {'aic': surv_metric3['aic'](model)}
+    return results
+
+
+def evaluate_1(time_events, predicted, actual):
+    results = {'_concordance_index': surv_metric1['_concordance_index'](time_events, actual, predicted)}
+    return results
 
 
 def evaluate(
