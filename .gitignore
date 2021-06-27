@@ -1,0 +1,8 @@
+__pycache__
+.ipynb_checkpoints
+*.*sv
+*.png
+*.svg
+.DS-STORE
+.vscode
+.tfevents
