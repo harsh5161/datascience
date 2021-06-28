@@ -683,7 +683,7 @@ def INIT(df, info):
     # wb.save('sampleeqn_encodings.xlsx')
     # print(selected_obj_cols)
     if len(selected_obj_cols):
-        with pd.ExcelWriter('sampleeqn_encodings.xlsx',engine='openpyxl') as writer:
+        with pd.ExcelWriter('ruletree_encodings.xlsx',engine='openpyxl') as writer:
             writer.book=wb
             writer.sheets = dict((ws.title, ws) for ws in wb.worksheets)
             for val in selected_obj_cols:
@@ -697,8 +697,8 @@ def INIT(df, info):
                         'Encoding', ignore_index=True, ascending=True)
                     # extract rule_df here and embed onto webapp under ruletree
                     # to output on python not for webapp
-                    print(tabulate(rule_df, headers='keys',
-                        tablefmt='psql', showindex=False))
+                    # print(tabulate(rule_df, headers='keys',
+                    #     tablefmt='psql', showindex=False))
                     rule_df.to_excel(writer, sheet_name = f'{val}')
                     writer.save()
                     std=wb.get_sheet_by_name('Sheet')
