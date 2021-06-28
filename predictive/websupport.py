@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 import re 
 from userInputs import *
+from all_other_functions import targetAnalysis
 
 def web_init():
-	path = 'datasets/titanic.csv' #Plug in the path to the valid dataset
+	path = 'datasets/tough_dataset.csv' #Plug in the path to the valid dataset
 	df, _ = importFile(None,None,path)
 	df = df.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
 	df = duplicateHandler(df)
@@ -18,6 +19,14 @@ def web_init():
 
 	numlist = list(df.select_dtypes(include=['int64','float64']).columns)
 	objectlist = list(df.select_dtypes(include=['object']).columns)
+ 
+	#adding dictionary that you can extract to tell the user if a selected column is valid or not
+	validOrNot = {}
+	for col in df.columns:
+		validOrNot[col] = False if targetAnalysis(df[col]) is None else True
+	print(validOrNot) #take the object and use it to render in react
+ 
+	
 	df[numlist]=df[numlist].fillna(df.mode().iloc[0])
 	# get the dataframe at this point for preview
 	for col in numlist:
