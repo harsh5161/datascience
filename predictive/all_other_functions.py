@@ -22,7 +22,7 @@ import shap
 from engineerings import numeric_engineering
 import gc
 from sklearn import tree
-
+from openpyxl import Workbook
 
 def targetAnalysis(df):
     print(">>>>>>[[Target Analysis]]>>>>>")
@@ -374,22 +374,35 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat,features_create
     dum2 = pd.DataFrame()
 #     list_dfs=[]
     selected_obj_cols = list(set(selected_features) & set(obj_df.columns))
+    wb = Workbook()
+    ws=wb.active
     if len(selected_obj_cols) != 0:  # to only print those encoded columns which are included in equation
         # print("\nWhere the columns are encoded like this:\n")
-        for i in selected_obj_cols:
-            dum = dummy.drop_duplicates(subset=[i])
-            dum2 = obj_df.drop_duplicates(subset=[i])
-            dum2.rename(columns={i: str(i)+" encoded"}, inplace=True)
-            dum3 = (pd.concat([dum[i], dum2[str(i)+" encoded"]],
-                    axis=1)).sort_values(str(i)+" encoded")
-#                     list_dfs.append(dum3)
-            from tabulate import tabulate
-            def pdtabulate(df): return tabulate(
-                df, headers='keys', tablefmt='psql', showindex=False)
-            # print(pdtabulate(dum3))
-            # Json variable to show the tables in a new format in the front end
-            json_var = dum3.to_json()
-            # print(json_var)
+        with pd.ExcelWriter('sample_equation_encodings.xlsx') as writer:
+            writer.book= wb
+            writer.sheets = dict((ws.title, ws) for ws in wb.worksheets)
+            for i in selected_obj_cols:
+                dum = dummy.drop_duplicates(subset=[i])
+                dum2 = obj_df.drop_duplicates(subset=[i])
+                dum2.rename(columns={i: str(i)+" encoded"}, inplace=True)
+                dum3 = (pd.concat([dum[i], dum2[str(i)+" encoded"]],
+                        axis=1)).sort_values(str(i)+" encoded")
+    #                     list_dfs.append(dum3)
+                dum3.reset_index(drop=True,inplace=True)
+                from tabulate import tabulate
+                def pdtabulate(df): return tabulate(
+                    df, headers='keys', tablefmt='psql', showindex=False)
+                # print(pdtabulate(dum3))
+                dum3.to_excel(writer, sheet_name = f'{i}')
+                writer.save()
+                try:
+                    std=wb.get_sheet_by_name('Sheet')
+                    wb.remove_sheet(std)
+                except:
+                    pass
+                # Json variable to show the tables in a new format in the front end
+                json_var = dum3.to_json()
+                # print(json_var)
 
 #     from IPython.display import display,HTML
 #     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form

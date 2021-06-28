@@ -665,8 +665,11 @@ def INIT(df, info):
                     #     showindex=False))  # to output on python not for webapp
                     encoding_df.to_excel(writer, sheet_name = f'{col}')
                     writer.save()
-                    std=wb.get_sheet_by_name('Sheet')
-                    wb.remove_sheet(std)
+                    try:
+                        std=wb.get_sheet_by_name('Sheet')
+                        wb.remove_sheet(std)
+                    except:
+                        pass
                     if len(encoding_df) < 5:
                         encoded_disc.append(encoding_df)
                 except Exception as e:
@@ -701,8 +704,11 @@ def INIT(df, info):
                     #     tablefmt='psql', showindex=False))
                     rule_df.to_excel(writer, sheet_name = f'{val}')
                     writer.save()
-                    std=wb.get_sheet_by_name('Sheet')
-                    wb.remove_sheet(std)
+                    try:
+                        std=wb.get_sheet_by_name('Sheet')
+                        wb.remove_sheet(std)
+                    except:
+                        pass
                 except Exception as e:
                     print(e)
                     # pass
