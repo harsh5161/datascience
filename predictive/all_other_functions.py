@@ -25,14 +25,14 @@ from sklearn import tree
 from openpyxl import Workbook
 
 def targetAnalysis(df):
+    '''
+    Function that returns if a particular column can undergo Classification, Regression and None
+    '''
     print(">>>>>>[[Target Analysis]]>>>>>")
-    # print('\n### TARGET ANALYSIS ENTERED ###')
+    
     Type = str(df.dtypes)
     # IF INT OR FLOAT IN TARGET, and IF NUMBER OF UNIQUE IS LESS, CLASSIFICATION, ELSE, REGRESSION
-    # print(Type)
-    # print('Target has {} unique values'.format(df.nunique()))
-    # print('Printing % occurence of each class in target Column')
-    # print(df.value_counts(normalize=True))
+    
     if ('int' in Type) or ('float' in Type):
         if df.nunique() <= 5:
             return 'Classification'
@@ -51,16 +51,15 @@ def targetAnalysis(df):
 
 
 def ForestImputer(num_df, disc_df, target):
+    '''
+    MissForest Imputation Function : Sometimes MissForest Imputation will not be done to speed up the application
+    '''
     print(">>>>>>[[Imputation]]>>>>>")
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
     concat_list = [num_df, disc_df]
     df = pd.concat(concat_list, axis=1)
-    # testing purposes
-    # print("checking Initial Presence of Missing Per Column",df.isna().any())
-    # print("Printing the total number of columns present in the dataframe",df.shape[1])
-    # print("Printing the count of column with missing values",df.isna().any().sum())
-    # testing purposes
+    
     cat_list = disc_df.columns.to_list()
     num_list = num_df.columns.to_list()
 
@@ -92,8 +91,7 @@ def ForestImputer(num_df, disc_df, target):
         X = df1
     # converting numpy array back to dataframe after transformation call
     df2 = pd.DataFrame(X, index=df1.index, columns=df1.columns)
-    # print("Checking Final Presence of Missing Per Column",df2.isna().any())
-    # print("!!!---!!!")
+    
     for col in df.columns:
         if col in df2.columns:
             if col not in cat_list:
@@ -103,6 +101,9 @@ def ForestImputer(num_df, disc_df, target):
 
 
 def Segregation(df, y):
+    '''
+    Grouping low categories together in a column
+    '''
     print("\n\n")
     print(">>>>>>[[Segregation Zone]]>>>>>")
     start = time.time()
@@ -141,46 +142,29 @@ def Segregation(df, y):
 
     print('We found {} obj type columns!'.format(obj_df.shape[1]))
     obj_df.fillna('missing', inplace=True)
-    # print('Printing Cardinality info of All Object Type Columns!\n')
-    # print(obj_df.nunique())
-    # print('\n')
+    
 
     print("Starting grouping of levels in categorical variables to reduce dimensionality.")
     # For each object type column, below are a sequence of conditions to determine if it's a unique column/not
     for col in obj_df:
         # If top 5 levels contribute to less than 10 percent of data
         if obj_df[col].value_counts(normalize=True)[:5].sum() <= 0.1:
-            # print(
-            #     '{} has top 5 levels that contribute to less than 10% of data!'.format(col))
-            # print('{} is unique\n'.format(col))
+            
             unique.append(col)
 
         # If number of unique entries is greater than or equal to 50000
         elif obj_df[col].nunique() >= 50000:
-            # print('{} has more than 50000 unique levels!'.format(col))
-            # print('{} is unique\n'.format(col))
             unique.append(col)
 
         # If Number of unique entries is greater than 75% of the total number of rows
         elif obj_df[col].nunique() > 0.75 * len(df):
-            # print('{} has more than 75% unique levels!'.format(col))
-            # print('{} is unique\n'.format(col))
             unique.append(col)
         # If none of the above is true, we try to group minor categories
         else:
-            # print(
-            #     '{} has top 5 levels that contribute to more than 10% of data!'.format(col))
-            # print('{} has {} levels before grouping'.format(
-            #     col, obj_df[col].nunique()))
             # If number of levels is greater than 60, attempt grouping
             if obj_df[col].nunique() > 60:
-                # print(
-                #     'Attempting grouping of minor levels of {} as the column has more than 60 levels'.format(col))
                 obj_df[col] = func(obj_df[col])
-                # print('{} has {} levels after grouping\n'.format(
-                #     col, obj_df[col].nunique()))
             else:
-                # print('{} is a discrete column!\n'.format(col))
                 pass
 
     print('We found {} unique columns!\n'.format(len(unique)))
@@ -189,8 +173,6 @@ def Segregation(df, y):
     obj_df.drop(unique, axis=1, inplace=True)
     print('We now have {} obj type discrete columns!'.format(
         obj_df.shape[1]))
-    # print('\nPrinting Cardinality info of obj Discrete Columns!\n')
-    # print(obj_df.nunique())
     disc = pd.concat([cat_num, obj_df], axis=1)
     if numeric.empty is False:
         if len(numeric) < 50000 and len(df.columns) < 100:
@@ -208,6 +190,9 @@ def Segregation(df, y):
 
 
 def DatasetSelection(X, Y):
+    '''
+    We either drop rows with null values first and then columns or vice-versa depending whichever logic results in more data being retained
+    '''
     print(">>>>>>[[Removing bad data]]>>>>>")
     X1 = X.copy()
     X2 = X.copy()
@@ -235,7 +220,6 @@ def DatasetSelection(X, Y):
     # checking in which case is number of rows getting dropped is lesser
     if len(Rowsdrop1) < len(Rowsdrop2):
         Y.drop(Rowsdrop1, inplace=True)
-        # print("Columns are getting dropped first then columns")
         print("The columns getting dropped are {}".format(
             list(set(X.columns)-set(X1.columns))))
         print("Shape of the dataframe: {}".format(X1.shape))
@@ -254,7 +238,9 @@ def DatasetSelection(X, Y):
 
 
 def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat,features_created):
-    # collect all 'category' columns
+    '''
+    Sample Equation is generated by this function, Logistic Regression is used for Classification and Linear Regression is used for Regression and the outputs are saved in an xlsx file
+    '''
     X = X.copy()
     obj_df = pd.DataFrame(X[disc_df_columns])
     for col in features_created:
@@ -372,12 +358,10 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat,features_create
         print("(The closer R squared is to 1, the better the model is)")
 
     dum2 = pd.DataFrame()
-#     list_dfs=[]
     selected_obj_cols = list(set(selected_features) & set(obj_df.columns))
     wb = Workbook()
     ws=wb.active
     if len(selected_obj_cols) != 0:  # to only print those encoded columns which are included in equation
-        # print("\nWhere the columns are encoded like this:\n")
         with pd.ExcelWriter('sample_equation_encodings.xlsx') as writer:
             writer.book= wb
             writer.sheets = dict((ws.title, ws) for ws in wb.worksheets)
@@ -387,12 +371,10 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat,features_create
                 dum2.rename(columns={i: str(i)+" encoded"}, inplace=True)
                 dum3 = (pd.concat([dum[i], dum2[str(i)+" encoded"]],
                         axis=1)).sort_values(str(i)+" encoded")
-    #                     list_dfs.append(dum3)
                 dum3.reset_index(drop=True,inplace=True)
                 from tabulate import tabulate
                 def pdtabulate(df): return tabulate(
                     df, headers='keys', tablefmt='psql', showindex=False)
-                # print(pdtabulate(dum3))
                 dum3.to_excel(writer, sheet_name = f'{i}')
                 writer.save()
                 try:
@@ -402,27 +384,13 @@ def SampleEquation(X, Y, class_or_Reg, disc_df_columns, LE, feat,features_create
                     pass
                 # Json variable to show the tables in a new format in the front end
                 json_var = dum3.to_json()
-                # print(json_var)
-
-#     from IPython.display import display,HTML
-#     def multi_column_df_display(list_dfs, cols=3):        #funtction to display encoded variable tables in grid form
-#         html_table = "<table style='width:100%; border:0px'>{content}</table>"
-#         html_row = "<tr style='border:0px'>{content}</tr>"
-#         html_cell = "<td style='width:{width}%;vertical-align:top;text-align:center;border:0px'>{{content}}</td>"
-#         html_cell = html_cell.format(width=100/cols)
-
-#         cells = [ html_cell.format(content=df.to_html(index=False)) for df in list_dfs ]
-#         cells += (cols - (len(list_dfs)%cols)) * [html_cell.format(content="")] # pad
-#         rows = [ html_row.format(content="".join(cells[i:i+cols])) for i in range(0,len(cells),cols)]
-#         display(HTML(html_table.format(content="".join(rows))))
-
-#     if list_dfs:    # only display table grid if any columns were encoded
-#         multi_column_df_display(list_dfs)
-    # print(feat)
     return list(set(feat))
 
 
 def featureSelectionPlot(feat_df):
+    '''
+    this function doesn't matter because the output of this function is only visible in the DS code, but isnt actually being used by the WebApp
+    '''
     f = 20
     plt.figure(figsize=(8, 8))
     plt.title('Feature Importance Plot', fontsize=f)
@@ -436,35 +404,25 @@ def featureSelectionPlot(feat_df):
 
 
 def FeatureSelection(X, y, class_or_Reg):
+    '''
+    Feature Selection is done using LGBM 
+    '''
     print(X.shape)
     if class_or_Reg == 'Classification':
 
         classes_num = y.nunique()  # Checking Number of classes in Target
         if classes_num == 2:
             print("\nBinary Classification Selector Used")
-#             k = y.value_counts()
-#             if k[0]>k[1]: impact_ratio = k[0]/k[1]
-#             else: impact_ratio = k[1]/k[0]
-#             selector = XGBClassifier(n_estimators =100, max_depth= 5, scale_pos_weight=impact_ratio, n_jobs=-1);
             selector = lgb.LGBMClassifier(class_weight='balanced', max_depth=16,
                                           num_leaves=30, n_estimators=100, random_state=42, objective='binary')
         else:
             print("\nMulticlass Classification Selector Used")
 
-            # Creating weight array for balancing
-#             class_weights = list(class_weight.compute_class_weight('balanced', np.unique(y),y))
-#             class_w=pd.Series(class_weights,index=np.unique(y))
-#             w_array = np.ones(y.shape[0], dtype = 'float')
-#             for i,val in enumerate(y):
-#               w_array[i] = class_w[val]
-
-#             selector = XGBClassifier(n_estimators =100, sample_weight = w_array, max_depth= 5, n_jobs=-1);
             selector = lgb.LGBMClassifier(class_weight='balanced', max_depth=16, num_leaves=30, n_estimators=100,
                                           random_state=42, objective='multiclass', num_class=classes_num, metric='multi_logloss')
 
         print("Classifer Selector Done...")
     else:
-        #         selector = XGBRegressor(n_estimators =100, max_depth= 5, n_jobs=-1);
         selector = lgb.LGBMRegressor(boosting_type='gbdt', learning_rate=0.01,
                                      n_estimators=1000, random_state=42, subsample=0.8, num_leaves=30, max_depth=16)
 
@@ -478,7 +436,6 @@ def FeatureSelection(X, y, class_or_Reg):
     k = selector.feature_importances_
     k = k.reshape(X.shape[1], 1)
     k = pd.DataFrame(k)
-    # print("k", k)
     gc.collect()
     # threshold one(This thres is able to select only top best features which are very few)
     thresh1 = k.mean()
@@ -490,7 +447,6 @@ def FeatureSelection(X, y, class_or_Reg):
     # threshold two(The mean of the remaining features is used as a thres)
     thresh2 = new_1['scores1'].mean()
     l2 = k > thresh2
-    # print('\nthresh2: {}'.format(thresh2))
     sheet2 = pd.concat([cols, k, l2], axis=1)
     sheet2.columns = ['col_name', 'scores2', 't/f']
     new_2 = sheet2.loc[(sheet2['t/f'] == True)]
@@ -508,6 +464,9 @@ def FeatureSelection(X, y, class_or_Reg):
 
 
 def removeLowClass(df, target):
+    '''
+    Additional logic to remove categories from a multiclass target that constitute a very small part of the dataset
+    '''
     if df[target].nunique() == 2:
         print('\nTarget has 2 Levels! No classes will be removed')
         return 1
@@ -532,6 +491,9 @@ def removeLowClass(df, target):
 
 
 def model_training(X_train, y_train, X_test, y_test, class_or_Reg, priorList, q_s):
+    '''
+    Modelling Process helper function, no idea why he added this here so if you are refactoring - move this inside the modelling.py
+    '''
     # Selecting best model
     if class_or_Reg == 'Classification':
         Classification = classification()
@@ -546,6 +508,9 @@ def model_training(X_train, y_train, X_test, y_test, class_or_Reg, priorList, q_
 
 
 def data_model_select(X_train, y_train):
+    '''
+    Deprecated
+    '''
     if len(X_train) <= 10000:
         input_X_train = X_train
         input_y_train = y_train
@@ -566,6 +531,9 @@ def data_model_select(X_train, y_train):
 
 
 def removeOutliers(df):
+    '''
+    Deprecated
+    '''
     df_z = (df - df.mean())/df.std()
     indices = df_z[(df_z > 4) | (df_z < -4)].dropna(how='all').index
     print('{} rows contain outliers and will be removed'.format(len(indices)))
@@ -588,6 +556,9 @@ def getDF(df, model):
 
 # !! targ stores column name and base_var stores target name!!
 def bivar_ploter(df1, targ, base_var):
+    '''
+    Only actually used as a placeholder. Webapp generates these plots in plotly separately, don't remove because of legacy code in the sever.
+    '''
 
     l = []
     for b in set(df1[targ]):
@@ -685,23 +656,22 @@ def findDefaulters(x):
 
 # LowerTriangularMatrix, Dictionary with related columns, the column with the maximum value
 def pearsonmaker(numeric_df, column_counter):
+    '''
+    Actual logic of pearson correlation, where the threshold is 0.85 and we are recursively recalculating the correlation matrix until we remove collinearity
+    '''
     req_cols = []
     high = 0.85
-    # corr = numeric_df.corr(method='pearson')
     corr = np.corrcoef(numeric_df.values, rowvar=False)
     corr = pd.DataFrame(corr, columns=numeric_df.columns.to_list())
-    # print("Initial correlation matrix",corr)
     corr = corr.where(np.tril(np.ones(corr.shape), k=-1).astype(np.bool))
 
     if column_counter is False:
-        # print("No columns are correlated")
         return numeric_df, {}
     else:
         maxi_col = max(column_counter.items(), key=operator.itemgetter(1))[0]
 
     val = column_counter[maxi_col]
     count = sum(x == val for x in column_counter.values())
-    # print(f"Value of count {count}")
     if count == 1:
         # Logic when only one column has the highest
         drop_col = maxi_col
@@ -712,13 +682,10 @@ def pearsonmaker(numeric_df, column_counter):
             if v == val:
                 req_cols.append(k)
         for col in corr.columns:
-            # if col in req_cols:
-            #     print(f"Max value of the column {col} :{corr[col].max()}")
             if col in req_cols and corr[col].max() > high:
                 high = corr[col].abs().max()
                 drop_col = col
 
-    # print(f"Column counter is {column_counter}")
     try:
         print(f"Dropping {drop_col} due to high correlation")
     except UnboundLocalError:
@@ -736,6 +703,9 @@ def format_y_labels(x, stored_labels):
 
 
 def rules_tree(X, y, mode, X_transformed, LE,features_created):
+    '''
+    Decision Tree Classifier or Regressor is used to generate human-readable rules from the tree
+    '''
     X_inside = X.copy()
     X_transformed_inside = X_transformed.copy()
     for col in features_created:
@@ -763,17 +733,16 @@ def rules_tree(X, y, mode, X_transformed, LE,features_created):
 
 
 def featureimportance(exp_mod, exp_name, num_features, features):
+    '''
+    This is the feature importance plot that actually gets generated for the webapp
+    '''
     print(">>>>>>[[Feature Importance Plot]]>>>>>")
-    # print("printing features",features)
-    # print("printing num features",num_features)
     r = random.random()
     b = random.random()
     g = random.random()
     colors = (r, g, b)
     importances = exp_mod.feature_importances_
-    # print("Inside feature importance printing feature importance",importances)
     indices = np.argsort(importances)
-    # print("printing argstorted indices",indices)
     feature_importances = (exp_mod.feature_importances_ /
                            sum(exp_mod.feature_importances_))*100
     print("printing feature importances",len(feature_importances))
@@ -798,6 +767,9 @@ def featureimportance(exp_mod, exp_name, num_features, features):
 
 
 def ruleTesting(X_test, y_test, mode, model, LE,features_created):
+    '''
+    Performance of the Decision Tree used in RuleTree is generated here, actually verify if this has been migrated to the webapp
+    '''
     X_test = X_test.copy()
     y_test = y_test.copy()
     for col in features_created:
@@ -834,30 +806,23 @@ def ruleTesting(X_test, y_test, mode, model, LE,features_created):
 
 
 def inputCap(df, target):
-
-    # print("###Performing Initial Numeric Engineering for Capping Purposes###")
-    #                 print("Initial columns",df.columns.to_list())
+    '''
+    A feature added a long time ago to limit the user data to 1 million rows, think about removing this some time in the future when the project is better rounded
+    '''
     dfsamp = df.sample(n=1000, random_state=42) if len(df) > 1000 else df.copy()
     dfsamp = numeric_engineering(dfsamp)
     dfsamp = dfsamp.dropna(axis=0, subset=[target])
-    # print("###Estimating the type of target for Capping Purposes###")
     class_or_Reg = targetAnalysis(dfsamp[target])
     if class_or_Reg == 'Classification':
         if len(df) > 1000000:
             df_train, _ = train_test_split(
                 df, train_size=1000000, random_state=42, stratify=df[target])
-           # print("Dataset size has been capped to 1 million rows for better performance")
-            # print("Length of the dataset is now", len(df_train))
             return df_train
         else:
-            # print("Dataset has not been capped")
-            # print("Length of the dataset is same as original", len(df))
             return df
     elif class_or_Reg == 'Regression':
         dfr = df.sample(n=1000000, random_state=42) if len(
             df) > 1000000 else df.copy()
-        #print("Dataset size has been capped to 1 million rows for better performance")
-        # print("Length of the dataset is now", len(dfr))
         return dfr
     elif class_or_Reg is None:
         return pd.DataFrame()

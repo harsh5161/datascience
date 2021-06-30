@@ -33,6 +33,9 @@ stemmer = SnowballStemmer('english')
 
 
 def formatter(x):
+    '''
+    removing special characters
+    '''
     try:
         return x.astype(str).str.strip(' %$€£¥+').str.lower()
     except:
@@ -40,6 +43,9 @@ def formatter(x):
 
 
 def list_or_dict(x):
+    '''
+    sometimes poorly built datasets have row values that are in the form [value] or like a dictionary so we find that here
+    '''
     if isinstance(x, list):
         return "List"
     elif isinstance(x, dict):
@@ -48,6 +54,9 @@ def list_or_dict(x):
         return np.nan
 
 def possibleDollarsOrEuros(x):
+    '''
+    A variation of the userInputs.py function but modified to check for extra special characters in numeric columns
+    '''
     temp = str(x).lower()
     flag = 0
     
@@ -55,11 +64,11 @@ def possibleDollarsOrEuros(x):
         flag = 1
     elif '€' in str(x)[0]:
         flag = 1 
-    elif 'k' in temp[-1]:
+    elif 'k' in temp[-1]: #thiusand
         flag = 1 
-    elif 'm' in temp[-1]:
+    elif 'm' in temp[-1]: #million
         flag = 1
-    elif 'b' in temp[-1]:
+    elif 'b' in temp[-1]: #billion
         flag = 1
     
     if flag == 1:
@@ -68,6 +77,9 @@ def possibleDollarsOrEuros(x):
         return False
 
 def numeric_engineering(df):
+    '''
+    This function tries to extract all the numeric columns from the dataset even the ones that are initially categorised as object but unlike other engineerings this function doesn't actually generate more columns
+    '''
     print("\n\n")
     print(">>>>>>[[Numeric Engineering]]>>>>>")
     start = time.time()
@@ -80,7 +92,6 @@ def numeric_engineering(df):
             return col
 
     obj_columns = list(df.dtypes[df.dtypes == np.object].index)
-    # print(f'object type columns are {obj_columns}')
     print(f'\t\t stripping spaces, symbols, and lower casing all entries')
     for col in obj_columns:
         df[col] = df[col].apply(lambda x: formatter(x))
@@ -141,10 +152,6 @@ def numeric_engineering(df):
         lambda x: pd.to_numeric(x, errors='coerce'))
     print('done ...')
 
-    # for i in df.columns :
-    # print(f'\t\t   {i} is of type {df[i].dtypes}')
-
-    # # End of Testing codes
     end = time.time()
     print('Numeric Engineering Completed...:', end - start)
     print('\n')
@@ -221,30 +228,10 @@ def getDateColumns(df, withPossibilies=0):
 def date_engineering(df, possible_datecols, DateTime=None, validation=False):
     import itertools
 
-    # def fixdate(entry):    # function to introduce '-' before and after month and and removing timestamp if it is seperated from date by':'
-    #  months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
-    #  for month in months:
-    #      if month in str(entry).lower():
-    #          index1= entry.find(month)
-    #          index2= index1+3
-    #          entry = entry[:index1]+'-'+entry[index1:index2]+'-'+entry[index2:]
-    #          index3=entry.find(':')  #only specific to messy dataset
-    #          entry=entry[:index3]
-    #  return entry
-
     start = time.time()
-
-    # if possible_datecols:
-    # for col in possible_datecols:
-    # df[col]=df[col].apply(fixdate)
-
-#    print(f'Before pdtodatetime: {df.head(10)}')
     df = df.apply(pd.to_datetime, errors='coerce')
- #   print(f'After pdtodatetime: {df.head(10)}')
-    # print('\nPrinting Missing % of date columns')
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(
         ascending=False)*100/len(df)).round(2)), columns=['Missing in %'])[:10]
-    # print(MISSING)
     before = df.columns.to_list()
     if validation == False:   # dropping columns with missing greater than 35% only in training not scoring
         print('Dropping Columns with missing greater than 35% of total number of rows completed...')
@@ -275,7 +262,6 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
             except Exception as e:
                 print(e)
         print("Analysis to find DateTime columns completed...")
-        # print(f'Possible DateTime columns are {possibleDateTime}')
     else:
         possibleDateTime = DateTime
     # removing datetime cols from date_cols
@@ -324,6 +310,9 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
     # See Near Holiday or not
 
     def nearHol(currentDate, us_hols, currentYear):
+        '''
+        Function that is used to see if a particular date is near a US Holiday
+        '''
         new_list = []
         append = new_list.append
         for date, occasion in us_hols:
@@ -342,7 +331,6 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
         return 0 if flag == 0 else 1
 
     for col in date_cols:
-        #         print('LOOP')
         # creating a unique list of all years corresponding to a column to minimise mapping
         us_hols = holidays.US(
             years=df[str(col)+'_year'].unique(), expand=False)
@@ -361,8 +349,6 @@ def date_engineering(df, possible_datecols, DateTime=None, validation=False):
     # removing the possible timecols from the dataframe
     df.drop(possibleTimeCols, axis=1, inplace=True)
 
-    # print("\nVisualizing Coloumns Generated\n {}" .format(visualize_dict))
-    # print("\nThe Following columns were generated to get days between dates of two seperate date columns\n {}".format(diff_days))
     print(f"Columns Impacted : {visualize_dict.keys()}")
     print(f"Columns Created: {visualize_dict.values()}")
     end = time.time()
@@ -389,6 +375,9 @@ def returnAddressCounter(string):
             return False
         
 def findAddressColumns(df):
+    '''
+    function that is used to see if there is a PO box number in a possible review column - 5+ digits 
+    '''
     possibleAddressColumns = []
     for col in df.columns:
         temp = df[col].apply(lambda x: returnAddressCounter(x)).to_list()
@@ -397,21 +386,23 @@ def findAddressColumns(df):
     return possibleAddressColumns
 
 def findReviewColumns(df):  # input main dataframe
+    '''
+    drop columns from text engineering logic if
+    - there arent enough unique values in the column
+    - if there are too many rows with 1,2,3 or 4 worded sentences
+    - if it is possibly an address column on the basis of PO Box
+    - after tokenising the entire column and seeing if the number of entities that match a geographic location or Person is above a threshold
+    '''
     print("\n\n")
     print(">>>>>>[[Text Engineering]]>>>>>")
     rf = df.sample(n=300, random_state=42).dropna(axis=0) if len(
         df) > 150 else df.dropna(axis=0)  # use frac=0.25 to get 25% of the data
 
-    # df.dropna(axis=0,inplace=True) #dropping all rows with null values
-
-    #categorical_variables = []
     col_list = []
     for col in rf.columns:
         if df[col].nunique() < 100:
             # define threshold for removing unique values #replace with variable threshold
             col_list.append(col)
-            # print(f"dropping {col} based on unique logic")
-            # here df contains object columns, no null rows, no string-categorical,
             rf.drop(col, axis=1, inplace=True)
 
     rf.reset_index(drop=True, inplace=True)
@@ -427,22 +418,19 @@ def findReviewColumns(df):  # input main dataframe
                 count3 = count3+1
             elif val == 4:
                 count4 = count4+1
-        # print(col,"count of words is",count1,"-",count2,"-",count3,"-",count4,"-")
+  
 
         if count1+count2+count3+count4 >= 0.75*len(rf):
             col_list.append(col)
-            # print("dropping column because of count logic",col)
             rf.drop(col, axis=1, inplace=True)
 
     #Additional logic to find and drop columns that may be address!
     possibleAddressColumns = findAddressColumns(rf)
-    # print(f"removing cols based on address logic {possibleAddressColumns}")
     for col in possibleAddressColumns:
         col_list.append(col)
         rf.drop(col,axis=1,inplace=True)
 
     start = time.time()
-    # print(rf.shape)
     nlp = spacy.load('en_core_web_sm', disable=['tagger', 'parser', 'textcat'])
     sf = pd.DataFrame()
     for col in rf.columns:
@@ -451,21 +439,14 @@ def findReviewColumns(df):  # input main dataframe
     end = time.time()
     print("Tokenizing DataFrame for text extraction completed...")
 
-    #print("Tokenised Sampled DataFrame",sf)
-    #print("Sampled DataFrame",rf)
-    #print("Actual Dataframe",df)
-
     start = time.time()
-    #testf = sf.sample(frac=0.10,random_state=44)
 
     # code to eliminate columns of name, city, address
     for col in sf.columns:
         entity_list = []
         # converting one column into tokens
         tokens = nlp(''.join(str(sf[col].tolist())))
-        # print("the tokens of each column are:", tokens)
         token_len = sum(1 for x in tokens.ents)
-        # print("Length of token entities",token_len)                                    #create two lists that hold the value of actual token entities and matched token entities respectively
         if token_len > 0:
             for ent in tokens.ents:
                 # matching is done on the basis of whether the entity label is
@@ -476,26 +457,19 @@ def findReviewColumns(df):  # input main dataframe
             entity_counter = Counter(
                 entity_list).elements()  # counts the match
             counter_length = sum(1 for x in entity_counter)
-            # print("Length of matched entities",counter_length) #if there is at least a 50% match, we drop that column TLDR works better on large corpus
             if (counter_length >= 0.60*token_len):
                 col_list.append(col)
         else:
-            #   print("Length of token entities 0")
-            #   print("Length of matched entities 0")
             pass
         counter_length = 0
         token_len = 0
 
     # list of columns that need to be removed
-    # print("Columns that are going to be removed are ", col_list)
     print("Analysis to determine non-text columns completed...")
-    ##########IMPORTANT LINE NEXT###############
-    rf = df.copy()  # unhide this to immediately work with the entire dataset and not just sampled dataset and vice-versa to work with sampled
-    ##########DO NOT IGNORE ABOVE LINE##########
+    rf = df.copy()
     for val in col_list:
         rf.drop(val, axis=1, inplace=True)
     end = time.time()
-    # print("Time taken for completion of excess column removal:", end-start)
     print("Finding text columns completed...")
     if (len(rf.columns) == 0):
         print("No Remarks or Comments Found ")
@@ -514,6 +488,9 @@ def findReviewColumns(df):  # input main dataframe
 
 
 def sentiment_analysis(rf):
+    '''
+    generating Polarity and Subjectivity
+    '''
     bf = pd.DataFrame()
     print("Running sentiment analysis...")
 
@@ -548,6 +525,9 @@ def lemmatize_stemming(text):
 
 
 def preprocess(text):
+    '''
+    Deprecated
+    '''
     result = []
     for token in gensim.utils.simple_preprocess(text):
         # removes stopwords and tokens with len>3
@@ -557,6 +537,9 @@ def preprocess(text):
 
 
 def preprocessWithoutLematizer(text):
+    '''
+    this is being done so that our wordcloud is human readable
+    '''
     result = []
     for token in gensim.utils.simple_preprocess(text):
         # removes stopwords and tokens with len>3
@@ -566,7 +549,9 @@ def preprocessWithoutLematizer(text):
 
 
 def topicExtraction(df, validation=False, lda_model_tfidf=None):
-
+    '''
+    using a pre-trained GENSIM model to generate a corupus from the review column and then filtering the words that are not within the extremes + generating the wordcloud + generating the document corpus and using TFIDF values to extract 10 topics
+    '''
     data_text = df.copy()
     data_text['index'] = data_text.index
     documents = data_text
@@ -576,7 +561,6 @@ def topicExtraction(df, validation=False, lda_model_tfidf=None):
     processed_docs = documents[headline].map(
         preprocessWithoutLematizer)  # preprocessing review column
 
-    #print("Processed Docs are as follows",processed_docs[:10])
 
     dictionary = gensim.corpora.Dictionary(
         processed_docs)  # converting into gensim dict
@@ -601,16 +585,12 @@ def topicExtraction(df, validation=False, lda_model_tfidf=None):
     bow_corpus = [dictionary.doc2bow(doc) for doc in processed_docs]
 
     if validation == False:
-        #print("BOW Corpus", bow_corpus[:10])
         tfidf = models.TfidfModel(bow_corpus)
         corpus_tfidf = tfidf[bow_corpus]  # generating the TF-IDF of the corpus
-        # print("!!!!!!", len(corpus_tfidf))
         start = time.time()
-        # multiprocessing Latent Dirilichtion Allocation Model , passes=1, workers=6
         lda_model_tfidf = gensim.models.LdaModel(
             corpus_tfidf, num_topics=10, id2word=dictionary)
         end = time.time()
-        # print(end-start)
         for idx, topic in lda_model_tfidf.print_topics(-1):
             # printing topics in the corpus
             # print('Topic: {} Word: {}'.format(idx, topic))
@@ -618,14 +598,13 @@ def topicExtraction(df, validation=False, lda_model_tfidf=None):
 
     ser = []
     append = ser.append
-    # print("Bag of Words Corpus length", len(bow_corpus))
     start = time.time()
     count = 0
     for i in range(len(bow_corpus)):
         val = bow_corpus[i]
         for i in range(len(val)):
             sentence = "Word {} (\"{}\") appears {} time.".format(
-                val[i][0], dictionary[val[i][0]], val[i][1])  # Messy3.csv error
+                val[i][0], dictionary[val[i][0]], val[i][1])  # Messy3.csv error 
         count = count+1
         try:
             for idx, topic in sorted(lda_model_tfidf[bow_corpus[i]], key=lambda tup: -1*tup[1]):
@@ -633,10 +612,8 @@ def topicExtraction(df, validation=False, lda_model_tfidf=None):
                 break
         except:
             append(idx)
-        # print("Loop ran for ",count)
     end = time.time()
     asf = pd.DataFrame(ser)
-    # print("Time for append", end-start)
     print("Topic Extraction Completed...")
     print("\n\n")
     return asf, lda_model_tfidf
@@ -659,6 +636,9 @@ def returnCountSum(x, val):
 
 
 def sentenceRecalibration(text):
+    '''
+    removing auxillary and pronouns from topic-word visualisation
+    '''
     nlp = spacy.load('en_core_web_sm')
     # excluded tags
     excluded_tags = {"AUX", "ADP"}
@@ -676,7 +656,6 @@ def topicWordVisualiser(analyticsFrame, topicColumn,topicClass=None,topicNumber=
     i = 0
     resultDict = {}
     for groupFrame in groups:
-        # currentGroupKey = group_keys[i]
         temporaryFrame = groupFrame
         reviewList = []
         reviewList.extend(temporaryFrame['Review'])
@@ -698,19 +677,17 @@ def topicWordVisualiser(analyticsFrame, topicColumn,topicClass=None,topicNumber=
         plt.bar(list(currentTopicDict.keys()),
                 currentTopicDict.values(), color='g')
         plt.xticks(rotation=45)
-
-        # Uncomment the above two lines are run messy8.csv to understand how the output looks, but implement these plots in the front end using plotly so that it looks better. It goes into the new text analytics tab, users will have an option to select the topic. extract resultDict after this for loop runs so that there aren't any empty dictionaries,then you can use the length of resultDict as the different topics that is present.
         plt.show()
         i += 1
 
 
 def text_analytics(review, col, mode, target, LE, topic_frame):
+    '''
+    creating text topics visualisation for every group
+    '''
     analyticsFrame = topic_frame.copy()
     topicColumn = analyticsFrame.columns[0]
     analyticsFrame['Review'] = review[col]
-    # print("Removing Auxillary's...")
-    # analyticsFrame['Review'] = analyticsFrame['Review'].apply(
-    #     lambda x: sentenceRecalibration(x))
     processed_docs = analyticsFrame['Review'].map(preprocessWithoutLematizer)
     analyticsFrame['Review'] = processed_docs
     if mode == 'Classification':
@@ -735,8 +712,6 @@ def text_analytics(review, col, mode, target, LE, topic_frame):
     print("Text Analytics Completed")
     print(">>>>>>[[Text Engineering]]>>>>>")
     print("\n\n")
-    # print(output_df)
-    # output_df.to_csv("output_df.csv")
 
 ############################################
 ############## EMAIL ENGINEERING ##############
@@ -780,24 +755,16 @@ def emailUrlEngineering(df, email=True, validation=False):
 
     start = time.time()
 
-    # if email is True:
-    #     print('\n########## EMAIL ENGINEERING RUNNING ##########')
-    # else:
-    #     print('\n########## URL ENGINEERING RUNNING ##########')
 
     def getEmailDomainName(col):
         # Get the first domain name, example: a@b.gov.edu.com, in this b alone is taken
         try:
-            # print("Inside email")
-            # print(col[1].split('.')[0])
             return col[1].split('.')[0]
         except:
             return np.nan  # Invalid Entry
 
     def getUrlDomainName(col):
         try:
-            # print("Inside url")
-            # print(col.split('://')[1].split('/')[0].split('.')[0])
             return col.split('://')[1].split('/')[0].split('.')[0]
         except:
             return np.nan  # Invalid Entry
@@ -822,9 +789,6 @@ def emailUrlEngineering(df, email=True, validation=False):
         # Checking percentage of missing values
         if validation == False:
             if df[domain_name].isnull().sum()/len(df) >= 0.5:
-                # print('The newly created \'{}\' column has 50% or more missing values!'.format(
-                # domain_name))
-                # print('And hence will be dropped!')
                 df.drop(domain_name, axis=1)
             else:
                 newCols.append(domain_name)
@@ -872,13 +836,11 @@ def findURLS(df):
     print("\n\n")
     print(">>>>>>[[URL Engineering]]>>>>>")
     extractor = URLExtract()
-#    extractor.update()
     url_cols = []
     for col in df.columns:
         a = df[col].apply(lambda x: urlCheck(x, extractor)).to_list()
         if a.count(True) > 0.75*len(df):
             url_cols.append(col)
-        # print(f"Trying column {col} and the percentage of urls are {a.count(True)}")
     if url_cols:
         print("The URL Columnns found are", url_cols)
     return url_cols
@@ -906,9 +868,6 @@ def urlparser(x, extractor):
 def URlEngineering(df):
     urls = {}
     extractor = URLExtract()
-    # extractor.update()
-#    print("Updating if extractor TLD's haven't been updated in seven days")
- #   extractor.update_when_older(7) #updates when list is older than 7 days
     print("URLs Parsed Successfully...")
     print("URL Domain Extraction Completed... ")
     for col in df.columns:
@@ -961,18 +920,13 @@ def checkLatLong(x):
 
 
 def checkCondition(x):
-    # Sometimes if we have columns with values that have [] around them then they are considered as lists, this will help it out.
+    # Sometimes if we have lat-long columns with values that have [] around them then they are considered as lists, this will help it out.
     if isinstance(x, list):
         if len(x) == 2:
             return True
         else:
             return False
 
-    # if isinstance(x,dict): #Sometimes if we have columns with values that have {} around them then they are considered as lists, this will help it out.
-    #     if len(x) == 2:
-    #         return True
-    #     else:
-    #         return False
     try:
         if x[0] == '(' and x[-1] == ')' and len(x.split(',')) == 2:
             return True
@@ -983,15 +937,12 @@ def checkCondition(x):
 
 
 def Floater(df, value):
-    print(value)
     floaters = []
     for column in df.columns:  # add try catch block
-        # print(f"testing column {column}")
         if value == "returnFloat":
             a = df[column].apply(lambda x: floatCheck(x)).to_list()
         elif value == "confirmLatLong":
             a = df[column].apply(lambda x: checkFormat(x)).to_list()
-        # print(f"printing true value counts {a.count(True)}")
         if a.count(True) > 0.9*len(df):
             floaters.append(column)
     return floaters
@@ -1021,7 +972,6 @@ def segregator(df):
 def pseudoFormat(df):
     lat_long_cols = []
     for col in df.columns:
-        # print(f"testing column {col}")
         a = df[col].apply(lambda x: checkCondition(x)).to_list()
         if a.count(True) > 0.9*len(df):
             lat_long_cols.append(col)
@@ -1036,8 +986,6 @@ def findLatLong(df):
     # will add logic for lat-long columns of the form (lat,long)
     lat_long_cols = []
     lat_long_cols = pseudoFormat(df)
-    # if lat_long_cols:
-    #     print("Columns that are are of the form Lat-Long are as follows", lat_long_cols)
     print("Analysis of columns in special format completed...")
     # List of float columns that could be lat or long
     columns = Floater(df, "returnFloat")
@@ -1050,9 +998,6 @@ def findLatLong(df):
             long_cols.append(ex)
             columns.remove(ex)
     desired = []
-    # print(f"lat-cols are {lat_cols}")
-    # print(f"long-cols are {long_cols}")
-    # print(f"columns are {columns}")
     requisites = ["Lat", "Long", "Latitude", "Longitude"]
     if len(columns) > 1:
         for val in itertools.product(columns, requisites):

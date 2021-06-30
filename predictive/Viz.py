@@ -12,6 +12,9 @@ from rpy2.robjects.packages import importr
 from rpy2.robjects.conversion import localconverter
 from rpy2.robjects import pandas2ri
 
+
+#these imports can help you out if you use google colab to set up R env temporarily rather than have it in your environment
+
 # utils = importr('utils')
 # utils.install_packages('rpart',repos="https://mirror.niser.ac.in/cran/")
 # utils.install_packages('rpart.plot',repos="https://mirror.niser.ac.in/cran/")
@@ -30,7 +33,6 @@ def cart_decisiontree(df, target_variable_name, class_or_Reg, priors,features_cr
     cat_df = df.select_dtypes('category')
     if not cat_df.empty:
         df.drop(cat_df.columns, axis=1, inplace=True)
-#         cat_df= cat_df.astype('object')
         d = defaultdict(LabelEncoder)
         cat_df = cat_df.apply(lambda x: d[x.name].fit_transform(x.astype(str)))
         cat_df = cat_df.apply(lambda x: d[x.name].inverse_transform(x))
@@ -38,7 +40,6 @@ def cart_decisiontree(df, target_variable_name, class_or_Reg, priors,features_cr
 
     for col in df.columns:
         if df[col].dtype == 'object':
-            #print(f"The object columns are {col}")
             s = pd.Series(df[col])
             try:
                 pd.to_numeric(s)
@@ -47,12 +48,9 @@ def cart_decisiontree(df, target_variable_name, class_or_Reg, priors,features_cr
                 df[col] = df[col].apply(
                     lambda x: x[0:6]+"." if (len(x) > 6) else x)
                 print("Large text columns truncated")
-                # print("The values after truncating the text are as follows")
-                # print(df[col].value_counts())
 
     with localconverter(ro.default_converter + pandas2ri.converter):
         r_from_pd_df = ro.conversion.py2rpy(df)
-        # class_or_Reg = ro.conversion.py2rpy(typer)
 
     print("What you want", class_or_Reg)
     rstring1 = """
@@ -86,7 +84,6 @@ def cart_decisiontree(df, target_variable_name, class_or_Reg, priors,features_cr
     if class_or_Reg == 'Classification':
         rfunc = ro.r(rstring1)
         p = rfunc(r_from_pd_df)
-        # print("Class weights are ",priors)
     elif class_or_Reg == 'Regression':
         rfunc = ro.r(rstring2)
         p = rfunc(r_from_pd_df)

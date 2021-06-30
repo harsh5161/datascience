@@ -15,6 +15,9 @@ from imblearn.over_sampling import RandomOverSampler
 import gc
 
 def score(df, init_info, validation=False):
+    '''
+    Follows the same flow of data as there in INIT +  some plotting for ROS, Deciles + Interpretable Model Plots using Shap + generating the validation csv file
+    '''
     print(">>>>>>[[VALIDATION AND SCORING]]>>>>>")
 
     if validation:
@@ -32,13 +35,9 @@ def score(df, init_info, validation=False):
     else:
         X_test = df
         y_test = pd.Series()
-    # print(f'Target Unique values and count \n {y_test.value_counts()} \n Unique values \n {y_test.nunique()}')
 
     if init_info['KEY']:
-        # print("Value of Key from Training is: ",init_info['KEY'])
-        # print("Total no. of null values present in the Key: ",df[init_info['KEY']].isna().sum())
         df.dropna(axis=0, subset=[init_info['KEY']], inplace=True)
-        # print("NUll values after removal are: ",df[init_info['KEY']].isna().sum())
         kkey = df.dtypes[init_info['KEY']]
         try:
             if df[init_info['KEY']].dtype == np.float64:
@@ -62,17 +61,13 @@ def score(df, init_info, validation=False):
     lon = init_info['lon']
     lat_lon_cols = init_info['lat_lon_cols']
     if (lat and lon) or lat_lon_cols:
-        # print('Running Lat-Long Engineering on validation dataset')
         LAT_LONG_DF = latlongEngineering(X_test, lat, lon, lat_lon_cols)
-        # LAT_LONG_DF.fillna(0.0,inplace=True)
-        # print(LAT_LONG_DF)
     else:
         LAT_LONG_DF = pd.DataFrame()
 
     date_cols = init_info['DateColumns']
     possible_datecols = init_info['PossibleDateColumns']
     if date_cols:
-        # print('Runnning Date Engineering on validation dataset')
         DATE_DF = date_engineering(
             X_test[date_cols], possible_datecols, init_info['possibleDateTimeCols'], validation=True)
         DATE_DF = DATE_DF[init_info['DateFinalColumns']]
@@ -83,12 +78,9 @@ def score(df, init_info, validation=False):
     if init_info['EMAIL_STATUS'] is False:
         email_cols = init_info['email_cols']
         if len(email_cols) > 0:
-            # print('Runnning Email Engineering on validation dataset')
             EMAIL_DF = emailUrlEngineering(
                 X_test[email_cols], email=True, validation=True)
             EMAIL_DF.reset_index(drop=True)
-            #EMAIL_DF.fillna('missing', inplace=True)
-            # print(EMAIL_DF)
         else:
             EMAIL_DF = pd.DataFrame()
     else:
@@ -96,11 +88,8 @@ def score(df, init_info, validation=False):
 
     url_cols = init_info['url_cols']
     if len(url_cols) > 0:
-        # print('Running URL Egnineering on validation dataset')
         URL_DF = URlEngineering(X_test[url_cols])
         URL_DF.reset_index(drop=True)
-        # URL_DF.fillna('missing',inplace=True)
-        # print(URL_DF)
     else:
         URL_DF = pd.DataFrame()
 
@@ -137,15 +126,12 @@ def score(df, init_info, validation=False):
     lda_models = init_info['lda_models']
 
     if some_list:
-        # print("The review/comment columns found are", some_list)
         start = time.time()
         sentiment_frame = sentiment_analysis(X_test[some_list])
         sentiment_frame.fillna(value=0.0, inplace=True)
-        # print(sentiment_frame)
         TEXT_DF = sentiment_frame.copy()
         TEXT_DF.reset_index(drop=True, inplace=True)
         end = time.time()
-        # print("Sentiment time",end-start)
         start = time.time()
         new_frame = X_test[some_list].copy()
         new_frame.fillna(value="None", inplace=True)
@@ -154,7 +140,6 @@ def score(df, init_info, validation=False):
             topic_frame, _ = topicExtraction(
                 new_frame[[col]], True, lda_models['Model'][ind])
             topic_frame.rename(columns={0: str(col)+"_Topic"}, inplace=True)
-            # print(topic_frame)
             topic_frame.reset_index(drop=True, inplace=True)
             TEXT_DF = pd.concat([TEXT_DF, topic_frame], axis=1, sort=False)
             ind = ind+1
@@ -175,16 +160,8 @@ def score(df, init_info, validation=False):
 
     # Removing the same columns that were removed in Pearson's Correlation
     num_df = num_df[init_info['PearsonsColumns']]
-    # print(f'Shape after Pearsons Correlation {num_df.shape}')
     num_df.reset_index(drop=True, inplace=True)
     disc_df.reset_index(drop=True, inplace=True)
-    # print('num_df - {}'.format(num_df.shape))
-    # print('disc_df - {}'.format(disc_df.shape))
-    # print('DATE_DF - {}'.format(DATE_DF.shape))
-    # print('TEXT_DF - {}'.format(TEXT_DF.shape))
-    # print('LAT_LONG_DF - {}'.format(LAT_LONG_DF.shape))
-    # print('EMAIL_DF - {}'.format(EMAIL_DF.shape))
-    # print('URL_DF - {}'.format(URL_DF.shape))
     if num_df.shape[1] != 0:  # Some datasets may contain only categorical data
         X_test = pd.concat([num_df, disc_df], axis=1)
     else:
@@ -208,12 +185,6 @@ def score(df, init_info, validation=False):
     X_test = pd.DataFrame(new_mm.fit_transform(
         X_test), columns=init_info['TrainingColumns'])
     print(">>>>>>[[Applying Transformations]]>>>>>")
-    # print('\nThis is final shape of X_test : {}'.format(X_test.shape))
-
-    # joblib.dump(X_test,'Xt')
-    # joblib.dump(X_train,'XT')
-    # joblib.dump(y_train,'YT')
-    # joblib.dump(y_test,'Yt')
     if validation:
         if init_info['ML'] == 'Classification':
             ros = RandomOverSampler(sampling_strategy='minority',random_state=42)
@@ -221,20 +192,7 @@ def score(df, init_info, validation=False):
         else:
             X_rt, y_rt = X_test, y_test
 
-    # print('\n #### PRINTING THE LIST OF COLUMNS AND ITS TYPES THAT ENTER THE MODEL TRAINING ####')
-    # print('#### PRINTING X_test ####')
-    # print(X_test.columns)
-    # print(X_test.dtypes)
-    # print('\n')
-    # print(X_test.head(20))
-    # print('\n\n')
     if validation:
-        # print('#### PRINTING X_train ####')
-        # print(X_train.columns)
-        # print(X_train.dtypes)
-        # print('\n')
-        # print(X_train.head(20))
-        # print('\n\n')
         start = time.time()
         gc.collect()
         ############# MODEL TRAINING #############
@@ -244,9 +202,6 @@ def score(df, init_info, validation=False):
             X_train, y_train, X_test, y_test, init_info['ML'], priorList, init_info['q_s'])
         rule_result = ruleTesting(
             X_rt, y_rt, init_info['ML'], init_info['rule_model'], init_info['TargetLabelEncoder'],init_info['features_created'])
-        # print('Printing Rule Tree Model Information')
-        # This needs to be embedded in the WebApp right below the text-rule tree image
-        # print(rule_result)
         print('MODEL SAVED')
 
         ############# MODEL TRAINING #############
@@ -265,7 +220,6 @@ def score(df, init_info, validation=False):
         regplotdf['y_pred'] = y_pred
 
     if init_info['ML'] == 'Classification':
-        #         y_probas = xg.predict_proba(X_test)
         y_probas = mod.predict_proba(X_test)
         y_pred = pd.Series(
             init_info['TargetLabelEncoder'].inverse_transform(y_pred))
@@ -282,11 +236,6 @@ def score(df, init_info, validation=False):
             init_info['y_probs_cols'] = y_probs_cols
         else:
             y_probs_cols = init_info['y_probs_cols']
-        # print("!!!!!!!!!!!!!!!!!!!!!!!")
-        # print("YPROBAS IS AS FOLLOWS",y_probas)
-        # print("YPRED IS AS FOLLOWS",y_pred)
-        # print("YPROBSCOLUMNS ARE AS FOLLOWS",y_probs_cols)
-        # print("!!!!!!!!!!!!!!!!!!!!!!!")
         
             
         y_probas = pd.DataFrame(y_probas, columns=y_probs_cols)
@@ -306,7 +255,6 @@ def score(df, init_info, validation=False):
                     y_test, y_probas, title='Lift Curve (Test Dataset)')
                 skplt.metrics.plot_cumulative_gain(
                     y_test, y_probas, title='Cumulative Gains Curve (Test Dataset)')
-#            skplt.metrics.plot_roc(y_test, y_probas,title='ROC Curves (Test Dataset)')
             plt.close('all')
     else:
         if validation:
@@ -363,11 +311,6 @@ def score(df, init_info, validation=False):
             # decile plot
             decileplot(regplotdf)
             plt.close('all')
-            # y_probas = pd.Series()
-            # fig3 = plt.figure()
-            # plt.plot(y_pred, figure =fig3)
-            # plt.plot(np.ones(len(y_pred))*y_pred.mean(), figure=fig3)
-            # plt.show()
     ############ PREDICTION/SCORING #############
 
     ############ Model Explainer#############
@@ -387,13 +330,11 @@ def score(df, init_info, validation=False):
         try:
             top_ten = featureimportance(
                 feat_mod, feat_name, num_features, features)
-            # print(top_ten)
         except:
             print(feat_name,"did not work")
             try:
                 top_ten = featureimportance(
                     exp_mod, exp_name, num_features, features)
-                # print(top_ten)
             except:
                 print(exp_name,"did not work")
                 try:
@@ -456,9 +397,6 @@ def score(df, init_info, validation=False):
                         zip(LE.classes_, LE.transform(LE.classes_)))
                 encoded_targ = pd.DataFrame(le_mapping.items(), columns=[
                                             'Target Classes', 'Encodings'])
-                # print('Generating Target Encodings')
-                # Embed this dataframe in the WebApp on the right side of the summary plot
-                # print(encoded_targ)
             for top in top_ten:
                 for idf in init_info['encoded_disc']:
                     if top in idf.columns.tolist()[0]:
@@ -537,8 +475,6 @@ def score(df, init_info, validation=False):
         for k, v in preview_vals.iteritems():
             printer = printer + \
                 f"{k} is present in {v}% of the Testing Preview\n"
-        # if init_info['ML'] == 'Classification':
-            # print(printer)
 
         preview.to_csv('preview.csv', sep=',', index=False)
         print(">>>>>>[[Preview Saved]]>>>>>")
@@ -548,8 +484,6 @@ def score(df, init_info, validation=False):
         for k, v in preview_vals.iteritems():
             printer = printer + \
                 f"{k} is present in {round((v/len(preview))*100,3)}% of the Scoring File\n"
-        # if init_info['ML'] == 'Classification':
-        #     print(printer)
         preview.to_csv('score.csv', sep=',', index=False)
         print(">>>>>>[[Scoring File Saved]]>>>>>")
     print('\nCode executed Successfully')

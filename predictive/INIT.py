@@ -29,7 +29,6 @@ def INIT(df, info):
     # Print columns with missing data in the descending order
     MISSING = pd.DataFrame(((df.isnull().sum().sort_values(
         ascending=False)*100/len(df)).round(2)), columns=['Missing in %'])[:10]
-    # print(MISSING)
 
     ############ TARGET NUMERIC ENGINEERING ###########
     if key:
@@ -129,39 +128,20 @@ def INIT(df, info):
     del df
 
     # Remove columns and rows with more than 50% missing values
-    # print('\nRemoving Rows and Columns with more than 50% missing\n')
     X, y = DatasetSelection(X, y)
 
-    # print('After removal of highly missing rows and columns')
     MISSING = pd.DataFrame(((X.isnull().sum().sort_values(
         ascending=False)*100/len(X)).round(2)), columns=['Missing in %'])[:10]
-    # print(MISSING)
-
-    # print("length of X going into sampling!!!!!!!!!!!!",len(X))
-    # print("length of y going into sampling!!!!!!!!!!!!",len(y))
-    # # Sampling Data
-    # print('Sampling Data!')
-    # X,y = data_model_select(X,y)
-    # print('After sampling:')
-    # print('Shape of X_train is {}'.format(X.shape))
-    # print('Shape of y_train is {}'.format(y.shape))
-    # if class_or_Reg == 'Classification':
-    #     print('printing target variable distribution for classification:\n')
-    # print(pd.Series(y).value_counts(normalize=True))
 
     ####### Logic to remove labels from validation that arent present in training ##########
-    # print("Checking if there are labels present in validation that arent present in training")
     if class_or_Reg == 'Classification':
         # To add future logic if required to only use the levels present in training for scoring purpose
         stored_labels = y.value_counts().keys().to_list()
-        # print("STORED LABELS ",stored_labels)
         init_len = len(validation)
         validation[target] = validation[target].apply(
             lambda x: format_y_labels(x, stored_labels))
         validation.dropna(axis=0, subset=[target], inplace=True)
         validation.reset_index(drop=True, inplace=True)
-        # print(
-        #     f"Number of columns dropped from validation dataset due to mismatched target variable is : {init_len-len(validation)}")
     else:
         stored_labels = None
 
@@ -173,8 +153,6 @@ def INIT(df, info):
     if (lat and lon) or lat_lon_cols:
         try:
             LAT_LONG_DF = latlongEngineering(X, lat, lon, lat_lon_cols)
-            # print(LAT_LONG_DF)
-            # print(LAT_LONG_DF.shape)
             if lat:
                 X.drop(lat, axis=1, inplace=True)
             if lon:
@@ -204,7 +182,6 @@ def INIT(df, info):
     if len(LAT_LONG_DF):
         features_created.extend(LAT_LONG_DF.columns.tolist())
     ######## DATE ENGINEERING #######
-#     date_cols = getDateColumns(X.sample(1500) if len(X) > 1500 else X)  # old logic
     date_cols, possible_datecols = getDateColumns(
         X.sample(1500,random_state=42) if len(X) > 1500 else X)
 
@@ -222,7 +199,6 @@ def INIT(df, info):
                         date_cols.remove(val)
                     if val in possible_datecols[:]:
                         possible_datecols.remove(val)
-            # print(DATE_DF.shape)
             DATE_DF.index = X.index
             X.drop(date_cols, axis=1, inplace=True)
         except Exception as exceptionMessage:
@@ -251,8 +227,6 @@ def INIT(df, info):
             # If any email columns found, we drop it after engineering
             X.drop(email_cols, axis=1, inplace=True)
             EMAIL_DF.reset_index(drop=True)
-            # print(EMAIL_DF)
-            # print(EMAIL_DF.shape)
             short_obj_df.drop(email_cols, axis=1, inplace=True)
         except Exception as e:
             print('### EMAIL ENGINEERING HAD ERRORS ###')
@@ -267,7 +241,6 @@ def INIT(df, info):
     num_features_created += len(EMAIL_DF.columns)
     if len(EMAIL_DF):
         features_created.extend(EMAIL_DF.columns.tolist())
-    # print('\n#### URL ENGINEERING RUNNING WAIT ####')
     short_obj_df = obj_df.astype(str).sample(500,random_state=42).dropna(how='all') if len(
         obj_df) > 500 else obj_df.astype(str).dropna(how='all')
     url_cols = findURLS(short_obj_df)
@@ -277,8 +250,6 @@ def INIT(df, info):
             # If any email columns found, we drop it post engineering
             X.drop(url_cols, axis=1, inplace=True)
             URL_DF.reset_index(drop=True)
-            # print(URL_DF)
-            # print(URL_DF.shape)
         except Exception as e:
             print('### URL ENGINEERING HAD ERRORS ###')
             print(f'The Exception is as {e}')
@@ -298,10 +269,6 @@ def INIT(df, info):
         EMAIL_STATUS = True
     else:
         EMAIL_STATUS = False
-    # if URL_DF.empty:
-    #     URL_STATUS = True
-    # else:
-    #     URL_STATUS =  False
 
     X.reset_index(drop=True, inplace=True)
     DATE_DF.reset_index(drop=True, inplace=True)
@@ -330,37 +297,28 @@ def INIT(df, info):
     # list1 contains list of usable comment columns, list2 contains list of unusable comment columns
     some_list, remove_list = findReviewColumns(X[useless_cols])
     end = time.time()
-    # print("Extracting Review Columns time", end-start)
     if (some_list is None):
         TEXT_DF = pd.DataFrame(None)
         lda_models = pd.DataFrame(None)
         print("No review/comment columns found")
     else:
         try:
-            # print(
-            #     'Respective columns will undergo text engineering and will be imputed in the function itself')
-            # print('\n#### TEXT ENGINEERING RUNNING WAIT ####')
             print("Text Columns impacted are as follows : ", some_list)
             start = time.time()
             sentiment_frame = sentiment_analysis(X[some_list])
             sentiment_frame.fillna(value=0.0, inplace=True)
-            # print(sentiment_frame)
-            #TEXT_DF = pd.concat([df, sentiment_frame], axis=1, sort=False)
             TEXT_DF = sentiment_frame.copy()
             TEXT_DF.reset_index(drop=True, inplace=True)
             end = time.time()
-            # print("Sentiment time", end-start)
             start = time.time()
             new_frame = X[some_list].copy()
             new_frame.fillna(value="None", inplace=True)
             lda_models = pd.DataFrame(index=range(5), columns=['Model'])
             ind = 0
-            # text_analytics(sentiment_frame, new_frame, class_or_Reg, y, LE)
             for col in new_frame.columns:
                 topic_frame, lda_model = topicExtraction(new_frame[[col]])
                 topic_frame.rename(
                     columns={0: str(col)+"_Topic"}, inplace=True)
-                # print(topic_frame)
                 text_analytics(new_frame, col,
                                class_or_Reg, y, LE, topic_frame)
                 topic_frame.reset_index(drop=True, inplace=True)
@@ -368,7 +326,6 @@ def INIT(df, info):
                 lda_models['Model'][ind] = lda_model
                 ind = ind+1
             end = time.time()
-            # print("Topic time", end-start)
             X.drop(some_list, axis=1, inplace=True)
             X.drop(remove_list, axis=1, inplace=True)
             lda_models.dropna(axis=0, inplace=True)
@@ -383,12 +340,6 @@ def INIT(df, info):
             lda_models = pd.DataFrame(None)
 
     end2 = time.time()
-
-    # print("total text analytics time taken =", end2-start1)
-    # print("Text Engineering Result", TEXT_DF)
-
-    # TEXT_DF holds the columns obtained from Text Engineering and
-    # X contains the columns after Text imputation
 
     ########################### TEXT ENGINEERING #############################
     disc_df.reset_index(drop=True, inplace=True)
@@ -424,29 +375,21 @@ def INIT(df, info):
     print(">>>>>>[[Pearson's Correlation]]>>>>>")
     initial_num_df = num_df.shape[1]
     if len(num_df.columns) > 1:
-        # print(f"The shape before Pearson's {num_df.shape}")
-        # corr = num_df.corr(method='pearson')
         corr = np.corrcoef(num_df.values, rowvar=False)
         corr = pd.DataFrame(corr, columns=num_df.columns.to_list())
-        # print("Initial correlation matrix",corr)
         corr = corr.where(np.tril(np.ones(corr.shape), k=-1).astype(np.bool))
-        # print("The Lower Triangular matrix is \n",corr)
         col_counter = {}
         for col in corr.columns:
             ser = corr[col].apply(lambda x: findDefaulters(x)).to_list()
-            # print(f"{col} : {ser.count(True)}")
             if ser.count(True) > 0:
                 col_counter[col] = ser.count(True)
-        # print("List of columns and how many columns they are corelated to", col_counter)
         if not col_counter:
             print("No columns are correlated")
         else:
             while col_counter:
-                # print(f"Len of the col_counter",len(col_counter))
                 num_df, col_counter = pearsonmaker(num_df, col_counter)
 
         del corr
-    # print(f'Pearsons Matrix \n {pd.DataFrame(num_df.corr())}')
     print(
         f"Number of columns impacted in Pearson's Correlation :  {initial_num_df - num_df.shape[1]}")
     PearsonsColumns = num_df.columns
@@ -479,9 +422,6 @@ def INIT(df, info):
     te_start = time.time()
     X = TE.fit_transform(X, y)
     te_end = time.time()
-    # print(X.shape)
-    # print(y.shape)
-    # print('Target Encoding Time taken : {}'.format(te_end-te_start))
     ############# TARGET ENCODING ############
     X_2 = X.copy()
     ############# FEATURE SELECTION AND PLOTS ############
@@ -491,9 +431,6 @@ def INIT(df, info):
         fe_s = time.time()
         rem, feat_df,feature_selection_model,feature_selection_features = FeatureSelection(X, y, class_or_Reg)
         fe_e = time.time()
-        # print(X.shape)
-        # print(y.shape)
-        # print('Feature Selection Time taken : {}'.format(fe_e-fe_s))
         X.drop(rem, axis=1, inplace=True)
         # removing columns through feature selection without target encoding
         X_old.drop(rem, axis=1, inplace=True)
@@ -504,11 +441,8 @@ def INIT(df, info):
         except:
             print('\nFEATURE SELECTION PLOT DID NOT RUN SUCCESSFULLY!')
         fe_e = time.time()
-        # print('Feature Selection Plot Time taken : {}'.format(fe_e-fe_s))
-        # print(X.shape)
-        # print(y.shape)
     else:
-        # print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
+        print('\n #### FEATURE SELECTION SKIPPED BECAUSE COLUMNS LESS THAN 10 ####')
         feature_selection_model = None
         feature_selection_features = []
     ############# FEATURE SELECTION AND PLOTS #####################
@@ -539,12 +473,8 @@ def INIT(df, info):
         y_cart = y.copy()
         y_cart.reset_index(drop=True, inplace=True)
         if class_or_Reg == 'Classification':
-            # print("Length of X_cart and y_cart",
-            #   len(X_cart), "---", len(y_cart))
             ros = RandomOverSampler(sampling_strategy='minority',random_state=42)
             X_cart_res, y_cart_res = ros.fit_resample(X_cart, y_cart)
-            # print("Length of X_cart_res and y_cart_res",
-            #   len(X_cart_res), "---", len(y_cart_res))
             passingList = y_cart_res.value_counts(normalize=True).values
             cart_list = [X_cart_res, y_cart_res]
             cart_df = pd.concat(cart_list, axis=1)
@@ -597,7 +527,6 @@ def INIT(df, info):
         num = len(feat)
     feat = [feat[i] for i in indices[-num:]]
     feat = [x for x in feat[:] if x in disc_df.columns.tolist()]
-    # print(f'Top important discrete features from Rule Tree are: {feat}')
     if rule_val:
         print('Rule Tree Generated')
     else:
@@ -647,7 +576,6 @@ def INIT(df, info):
     print(">>>>>>[[Model Explainer Encoding]]>>>>>")
     wb = Workbook()
     ws=wb.active
-    # wb.save('shapely_encodings.xlsx')
     if len(temp):
         with pd.ExcelWriter('shapely_encodings.xlsx') as writer:
             writer.book=wb
@@ -683,8 +611,6 @@ def INIT(df, info):
     print(">>>>>>[[Rule Tree Encoding]]>>>>>")
     wb = Workbook()
     ws=wb.active
-    # wb.save('sampleeqn_encodings.xlsx')
-    # print(selected_obj_cols)
     if len(selected_obj_cols):
         with pd.ExcelWriter('ruletree_encodings.xlsx',engine='openpyxl') as writer:
             writer.book=wb
