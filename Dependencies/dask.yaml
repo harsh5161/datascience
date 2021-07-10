@@ -1,0 +1,40 @@
+scheduler:
+  env:
+    - name: EXTRA_CONDA_PACKAGES
+      value: numba xarray scikit-learn==0.23.1  pandas==1.2.3 lightgbm==3.2.1 xgboost joblib==0.16.0 -c conda-forge 
+    - name: EXTRA_PIP_PACKAGES
+      # value: swifter xgboost tqdm category_encoders joblib scikit-plot scikit-learn catboost RegscorePy spacy gensim xlrd lightgbm hyperopt holidays textblob pydotplus graphviz imblearn missingpy urlextract seaborn dask s3fs dask-ml --upgrade
+      # value: scikit-learn==0.23.1 xgboost==1.3.1 catboost==0.24.1  imblearn==0.7 lightgbm==2.3.1 hyperopt==0.2 dask==2021.1.1 joblib==1.0.0 s3fs dask-ml bokeh==2.2.3
+      value:  xgboost==1.4.2 catboost==0.23.2  scikit-learn==0.23.1 lightgbm==3.2.1 dask-core==2021.5.0 pandas==1.2.4 catboost==0.23.2 dask-yarn==0.6.1 category-encoders==2.2.2 cloudpickle==1.5.0 colorlover==0.3.0 combo==0.1.1 configparser==5.0.0 confuse==1.3.0 convertdate==2.2.1 cufflinks==0.17.3 cycler==0.10.0 cymem==2.0.3 databricks-cli==0.11.0  datefinder==0.7.1 hyperopt distributed==2021.5.0 jupyter-client==6.1.6 ipython==7.17.0 ipython-genutils==0.2.0 docutils==0.15.2 joblib==0.16.0 s3fs dask-ml dask==2021.05.0    databricks-cli==0.11.0 dateparser==0.7.6 datetime==4.3 defusedxml==0.6.0 distributed==2021.05.0 docker==4.2.2 docutils==0.15.2 entrypoints==0.3 funcy==1.14 gast==0.2.2 gensim==3.8.3  geotext==0.4.0 grpcio==1.30.0 gunicorn==20.0.4 
+worker:
+  replicas: 3
+  # resources:
+  #   limits:
+  #     cpu: 2
+  #     memory: 7.5G
+#    requests:
+#      cpu: 2
+#      memory: 7.5G
+  env:
+    - name: EXTRA_CONDA_PACKAGES
+      value: numba xarray scikit-learn==0.23.1  pandas==1.2.3 lightgbm==3.2.1 xgboost joblib==0.16.0 -c conda-forge  
+    - name: EXTRA_PIP_PACKAGES
+      # value: swifter xgboost tqdm category_encoders joblib scikit-plot scikit-learn catboost RegscorePy spacy gensim xlrd lightgbm hyperopt holidays textblob pydotplus graphviz imblearn missingpy urlextract seaborn dask s3fs dask-ml --upgrade
+      # value: scikit-learn==0.23.1 xgboost==1.3.1 catboost==0.24.1  imblearn==0.7 lightgbm==2.3.1 hyperopt==0.2 dask==2021.1.1 joblib==1.0.0 s3fs dask-ml bokeh==2.2.3
+      value:  xgboost==1.4.2 catboost==0.23.2  scikit-learn==0.23.1  lightgbm==3.2.1 dask-core==2021.5.0 pandas==1.2.4 catboost==0.23.2 dask-yarn==0.6.1 category-encoders==2.2.2 cloudpickle==1.5.0 colorlover==0.3.0 combo==0.1.1 configparser==5.0.0 confuse==1.3.0 convertdate==2.2.1 cufflinks==0.17.3 cycler==0.10.0 cymem==2.0.3 databricks-cli==0.11.0  datefinder==0.7.1 hyperopt distributed==2021.5.0 jupyter-client==6.1.6 ipython==7.17.0 ipython-genutils==0.2.0 docutils==0.15.2 joblib==0.16.0 s3fs dask-ml dask==2021.05.0    databricks-cli==0.11.0 dateparser==0.7.6 datetime==4.3 defusedxml==0.6.0 distributed==2021.05.0 docker==4.2.2 docutils==0.15.2 entrypoints==0.3 funcy==1.14 gast==0.2.2 gensim==3.8.3  geotext==0.4.0 grpcio==1.30.0 gunicorn==20.0.4 
+
+# We want to keep the same packages on the worker and jupyter environments
+jupyter:
+  enabled: no
+  env:
+    - name: EXTRA_CONDA_PACKAGES
+      value: numba xarray joblib==0.16.0 -c conda-forge 
+    - name: EXTRA_PIP_PACKAGES
+      # value: swifter xgboost tqdm category_encoders joblib scikit-plot scikit-learn catboost RegscorePy spacy gensim xlrd lightgbm hyperopt holidays textblob pydotplus graphviz imblearn missingpy urlextract seaborn dask s3fs dask-ml --upgrade
+      # value: scikit-learn==0.23.1 xgboost==1.3.1 catboost==0.24.1  imblearn==0.7 lightgbm==2.3.1 hyperopt==0.2 dask==2021.1.1 joblib==1.0.0 s3fs dask-ml bokeh==2.2.3
+      value:  xgboost==1.4.2 catboost==0.23.2 imblearn==0.7 scikit-learn==0.23.1 dask-core==2021.5.0 pandas==1.2.3 catboost==0.23.2 dask-yarn==0.6.1 category-encoders==2.2.2 cloudpickle==1.5.0 colorlover==0.3.0 combo==0.1.1 configparser==5.0.0 confuse==1.3.0 convertdate==2.2.1 cufflinks==0.17.3 cycler==0.10.0 cymem==2.0.3 databricks-cli==0.11.0  datefinder==0.7.1 hyperopt distributed==2021.5.0 jupyter-client==6.1.6 ipython==7.17.0 ipython-genutils==0.2.0 docutils==0.15.2 joblib==0.16.0 s3fs dask-ml dask==2021.05.0    databricks-cli==0.11.0 dateparser==0.7.6 datetime==4.3 defusedxml==0.6.0 distributed==2021.05.0 docker==4.2.2 docutils==0.15.2 entrypoints==0.3 funcy==1.14 gast==0.2.2 gensim==3.8.3  geotext==0.4.0 grpcio==1.30.0 gunicorn==20.0.4 
+  # env:
+  #   - name: EXTRA_CONDA_PACKAGES
+  #     value:  numba xarray -c conda-forge 
+  #   - name: EXTRA_PIP_PACKAGES
+  #     value: scikit-learn==0.23.1 xgboost==1.3.1 catboost==0.24.1 imblearn==0.7 lightgbm==2.3.1 hyperopt==0.2 joblib==0.17.0 dask==2.30.0 s3fs dask-ml bokeh==2.2.3
