@@ -1,0 +1,44 @@
+**Dataset Instructions**
+
+1. turnover.csv
+-> Should be used as Right/Uncensored data
+-> Can be used as Left censored data (Just for practice)
+-> Duration column is "stag"
+-> Event target column in "event"
+-> No ID column present
+-> Categorical columns are - industry, profession, traffic, gender, head_gender, coach, greywage, way
+
+2. diabetes.csv
+-> Interval censored data
+-> Lower bound is "left"
+-> Upper bound is "right"
+-> Event target column is "ev"
+-> ID column is "Unnamed: 0"
+-> Categorical column is "gender"
+
+3. dd_data.csv
+-> Should be used as Right/Uncensored data
+-> Can be used as Left censored data (Just for practice)
+-> Duration column is "duration"
+-> Event target column is "observed"
+-> Columns to drop - leaderspellreg, ehead, Name, start_year
+-> Categorical columns - ctryname, un_region_name, un_continent_name, regime, democracy
+
+4. senator.csv
+-> No ID columns
+-> Should be used as Right/Uncensored data
+-> Can be used as Left censored data (Just for practice)
+-> Categorical columns - Political Affiliation at Appointment, Province / Territory, reason
+-> Duration columns-
+	1. If "diff_days" is used as duration column
+		-> Columns to drop - Term (yyyy.mm.dd), Appointed on the advice of, Name, start_year, end_year
+	2. If "start_year" and "end_year" are used as lower and upper bound for duration
+		-> Columns to drop - Term (yyyy.mm.dd), Appointed on the advice of, Name, diff_days
+
+5. train.csv
+-> ID column is "ID"
+-> Categorical column - Aged, Married, sex, TotalDependents, SettlementProcess, FilmSubscription, MobileService, 4GService, TechnicalAssistance, CyberProtection, HardwareSupport
+-> Duration column is "ServiceSpan"
+-> Event target column is "CustomerAttrition"
+-> Should be used as Right/Uncensored data
+-> Can be used as Left censored data (Just for practice)
