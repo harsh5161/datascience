@@ -38,11 +38,7 @@ def get_cmap(n, name='hsv'):
 
 
 def findTrainSize(df):
-    df = df.sample(frac=1)
-    if len(df) > 100000:
-        return 100000, 40000
-    else:
-        return int(len(df) * 0.75), int(len(df) * 0.25)
+    return int(len(df) * 0.75), int(len(df) * 0.25)
 
 
 # For univariate modelling with Left/Right/Uncensored data
@@ -117,11 +113,7 @@ def featureSelection(df, target, dur, censoring_type):
 
 
 def findTrainSize_uni(df):
-    df = df.sample(frac=1)
-    if len(df) >= 300000:
-        return 300000, 50000
-    else:
-        return int(len(df) * 0.75), int(len(df) * 0.25)
+    return int(len(df) * 0.75), int(len(df) * 0.25)
 
 
 def right_cens(df, target, resultsDict, predictionsDict, dur, modelsDict, resultsDict_, predictionsDict_,

@@ -26,8 +26,7 @@ def userInputs_():
     ###############################
     ##### Numeric Engineering #####
     ###############################
-    df = df.sample(n=500000) if len(df) > 500000 else df
-    df = df.reset_index(drop=True)
+
 
     # ID column is kept optional
     key = input('\nEnter optional ID column or enter "None" if no id column is present: ')

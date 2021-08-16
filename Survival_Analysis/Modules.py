@@ -143,10 +143,7 @@ def targetDistribution(df, target):
 
 def findTrainSize(df):
     df = df.sample(frac=1)
-    if len(df) >= 300000:
-        return 300000, 50000
-    else:
-        return int(len(df) * 0.75), int(len(df) * 0.25)
+    return int(len(df) * 0.75), int(len(df) * 0.25)
 
 
 def targetEngineering(df, target):
