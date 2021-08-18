@@ -40,10 +40,10 @@ class Uni_Modelling:
     #     self.modelsDict['KaplanMeierFitter'] = model
 
     def exponential(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = ExponentialFitter()
         if winner:
             return model
@@ -54,10 +54,10 @@ class Uni_Modelling:
         self.modelsDict['ExponentialFitter'] = model
 
     def logLogistic(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = LogLogisticFitter()
         if winner:
             return model
@@ -68,10 +68,10 @@ class Uni_Modelling:
         self.modelsDict['LogLogisticFitter'] = model
 
     def logNormal(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = LogNormalFitter()
         if winner:
             return model
@@ -82,10 +82,10 @@ class Uni_Modelling:
         self.modelsDict['LogNormalFitter'] = model
 
     def generalizedGamma(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = GeneralizedGammaFitter()
         if winner:
             return model
@@ -96,10 +96,10 @@ class Uni_Modelling:
         self.modelsDict['GeneralizedGammaFitter'] = model
 
     def weibull(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = WeibullFitter()
         if winner:
             return model
@@ -196,10 +196,10 @@ class Uni_Modelling_left:
     #     self.modelsDict['KaplanMeierFitter'] = model
 
     def exponential(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = ExponentialFitter()
         if winner:
             return model
@@ -210,10 +210,10 @@ class Uni_Modelling_left:
         self.modelsDict['ExponentialFitter'] = model
 
     def logLogistic(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = LogLogisticFitter()
         if winner:
             return model
@@ -224,10 +224,10 @@ class Uni_Modelling_left:
         self.modelsDict['LogLogisticFitter'] = model
 
     def logNormal(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = LogNormalFitter()
         if winner:
             return model
@@ -238,10 +238,10 @@ class Uni_Modelling_left:
         self.modelsDict['LogNormalFitter'] = model
 
     def generalizedGamma(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = GeneralizedGammaFitter()
         if winner:
             return model
@@ -255,10 +255,10 @@ class Uni_Modelling_left:
         self.modelsDict['GeneralizedGammaFitter'] = model
 
     def weibull(self, winner=False):
-        T_train = self.T_train.copy()
-        E_train = self.E_train.copy()
-        T_test = self.T_test.copy()
-        E_test = self.E_test.copy()
+        T_train = self.T_train
+        E_train = self.E_train
+        T_test = self.T_test
+        E_test = self.E_test
         model = WeibullFitter()
         if winner:
             return model
